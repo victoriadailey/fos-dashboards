@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOS Dashboards</title>
+<style>
+  :root {
+    --blue: #196CFC;
+    --primetime: #0D1D64;
+    --turf: #007640;
+    --red: #E00922;
+    --center-court: #CFA677;
+    --deep-rough: #044928;
+    --infield: #B47E41;
+    --seams: #800B14;
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* Header */
+  .header {
+    background: var(--primetime);
+    color: white;
+    padding: 40px 32px 36px;
+  }
+  .header-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .header .logo {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 8px;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+  }
+  .header p {
+    color: rgba(255,255,255,0.6);
+    font-size: 14px;
+    margin-top: 6px;
+  }
+
+  /* Container */
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 32px 24px 60px;
+  }
+
+  /* Category Section */
+  .category {
+    margin-bottom: 36px;
+  }
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .category-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .category-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primetime);
+  }
+  .category-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  /* Dashboard Cards */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  .dashboard-card {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 20px 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border-left: 4px solid var(--blue);
+    text-decoration: none;
+    color: var(--text);
+    transition: box-shadow 0.2s, transform 0.15s;
+    display: block;
+  }
+  .dashboard-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .card-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 11px;
+  }
+
+  /* Color coding by area */
+  .border-growth { border-left-color: var(--turf); }
+  .border-social { border-left-color: var(--blue); }
+  .border-sales { border-left-color: var(--center-court); }
+  .border-editorial { border-left-color: var(--red); }
+  .border-events { border-left-color: var(--infield); }
+  .border-partnerships { border-left-color: var(--seams); }
+
+  .tag-growth { background: #D1FAE5; color: var(--deep-rough); }
+  .tag-social { background: #DBEAFE; color: var(--blue); }
+  .tag-sales { background: #FEF3C7; color: #92400E; }
+  .tag-editorial { background: #FEE2E2; color: var(--seams); }
+  .tag-events { background: #F3E8FF; color: #6B21A8; }
+  .tag-partnerships { background: #FCE7F3; color: #9D174D; }
+
+  .icon-growth { background: #D1FAE5; }
+  .icon-social { background: #DBEAFE; }
+  .icon-sales { background: #FEF3C7; }
+  .icon-editorial { background: #FEE2E2; }
+  .icon-events { background: #F3E8FF; }
+  .icon-partnerships { background: #FCE7F3; }
+
+  /* Placeholder for empty categories */
+  .coming-soon {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    border: 2px dashed var(--border);
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">Front Office Sports</div>
+    <h1>Dashboard Hub</h1>
+    <p>Interactive dashboards across the FOS business — updated regularly</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- GROWTH -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-icon icon-growth">📈</div>
+      <div class="category-name">Growth</div>
+      <div class="category-sub">Newsletter &amp; Audience Development</div>
+    </div>
+    <div class="dashboard-grid">
+      <a href="growth/newsletter/welcome-sequence.html" class="dashboard-card border-growth">
+        <div class="card-title">The Memo — Welcome Email Sequence</div>
+        <div class="card-desc">Draft welcome sequence strategy for The Memo newsletter with email flow, timing, and content recommendations.</div>
+        <div class="card-meta">
+          <span class="card-tag tag-growth">Newsletter</span>
+          <span>Updated Mar 31, 2026</span>
+        </div>
+      </a>
+      <a href="growth/newsletter/unsubscribe-analysis.html" class="dashboard-card border-growth">
+        <div class="card-title">The Memo — Unsubscribe Analysis</div>
+        <div class="card-desc">Unsubscribe trends, patterns, and retention insights for The Memo from Sept 2025 – Mar 2026.</div>
+        <div class="card-meta">
+          <span class="card-tag tag-growth">Newsletter</span>
+          <span>Updated Mar 31, 2026</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- SOCIAL -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-icon icon-social">📱</div>
+      <div class="category-name">Social</div>
+      <div class="category-sub">Platform Performance &amp; Content</div>
+    </div>
+    <div class="coming-soon">Dashboards coming soon</div>
+  </div>
+
+  <!-- SALES -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-icon icon-sales">💰</div>
+      <div class="category-name">Sales</div>
+      <div class="category-sub">Pipeline &amp; Revenue Intelligence</div>
+    </div>
+    <div class="coming-soon">Dashboards coming soon</div>
+  </div>
+
+  <!-- EDITORIAL -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-icon icon-editorial">📝</div>
+      <div class="category-name">Editorial</div>
+      <div class="category-sub">Content Performance &amp; Engagement</div>
+    </div>
+    <div class="coming-soon">Dashboards coming soon</div>
+  </div>
+
+  <!-- EVENTS -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-icon icon-events">🎪</div>
+      <div class="category-name">Events</div>
+      <div class="category-sub">Event Analytics &amp; Sponsorship</div>
+    </div>
+    <div class="coming-soon">Dashboards coming soon</div>
+  </div>
+
+  <!-- PARTNERSHIPS -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-icon icon-partnerships">🤝</div>
+      <div class="category-name">Partnerships</div>
+      <div class="category-sub">Brand &amp; Sponsorship Performance</div>
+    </div>
+    <div class="coming-soon">Dashboards coming soon</div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Front Office Sports — Internal Dashboard Hub &nbsp;·&nbsp; Questions? Reach out to the Marketing &amp; Strategy team
+</div>
+
+</body>
+</html>
