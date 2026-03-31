@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOS Social → Site Traffic Dashboard | March 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root { --scoreboard-blue:#196CFC; --primetime:#0D1D64; --turf:#007640; --deep-rough:#044928; --center-court:#CFA677; --red-card:#E00922; --infield:#B47E41; --seams:#800B14; --bg:#F7F8FA; --card:#FFFFFF; --text:#1A1A1A; --text-secondary:#5A6270; --border:#E5E8ED; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--text); line-height:1.15; }
+  .header { background:linear-gradient(135deg,var(--primetime) 0%,var(--scoreboard-blue) 100%); color:white; padding:32px 40px; }
+  .header h1 { font-size:28px; font-weight:700; margin-bottom:6px; }
+  .header .subtitle { font-size:15px; opacity:0.8; }
+  .header .date-badge { display:inline-block; background:rgba(255,255,255,0.15); border-radius:6px; padding:5px 14px; font-size:13px; margin-top:12px; font-weight:600; }
+  .container { max-width:1280px; margin:0 auto; padding:28px 24px; }
+  .exec-summary { background:var(--card); border-radius:12px; padding:28px 32px; margin-bottom:24px; border:1px solid var(--border); }
+  .exec-summary h2 { font-size:18px; color:var(--primetime); margin-bottom:14px; }
+  .exec-summary p { font-size:14px; color:var(--text-secondary); line-height:1.6; margin-bottom:10px; }
+  .exec-summary .highlight { background:#EBF3FF; border-left:3px solid var(--scoreboard-blue); padding:12px 16px; border-radius:0 8px 8px 0; margin-top:14px; font-size:14px; color:var(--primetime); font-weight:600; line-height:1.5; }
+  .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-bottom:28px; }
+  .kpi-card { background:var(--card); border-radius:12px; padding:22px 24px; border:1px solid var(--border); position:relative; overflow:hidden; }
+  .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+  .kpi-card.blue::before { background:var(--scoreboard-blue); }
+  .kpi-card.green::before { background:var(--turf); }
+  .kpi-card.gold::before { background:var(--center-court); }
+  .kpi-card.red::before { background:var(--red-card); }
+  .kpi-card.navy::before { background:var(--primetime); }
+  .kpi-label { font-size:12px; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-secondary); font-weight:600; margin-bottom:8px; }
+  .kpi-value { font-size:32px; font-weight:700; color:var(--text); line-height:1.1; }
+  .kpi-sub { font-size:12px; color:var(--text-secondary); margin-top:6px; }
+  .tab-nav { display:flex; gap:4px; margin-bottom:20px; background:#F2F4F7; border-radius:10px; padding:4px; width:fit-content; }
+  .tab-btn { padding:8px 20px; border:none; background:transparent; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; color:var(--text-secondary); font-family:Arial,Helvetica,sans-serif; transition:all 0.2s; }
+  .tab-btn.active { background:white; color:var(--primetime); box-shadow:0 1px 3px rgba(0,0,0,0.1); }
+  .tab-content { display:none; } .tab-content.active { display:block; }
+  .chart-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
+  .chart-card { background:var(--card); border-radius:12px; padding:24px; border:1px solid var(--border); }
+  .chart-card h3 { font-size:15px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .chart-card .chart-sub { font-size:12px; color:var(--text-secondary); margin-bottom:14px; }
+  .chart-card canvas { max-height:320px; }
+  .data-table-wrap { background:var(--card); border-radius:12px; padding:24px; border:1px solid var(--border); margin-bottom:24px; overflow-x:auto; }
+  .data-table-wrap h3 { font-size:15px; font-weight:700; margin-bottom:4px; }
+  .data-table-wrap .table-sub { font-size:12px; color:var(--text-secondary); margin-bottom:16px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; padding:10px 14px; background:#F2F4F7; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary); border-bottom:2px solid var(--border); }
+  td { padding:12px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  tr:last-child td { border-bottom:none; } tr:hover td { background:#F8FAFC; }
+  .num { text-align:right; font-variant-numeric:tabular-nums; }
+  .channel-badge { display:inline-flex; align-items:center; gap:6px; font-weight:600; }
+  .badge-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .highlight-row td { background:#F0F7FF !important; }
+  .totals-row td { font-weight:700; background:#F2F4F7 !important; border-top:2px solid var(--primetime); }
+  .top-articles { background:var(--card); border-radius:12px; padding:24px; border:1px solid var(--border); margin-bottom:24px; }
+  .top-articles h3 { font-size:15px; font-weight:700; margin-bottom:16px; }
+  .article-item { display:flex; align-items:flex-start; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); }
+  .article-item:last-child { border-bottom:none; }
+  .article-rank { min-width:32px; height:32px; border-radius:8px; background:var(--primetime); color:white; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+  .article-info { flex:1; } .article-title { font-size:14px; font-weight:600; margin-bottom:4px; color:var(--text); }
+  .article-meta { font-size:12px; color:var(--text-secondary); }
+  .article-views { font-size:18px; font-weight:700; color:var(--scoreboard-blue); white-space:nowrap; }
+  .article-views small { display:block; font-size:11px; color:var(--text-secondary); font-weight:400; }
+  .rec-card { background:var(--card); border-radius:12px; padding:24px 28px; border:1px solid var(--border); margin-bottom:16px; position:relative; overflow:hidden; }
+  .rec-card::before { content:''; position:absolute; top:0; left:0; bottom:0; width:4px; }
+  .rec-card.opportunity::before { background:var(--turf); }
+  .rec-card.optimize::before { background:var(--scoreboard-blue); }
+  .rec-card.watch::before { background:var(--center-court); }
+  .rec-card.alert::before { background:var(--red-card); }
+  .rec-channel { font-size:11px; text-transform:uppercase; letter-spacing:1px; font-weight:700; margin-bottom:6px; }
+  .rec-card.opportunity .rec-channel { color:var(--turf); }
+  .rec-card.optimize .rec-channel { color:var(--scoreboard-blue); }
+  .rec-card.watch .rec-channel { color:var(--infield); }
+  .rec-card.alert .rec-channel { color:var(--red-card); }
+  .rec-title { font-size:16px; font-weight:700; margin-bottom:8px; color:var(--text); }
+  .rec-body { font-size:13px; color:var(--text-secondary); line-height:1.6; } .rec-body strong { color:var(--text); }
+  .rec-tag { display:inline-block; padding:3px 10px; border-radius:4px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-top:10px; }
+  .tag-high { background:#E8F5E9; color:var(--turf); } .tag-medium { background:#EBF3FF; color:var(--scoreboard-blue); }
+  .tag-low { background:#FFF8E7; color:var(--infield); } .tag-urgent { background:#FFEBEE; color:var(--red-card); }
+  .methodology { background:#F8F9FB; border-radius:12px; padding:24px; border:1px solid var(--border); margin:24px 0; font-size:13px; color:var(--text-secondary); line-height:1.6; }
+  .methodology h3 { font-size:14px; font-weight:700; color:var(--text); margin-bottom:10px; }
+  .methodology .method-item { margin-bottom:8px; }
+  .source-tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700; text-transform:uppercase; margin-right:6px; }
+  .source-parsely { background:#E8F5E9; color:var(--turf); } .source-sprout { background:#EBF3FF; color:var(--scoreboard-blue); }
+  .callout-box { background:#FFF8E7; border:1px solid var(--center-court); border-radius:8px; padding:14px 18px; margin-top:14px; font-size:13px; color:var(--text); line-height:1.6; }
+  .callout-box strong { color:var(--infield); }
+  .footer { text-align:center; padding:24px; font-size:12px; color:var(--text-secondary); border-top:1px solid var(--border); margin-top:40px; }
+  @media (max-width:768px) { .chart-row { grid-template-columns:1fr; } .kpi-grid { grid-template-columns:repeat(2,1fr); } .header { padding:24px 20px; } .container { padding:16px; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Social → Site Traffic Dashboard</h1>
+  <div class="subtitle">Traffic driven to frontofficesports.com from FOS social posts</div>
+  <div class="date-badge">March 1 – 31, 2026</div>
+</div>
+
+<div class="container">
+
+  <!-- EXECUTIVE SUMMARY -->
+  <div class="exec-summary">
+    <h2>The So What</h2>
+    <p>FOS social posts drove <strong>66,183 page views</strong> to frontofficesports.com in March, sending readers to <strong>378 unique articles</strong>. <strong>X is the clear engine</strong> — FOS's two X accounts (@FOS and @FOS_News_) combined for 62,472 page views across 375 articles, powered by @FOS's headline + article image card strategy that generates massive reach (41.2M combined impressions) and converts at a rate that proves social is a real traffic lever.</p>
+    <p><strong>LinkedIn is the quality play.</strong> FOS LinkedIn posts drove 2,140 page views to 19 articles, and those visitors spend <strong>~2x longer on FOS articles</strong> (0:49 avg engaged time) than X visitors (0:25). But with only 19 articles receiving LinkedIn traffic vs. 375 from X, there's significant room to expand the volume.</p>
+    <div class="highlight">The opportunity: X proves the model works — 62K+ monthly page views from social posts. Replicating even a fraction of that consistency on LinkedIn (more FOS article links, more frequently) could add 5,000–10,000 monthly page views of the highest-quality traffic we see in this data. Meanwhile, implementing separate UTMs for @FOS vs. @FOS_News_ will unlock account-level performance visibility that's currently missing.</div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card blue">
+      <div class="kpi-label">Total Page Views from FOS Posts</div>
+      <div class="kpi-value">66,183</div>
+      <div class="kpi-sub">Traffic to frontofficesports.com from FOS social posts</div>
+    </div>
+    <div class="kpi-card navy">
+      <div class="kpi-label">FOS on X — Page Views</div>
+      <div class="kpi-value">62,472</div>
+      <div class="kpi-sub">94% of all social-driven traffic · @FOS + @FOS_News_ combined</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">New Visitors from Social</div>
+      <div class="kpi-value">44,280</div>
+      <div class="kpi-sub">75% new — social is a top-of-funnel discovery engine</div>
+    </div>
+    <div class="kpi-card gold">
+      <div class="kpi-label">Engaged Minutes</div>
+      <div class="kpi-value">22,979</div>
+      <div class="kpi-sub">Avg 0:26 per view — quality readers from social</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">FOS Articles with Social Traffic</div>
+      <div class="kpi-value">378</div>
+      <div class="kpi-sub">Unique articles receiving traffic across all channels</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('overview')">Traffic Overview</button>
+    <button class="tab-btn" onclick="switchTab('deep')">Channel Deep Dives</button>
+    <button class="tab-btn" onclick="switchTab('recs')">Optimizations</button>
+  </div>
+
+  <!-- TAB: OVERVIEW -->
+  <div class="tab-content active" id="tab-overview">
+    <div class="chart-row">
+      <div class="chart-card">
+        <h3>Page Views by Channel</h3>
+        <div class="chart-sub">Traffic to frontofficesports.com from FOS social posts, March 2026</div>
+        <canvas id="chartTraffic"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Traffic Share</h3>
+        <div class="chart-sub">FOS on X drives 94% of all social post-driven traffic</div>
+        <canvas id="chartPie"></canvas>
+      </div>
+    </div>
+
+    <div class="data-table-wrap">
+      <h3>Channel Performance — Traffic from FOS Posts to frontofficesports.com</h3>
+      <div class="table-sub">All data reflects traffic driven by FOS's own social posts, tracked via UTM-segmented Parse.ly data</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Channel</th>
+            <th class="num">FOS Articles</th>
+            <th class="num">Page Views</th>
+            <th class="num">Unique Visitors</th>
+            <th class="num">New Visitors</th>
+            <th class="num">Engaged Min</th>
+            <th class="num">Avg Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="highlight-row">
+            <td><span class="channel-badge"><span class="badge-dot" style="background:#196CFC"></span>FOS on X</span></td>
+            <td class="num">375</td>
+            <td class="num"><strong>62,472</strong></td>
+            <td class="num">55,961</td>
+            <td class="num">41,436</td>
+            <td class="num">20,709</td>
+            <td class="num">0:25</td>
+          </tr>
+          <tr>
+            <td><span class="channel-badge"><span class="badge-dot" style="background:#007640"></span>FOS on LinkedIn</span></td>
+            <td class="num">19</td>
+            <td class="num">2,140</td>
+            <td class="num">1,907</td>
+            <td class="num">1,655</td>
+            <td class="num">1,536</td>
+            <td class="num"><strong>0:49</strong></td>
+          </tr>
+          <tr>
+            <td><span class="channel-badge"><span class="badge-dot" style="background:#94A3B8"></span>FOS on Facebook</span></td>
+            <td class="num">5</td>
+            <td class="num">874</td>
+            <td class="num">822</td>
+            <td class="num">796</td>
+            <td class="num">365</td>
+            <td class="num">0:27</td>
+          </tr>
+          <tr>
+            <td><span class="channel-badge"><span class="badge-dot" style="background:#CFA677"></span>@FrontOfficeSports IG</span></td>
+            <td class="num">56</td>
+            <td class="num">689</td>
+            <td class="num">526</td>
+            <td class="num">387</td>
+            <td class="num">365</td>
+            <td class="num">0:44</td>
+          </tr>
+          <tr>
+            <td><span class="channel-badge"><span class="badge-dot" style="background:#E00922"></span>@frontofficesports on Threads</span></td>
+            <td class="num">1</td>
+            <td class="num">8</td>
+            <td class="num">8</td>
+            <td class="num">6</td>
+            <td class="num">4</td>
+            <td class="num">0:26</td>
+          </tr>
+          <tr class="totals-row">
+            <td>TOTAL</td>
+            <td class="num">378*</td>
+            <td class="num">66,183</td>
+            <td class="num">59,224</td>
+            <td class="num">44,280</td>
+            <td class="num">22,979</td>
+            <td class="num">0:25</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:11px; color:var(--text-secondary); margin-top:10px;">*Unique articles deduplicated across channels. "FOS on X" combines @FOS and @FOS_News_ traffic — current UTM setup does not distinguish between accounts. Avg Time = Parse.ly pageview-weighted average engaged time.</p>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card">
+        <h3>Reader Quality: Avg Engaged Time per Page View</h3>
+        <div class="chart-sub">LinkedIn visitors spend ~2x longer on FOS articles than X visitors</div>
+        <canvas id="chartEngMin"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Articles Receiving Traffic by Channel</h3>
+        <div class="chart-sub">X drives traffic to 375 articles vs. 19 from LinkedIn</div>
+        <canvas id="chartArticles"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: DEEP DIVES -->
+  <div class="tab-content" id="tab-deep">
+
+    <!-- FOS on X (combined) -->
+    <div class="data-table-wrap">
+      <h3>FOS on X — The Traffic Engine</h3>
+      <div class="table-sub">1,012 posts (@FOS: 835 + @FOS_News_: 177) · 41.2M impressions · 62,472 page views · 375 articles · 0:25 avg engaged time</div>
+      <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">FOS's X accounts drive the overwhelming majority of social-to-site traffic. @FOS posts breaking news headlines with article image cards — X generates a visual card preview from the FOS URL, which viewers click to read the full story. @FOS_News_ complements this as a link-sharing account, often posting direct article URLs in follow-up threads. Together they drove traffic to 375 unique FOS articles, with exclusives and breaking news consistently generating the highest page views.</p>
+      <div class="callout-box"><strong>⚠ Data note:</strong> The current UTM setup uses the same "Twitter" source tag for both @FOS and @FOS_News_ (the casing difference in Parse.ly — "TWITTER" vs. "Twitter" — reflects a mid-month formatting change, not an account split). This means we cannot currently attribute traffic to one account vs. the other. See the UTM recommendation in the Optimizations tab.</div>
+      <table>
+        <thead><tr><th>Top FOS Articles from X</th><th class="num">Page Views</th><th class="num">Engaged Min</th></tr></thead>
+        <tbody>
+          <tr><td>Jack Nicklaus Re-Acquires Nicklaus Companies After $50M Lawsuit</td><td class="num">6,831</td><td class="num">3,588</td></tr>
+          <tr><td>Jeff Passan Explains Why He Decided Against Replacing Wojnarowski</td><td class="num">1,967</td><td class="num">271</td></tr>
+          <tr><td>Hawks Stand By 'Magic City Monday' Promotion</td><td class="num">1,944</td><td class="num">325</td></tr>
+          <tr><td>Bucs Previously Duped by Fake Emeka Egbuka Account</td><td class="num">1,832</td><td class="num">68</td></tr>
+          <tr><td>College Athletic Depts Are Becoming Full-Blown Media Companies</td><td class="num">1,813</td><td class="num">591</td></tr>
+          <tr><td>Sources: NBC Taps Jason Benetti As Top MLB Announcer</td><td class="num">1,452</td><td class="num">297</td></tr>
+          <tr><td>PFF Lays Off Several Employees Amid Company Sale</td><td class="num">1,436</td><td class="num">244</td></tr>
+          <tr><td>PGA Tour Not Holding a Creator Classic at The Players</td><td class="num">1,323</td><td class="num">72</td></tr>
+          <tr><td>Why the NFL's 2026 Schedule Could Look Very Different</td><td class="num">1,160</td><td class="num">676</td></tr>
+          <tr><td>Darryn Peterson Says 'Mind Stuff' Derailed Bizarre Season</td><td class="num">1,153</td><td class="num">147</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:11px; color:var(--text-secondary); margin-top:12px;">Page views are combined across both Parse.ly Twitter UTM segments. The top 10 articles account for ~31% of all X-driven traffic.</p>
+    </div>
+
+    <!-- LinkedIn -->
+    <div class="data-table-wrap">
+      <h3>FOS on LinkedIn — Highest-Quality Traffic, Lowest Volume</h3>
+      <div class="table-sub">111 posts · 8.5M impressions · 2,140 page views · 19 articles · 0:49 avg engaged time</div>
+      <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">FOS LinkedIn posts drove traffic to 19 articles, generating 2,140 page views. Visitors from LinkedIn spend <strong>0:49 avg engaged time</strong> — nearly double X's 0:25. These are deeply engaged readers. The top performer ("Mike Repole / St. John's NIL") averaged 1.6 min/visit. With only 19 articles receiving traffic vs. 375 from X, expanding the number of articles linked from LinkedIn represents a major growth opportunity — especially given how much this audience engages once they arrive.</p>
+      <table>
+        <thead><tr><th>Top LinkedIn Articles</th><th class="num">Page Views</th><th class="num">Engaged Min</th><th class="num">New Visitors</th></tr></thead>
+        <tbody>
+          <tr><td>How Mike Repole's Millions Pulled St. John's Into the NIL Era</td><td class="num">378</td><td class="num">526</td><td class="num">304</td></tr>
+          <tr><td>Trump's College Sports Roundtable Includes No College Athletes</td><td class="num">253</td><td class="num">256</td><td class="num">213</td></tr>
+          <tr><td>Alabama Leads College Football in Private Jet Spending</td><td class="num">202</td><td class="num">75</td><td class="num">134</td></tr>
+          <tr><td>How a 'Life Skills University' Is Upending March Madness</td><td class="num">195</td><td class="num">47</td><td class="num">167</td></tr>
+          <tr><td>WWE &amp; Front Office Sports Announce Content Partnership</td><td class="num">167</td><td class="num">47</td><td class="num">134</td></tr>
+          <tr><td>Viral McNeese Student Manager Makes March Madness Return</td><td class="num">154</td><td class="num">90</td><td class="num">129</td></tr>
+          <tr><td>Young Athletes Have Entered Their LinkedIn Era</td><td class="num">151</td><td class="num">73</td><td class="num">120</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Threads + IG -->
+    <div class="chart-row">
+      <div class="chart-card">
+        <h3>@FrontOfficeSports on Instagram</h3>
+        <div class="chart-sub">689 page views via link-in-bio (662) and Stories (27)</div>
+        <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:12px;">Instagram drove 689 page views across 56 articles. The top performer — "College Media Companies" — accounted for 292 views (42% of all IG traffic), suggesting that when the link-in-bio is prominently called out in the caption, it converts. Stories drove only 27 views across 9 articles, suggesting underuse of the link sticker for traffic.</p>
+        <table style="font-size:12px;">
+          <tr><td style="font-weight:600;">Link-in-Bio Views</td><td>662 (47 articles)</td></tr>
+          <tr><td style="font-weight:600;">Story Link Views</td><td>27 (9 articles)</td></tr>
+          <tr><td style="font-weight:600;">Top Article</td><td>"College Media Companies" — 292 views</td></tr>
+          <tr><td style="font-weight:600;">Avg Engaged Time</td><td>0:44</td></tr>
+        </table>
+      </div>
+      <div class="chart-card">
+        <h3>@frontofficesports on Threads</h3>
+        <div class="chart-sub">82 posts · 1.1M impressions · 8 page views</div>
+        <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:12px;"><strong>8 page views from 82 posts and 1.1M impressions.</strong> Threads is not a traffic channel. The platform doesn't support link-click behavior and the audience isn't conditioned to click out. This isn't a content strategy failure — it's a platform limitation. Threads serves brand and audience-building purposes but should be measured on those terms, not traffic.</p>
+        <table style="font-size:12px;">
+          <tr><td style="font-weight:600;">Posts</td><td>82</td></tr>
+          <tr><td style="font-weight:600;">Impressions</td><td>1,123,982</td></tr>
+          <tr><td style="font-weight:600;">Engagements</td><td>7,419</td></tr>
+          <tr><td style="font-weight:600;">Page Views</td><td style="color:var(--red-card); font-weight:700;">8</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: OPTIMIZATIONS -->
+  <div class="tab-content" id="tab-recs">
+
+    <div class="rec-card alert">
+      <div class="rec-channel">UTM Tracking — Fix the Blind Spot Before Scaling</div>
+      <div class="rec-title">Implement separate UTM parameters for @FOS vs. @FOS_News_ on X</div>
+      <div class="rec-body">
+        Right now, both @FOS and @FOS_News_ use the same Twitter UTM source tag in article links. That means Parse.ly lumps all X traffic together — we can see that X drove 62,472 page views, but we <strong>can't tell how much came from @FOS vs. @FOS_News_</strong>. Given that these accounts have very different strategies (headline + image card vs. direct link sharing) and very different post volumes (835 vs. 177), this is critical visibility to unlock.
+        <br><br>
+        <strong>Action items:</strong> (1) Assign distinct UTM campaign or source values — e.g., <code>utm_source=twitter_fos</code> for @FOS and <code>utm_source=twitter_fosnews</code> for @FOS_News_. (2) Update link templates in Sprout (or wherever links are generated) for each account. (3) Coordinate with whoever manages the Parse.ly UTM filters to ensure the new values create separate segments. (4) Once live, this unlocks account-level optimization: we'll finally know which account is the real traffic driver, where to invest more, and how the two accounts work together (or don't).
+        <br><br>
+        <strong>Cross-functional note:</strong> This same UTM hygiene improvement should extend to LinkedIn, Instagram, and any other channel where FOS controls the links. Clean attribution makes every future traffic analysis more actionable — and strengthens any data story for sales and partnerships.
+      </div>
+      <span class="rec-tag tag-urgent">Do This First</span>
+    </div>
+
+    <div class="rec-card opportunity">
+      <div class="rec-channel">FOS on LinkedIn — Scale the Highest-Quality Traffic Source</div>
+      <div class="rec-title">Expand from 19 articles to 50+ articles per month with FOS links</div>
+      <div class="rec-body">
+        LinkedIn visitors average <strong>0:49 engaged time</strong> — the highest of any channel and nearly 2x the X average. But only 19 articles received LinkedIn traffic this month vs. 375 from X. The quality is proven; the volume opportunity is wide open.
+        <br><br>
+        <strong>Action items:</strong> (1) Post FOS article links more frequently — aim for 4–5 link posts per week alongside the existing video/carousel/photo content. (2) Ensure every FOS exclusive and feature gets a LinkedIn link post with UTM parameters. (3) For carousel and photo posts that cover an FOS article's topic, add the article link in the first comment. (4) Prioritize features and long-form pieces — the Mike Repole story generated 1.6 min avg engaged time, and the Trump roundtable piece drew 253 page views with deep engagement. This is exactly the kind of content LinkedIn's audience wants to read in full.
+        <br><br>
+        <strong>Cross-functional note:</strong> LinkedIn drives the highest-quality visitors by engaged time — exactly the profile that matters for B2B advertising and sponsorship sales. Growing LinkedIn traffic directly strengthens the value prop for sponsored content partnerships.
+      </div>
+      <span class="rec-tag tag-high">Highest Impact</span>
+    </div>
+
+    <div class="rec-card optimize">
+      <div class="rec-channel">FOS on X — Protect the Engine, Optimize the Exclusives</div>
+      <div class="rec-title">Build a coordinated "traffic play" for every FOS exclusive</div>
+      <div class="rec-body">
+        X's combined strategy is working — 62,472 page views across 375 articles. The opportunity isn't to change the strategy; it's to make every exclusive a coordinated traffic event across channels and to identify what's overperforming.
+        <br><br>
+        <strong>Action items:</strong> (1) For every FOS exclusive: @FOS posts headline + image card → @FOS_News_ follows with direct article link → LinkedIn gets a link post — all within a 2-hour window. (2) Spot "sleeper" articles that outperform their impression count — e.g., NFL 2026 Schedule (1,160 views from just 23K impressions = 5% conversion) — and re-promote them 24–48 hours later. (3) Track which article topics and formats drive the highest views-per-impression ratio to inform editorial prioritization. (4) Once separate UTMs are live, compare @FOS image card performance vs. @FOS_News_ direct link performance to optimize the playbook.
+      </div>
+      <span class="rec-tag tag-high">High Impact</span>
+    </div>
+
+    <div class="rec-card optimize">
+      <div class="rec-channel">Cross-Platform — Coordinated Traffic Workflow</div>
+      <div class="rec-title">Give social a weekly "traffic priority" list from editorial</div>
+      <div class="rec-body">
+        The top articles show up across multiple channels — "College Media Companies" received traffic from X, LinkedIn, and Instagram — but this looks incidental, not planned. A coordinated push would compound traffic for priority stories.
+        <br><br>
+        <strong>Action items:</strong> (1) Flag 3–5 articles per week as "traffic priority" in coordination with editorial. (2) Create a playbook template: what gets posted where, in what format, with what CTA — within a defined window. (3) Set up a shared tracker (Asana or Slack) where editorial flags stories and social reports back on traffic. (4) Use this dashboard monthly to measure progress and identify what's working.
+        <br><br>
+        <strong>For sales and partnerships:</strong> If FOS can show consistent, growing social-to-site traffic, it directly supports the value prop for any sponsored content or branded partnerships that live on frontofficesports.com.
+      </div>
+      <span class="rec-tag tag-medium">Medium Impact</span>
+    </div>
+
+    <div class="rec-card watch">
+      <div class="rec-channel">@FrontOfficeSports on Instagram — Optimize Link-in-Bio</div>
+      <div class="rec-title">Tie bio link to editorial calendar; push Stories link stickers</div>
+      <div class="rec-body">
+        Instagram's 689 page views are constrained by the link-in-bio format, but the data shows it works when done intentionally — one article drove 42% of all IG traffic.
+        <br><br>
+        <strong>Action items:</strong> (1) Update link-in-bio daily to match the top FOS story. (2) Add "Link in bio" CTAs to captions tied to FOS articles. (3) Use Stories with link stickers more aggressively — they only drove 27 views, suggesting underuse. (4) Track which post formats drive the most bio link taps via IG native analytics.
+      </div>
+      <span class="rec-tag tag-low">Moderate Impact</span>
+    </div>
+
+    <div class="rec-card alert">
+      <div class="rec-channel">@frontofficesports on Threads — Not a Traffic Channel</div>
+      <div class="rec-title">Remove from traffic KPIs; measure on brand metrics only</div>
+      <div class="rec-body">
+        <strong>8 page views from 82 posts and 1.1M impressions.</strong> Threads does not drive site traffic — it's a platform limitation, not a content failure. Remove it from traffic reporting and measure it on impressions, engagement rate, and follower growth instead. If traffic is a team priority, reallocate some of the 82 posts/month effort toward more LinkedIn link posts.
+      </div>
+      <span class="rec-tag tag-urgent">Strategic Shift</span>
+    </div>
+  </div>
+
+  <!-- METHODOLOGY — at end -->
+  <div class="methodology">
+    <h3>Data Sources & Methodology</h3>
+    <div class="method-item"><span class="source-tag source-parsely">Parse.ly</span> <strong>Site traffic (source of truth)</strong> — Page views, visitors, and engaged minutes to frontofficesports.com. Parse.ly data is segmented by UTM parameters specific to FOS's own social posts — this tracks traffic driven by FOS's posts only, not all social referral traffic to the site. Average engaged time is a <strong>pageview-weighted average</strong> as reported by Parse.ly — each article's time is weighted by its page views, so high-traffic articles have a larger impact on the average than low-traffic ones.</div>
+    <div class="method-item"><span class="source-tag source-parsely">Parse.ly</span> <strong>X / Twitter data note</strong> — Parse.ly contains two Twitter UTM segments ("TWITTER" and "Twitter") that reflect a mid-month formatting change in UTM tagging, <strong>not</strong> a split between @FOS and @FOS_News_. Cross-referencing article titles against Sprout post text confirmed that articles in both segments were posted by both accounts. All X traffic is therefore reported as a single combined channel. Implementing distinct UTMs per account is recommended to enable account-level analysis in future months.</div>
+    <div class="method-item"><span class="source-tag source-sprout">Sprout Social</span> <strong>Post engagement & content audit</strong> — Impressions, engagement rate, and content type for posts from @FOS (835 posts), @FOS_News_ (177 posts), FOS on LinkedIn (111 posts), and @frontofficesports on Threads (82 posts). Note: on X, most @FOS posts use article image cards (URL pasted → X generates card preview, strips URL from text). Sprout exports these as "Text" with no visible URL, but the card link is present and clickable. Similar behavior observed on LinkedIn.</div>
+    <div class="method-item"><strong>Scope:</strong> Traffic to frontofficesports.com pages only, driven by FOS's own social posts. Non-FOS destinations excluded.</div>
+  </div>
+
+  <div class="footer">
+    Front Office Sports · Social → Site Traffic Dashboard · March 2026<br>
+    Generated March 31, 2026
+  </div>
+</div>
+
+<script>
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+  event.target.classList.add('active');
+}
+Chart.defaults.font.family = 'Arial,Helvetica,sans-serif';
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#5A6270';
+const C = { blue:'#196CFC', navy:'#0D1D64', green:'#007640', gold:'#CFA677', red:'#E00922', gray:'#94A3B8' };
+
+new Chart(document.getElementById('chartTraffic'), {
+  type:'bar', data: { labels:['FOS on X','FOS on\nLinkedIn','FOS on\nFacebook','FOS on\nInstagram','FOS on\nThreads'],
+    datasets:[{ data:[62472,2140,874,689,8], backgroundColor:[C.blue,C.green,C.gray,C.gold,C.red], borderRadius:6, borderSkipped:false }] },
+  options: { responsive:true, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>ctx.parsed.y.toLocaleString()+' page views' }}},
+    scales: { y:{ beginAtZero:true, ticks:{callback:v=>v>=1000?(v/1000)+'K':v}, grid:{color:'#F2F4F7'} }, x:{grid:{display:false}} }}
+});
+
+new Chart(document.getElementById('chartPie'), {
+  type:'doughnut', data: { labels:['FOS on X — 94%','FOS on LinkedIn — 3%','FOS on Facebook — 1%','FOS on Instagram — 1%','FOS on Threads — <1%'],
+    datasets:[{ data:[62472,2140,874,689,8], backgroundColor:[C.blue,C.green,C.gray,C.gold,C.red], borderWidth:2, borderColor:'#fff' }] },
+  options: { responsive:true, cutout:'55%', plugins:{ legend:{ position:'right', labels:{padding:12, usePointStyle:true, pointStyle:'circle'} }}}
+});
+
+new Chart(document.getElementById('chartEngMin'), {
+  type:'bar', data: { labels:['FOS on LinkedIn\n0:49','FOS on Instagram\n0:44','FOS on Facebook\n0:27','FOS on Threads\n0:26','FOS on X\n0:25'],
+    datasets:[{ data:[49,44,27,26,25], backgroundColor:[C.green,C.gold,C.gray,C.red,C.blue], borderRadius:6, borderSkipped:false }] },
+  options: { indexAxis:'y', responsive:true, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>'0:'+String(ctx.parsed.x).padStart(2,'0')+' avg engaged time' }}},
+    scales: { x:{ beginAtZero:true, max:60, ticks:{callback:v=>'0:'+String(v).padStart(2,'0')}, grid:{color:'#F2F4F7'} }, y:{grid:{display:false}} }}
+});
+
+new Chart(document.getElementById('chartArticles'), {
+  type:'bar', data: { labels:['FOS on X','FOS on\nInstagram','FOS on\nLinkedIn','FOS on\nFacebook','FOS on\nThreads'],
+    datasets:[{ label:'Articles', data:[375,56,19,5,1], backgroundColor:[C.blue,C.gold,C.green,C.gray,C.red], borderRadius:6, borderSkipped:false }] },
+  options: { responsive:true, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>ctx.parsed.y+' articles' }}},
+    scales: { y:{ beginAtZero:true, grid:{color:'#F2F4F7'} }, x:{grid:{display:false}} }}
+});
+</script>
+</body>
+</html>
