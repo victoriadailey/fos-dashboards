@@ -23,7 +23,6 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
 
-  /* Header */
   .header {
     background: var(--primetime);
     color: white;
@@ -51,14 +50,12 @@
     margin-top: 6px;
   }
 
-  /* Container */
   .container {
     max-width: 1000px;
     margin: 0 auto;
     padding: 32px 24px 60px;
   }
 
-  /* Category Section */
   .category {
     margin-bottom: 36px;
   }
@@ -89,7 +86,6 @@
     margin-left: auto;
   }
 
-  /* Dashboard Cards */
   .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -138,27 +134,23 @@
 
   /* Color coding by area */
   .border-growth { border-left-color: var(--turf); }
-  .border-social { border-left-color: var(--blue); }
-  .border-sales { border-left-color: var(--center-court); }
-  .border-editorial { border-left-color: var(--red); }
-  .border-events { border-left-color: var(--infield); }
-  .border-partnerships { border-left-color: var(--seams); }
+  .border-content { border-left-color: var(--blue); }
+  .border-creative { border-left-color: var(--red); }
+  .border-partners { border-left-color: var(--center-court); }
+  .border-social { border-left-color: var(--seams); }
 
   .tag-growth { background: #D1FAE5; color: var(--deep-rough); }
-  .tag-social { background: #DBEAFE; color: var(--blue); }
-  .tag-sales { background: #FEF3C7; color: #92400E; }
-  .tag-editorial { background: #FEE2E2; color: var(--seams); }
-  .tag-events { background: #F3E8FF; color: #6B21A8; }
-  .tag-partnerships { background: #FCE7F3; color: #9D174D; }
+  .tag-content { background: #DBEAFE; color: var(--blue); }
+  .tag-creative { background: #FEE2E2; color: var(--seams); }
+  .tag-partners { background: #FEF3C7; color: #92400E; }
+  .tag-social { background: #FCE7F3; color: #9D174D; }
 
   .icon-growth { background: #D1FAE5; }
-  .icon-social { background: #DBEAFE; }
-  .icon-sales { background: #FEF3C7; }
-  .icon-editorial { background: #FEE2E2; }
-  .icon-events { background: #F3E8FF; }
-  .icon-partnerships { background: #FCE7F3; }
+  .icon-content { background: #DBEAFE; }
+  .icon-creative { background: #FEE2E2; }
+  .icon-partners { background: #FEF3C7; }
+  .icon-social { background: #FCE7F3; }
 
-  /* Placeholder for empty categories */
   .coming-soon {
     background: var(--card);
     border-radius: 10px;
@@ -169,7 +161,6 @@
     border: 2px dashed var(--border);
   }
 
-  /* Footer */
   .footer {
     text-align: center;
     padding: 24px;
@@ -195,7 +186,7 @@
     <div class="category-header">
       <div class="category-icon icon-growth">📈</div>
       <div class="category-name">Growth</div>
-      <div class="category-sub">Newsletter &amp; Audience Development</div>
+      <div class="category-sub">Newsletter, Audience &amp; Acquisition</div>
     </div>
     <div class="dashboard-grid">
       <a href="growth/newsletter/welcome-sequence.html" class="dashboard-card border-growth">
@@ -217,52 +208,42 @@
     </div>
   </div>
 
+  <!-- CONTENT STRATEGY -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-icon icon-content">📝</div>
+      <div class="category-name">Content Strategy</div>
+      <div class="category-sub">Editorial Planning &amp; Performance</div>
+    </div>
+    <div class="coming-soon">Dashboards coming soon</div>
+  </div>
+
+  <!-- CREATIVE STRATEGY -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-icon icon-creative">🎨</div>
+      <div class="category-name">Creative Strategy</div>
+      <div class="category-sub">Brand Creative &amp; Campaign Assets</div>
+    </div>
+    <div class="coming-soon">Dashboards coming soon</div>
+  </div>
+
+  <!-- PARTNER CAMPAIGNS -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-icon icon-partners">🤝</div>
+      <div class="category-name">Partner Campaigns</div>
+      <div class="category-sub">Sponsorship &amp; Brand Partnership Performance</div>
+    </div>
+    <div class="coming-soon">Dashboards coming soon</div>
+  </div>
+
   <!-- SOCIAL -->
   <div class="category">
     <div class="category-header">
       <div class="category-icon icon-social">📱</div>
       <div class="category-name">Social</div>
-      <div class="category-sub">Platform Performance &amp; Content</div>
-    </div>
-    <div class="coming-soon">Dashboards coming soon</div>
-  </div>
-
-  <!-- SALES -->
-  <div class="category">
-    <div class="category-header">
-      <div class="category-icon icon-sales">💰</div>
-      <div class="category-name">Sales</div>
-      <div class="category-sub">Pipeline &amp; Revenue Intelligence</div>
-    </div>
-    <div class="coming-soon">Dashboards coming soon</div>
-  </div>
-
-  <!-- EDITORIAL -->
-  <div class="category">
-    <div class="category-header">
-      <div class="category-icon icon-editorial">📝</div>
-      <div class="category-name">Editorial</div>
-      <div class="category-sub">Content Performance &amp; Engagement</div>
-    </div>
-    <div class="coming-soon">Dashboards coming soon</div>
-  </div>
-
-  <!-- EVENTS -->
-  <div class="category">
-    <div class="category-header">
-      <div class="category-icon icon-events">🎪</div>
-      <div class="category-name">Events</div>
-      <div class="category-sub">Event Analytics &amp; Sponsorship</div>
-    </div>
-    <div class="coming-soon">Dashboards coming soon</div>
-  </div>
-
-  <!-- PARTNERSHIPS -->
-  <div class="category">
-    <div class="category-header">
-      <div class="category-icon icon-partnerships">🤝</div>
-      <div class="category-name">Partnerships</div>
-      <div class="category-sub">Brand &amp; Sponsorship Performance</div>
+      <div class="category-sub">Platform Performance &amp; Engagement</div>
     </div>
     <div class="coming-soon">Dashboards coming soon</div>
   </div>
