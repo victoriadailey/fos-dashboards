@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOS Sponsored Social — Campaign Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<style>
+  :root {
+    --scoreboard-blue: #196CFC;
+    --primetime: #0D1D64;
+    --turf: #007640;
+    --eats-yellow: #FACA06;
+    --red-card: #E00922;
+    --deep-rough: #044928;
+    --infield: #B47E41;
+    --seams: #800B14;
+    --center-court: #CFA677;
+    --bg: #F7F8FA;
+    --card-bg: #FFFFFF;
+    --border: #E5E7EB;
+    --text-primary: #111827;
+    --text-secondary: #6B7280;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; background: var(--bg); color: var(--text-primary); line-height: 1.15; }
+
+  .header { background: var(--primetime); color: #fff; padding: 24px 40px; display: flex; justify-content: space-between; align-items: center; }
+  .header h1 { font-size: 22px; font-weight: 700; }
+  .header .subtitle { font-size: 13px; opacity: 0.7; margin-top: 4px; }
+  .last-updated { text-align: right; font-size: 12px; opacity: 0.8; }
+
+  .tab-bar { display: flex; gap: 0; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+  .tab { padding: 14px 20px; font-size: 13px; font-weight: 600; color: var(--text-secondary); cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: all 0.2s; }
+  .tab:hover { color: var(--scoreboard-blue); }
+  .tab.active { color: var(--scoreboard-blue); border-bottom-color: var(--scoreboard-blue); }
+
+  .main { padding: 24px 40px 40px 40px; max-width: 1200px; margin: 0 auto; }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .section-title { font-size: 16px; font-weight: 700; color: var(--primetime); margin-bottom: 16px; }
+  .section-subtitle { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .section-header { margin-bottom: 16px; }
+
+  /* Campaign Pacing Cards */
+  .campaign-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .campaign-card { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); cursor: pointer; transition: all 0.2s; }
+  .campaign-card:hover { border-color: var(--scoreboard-blue); box-shadow: 0 4px 12px rgba(25,108,252,0.1); }
+  .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .partner-name { font-size: 17px; font-weight: 700; color: var(--primetime); }
+  .content-category { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+  .status { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .status.green { background: #ECFDF5; color: var(--turf); }
+  .status.yellow { background: #FFFBEB; color: #92400E; }
+  .status.red { background: #FEF2F2; color: var(--red-card); }
+  .status.upcoming { background: #F0F4FF; color: var(--scoreboard-blue); }
+
+  .pacing-row { margin-bottom: 12px; }
+  .pacing-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+  .pacing-label .label-text { color: var(--text-secondary); font-weight: 600; }
+  .pacing-label .label-val { color: var(--text-primary); font-weight: 700; }
+  .progress-bar { height: 8px; background: #E5E7EB; border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+
+  .card-flight { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); }
+  .card-time { font-size: 11px; color: var(--text-secondary); margin-top: 6px; }
+
+  /* KPI Cards */
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .kpi-card { background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .kpi-label { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+  .kpi-sub { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+  /* Top Performers */
+  .performers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 32px; }
+  .performer-card { background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .performer-card .campaign-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+  .performer-card .campaign-tag.adp { background: #F0F4FF; color: var(--scoreboard-blue); }
+  .performer-card .campaign-tag.sf { background: #FEF2F2; color: var(--red-card); }
+  .performer-card .platform-badge { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+  .performer-card .post-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; line-height: 1.3; }
+  .performer-card .hero-metric { font-size: 20px; font-weight: 700; color: var(--scoreboard-blue); margin-bottom: 8px; }
+  .performer-card .metric-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; border-bottom: 1px solid #f3f4f6; }
+  .performer-card .metric-row:last-child { border-bottom: none; }
+  .performer-card .insight { margin-top: 10px; font-size: 11px; color: var(--turf); font-weight: 600; }
+
+  /* Tables */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 24px; background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .data-table th { background: #F9FAFB; padding: 10px 12px; text-align: left; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; font-size: 11px; border-bottom: 2px solid var(--border); }
+  .data-table td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; }
+  .data-table tr:hover { background: #F9FAFB; }
+  .data-table .num { text-align: right; }
+
+  /* Charts */
+  .chart-card { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .chart-card h3 { font-size: 13px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; margin-bottom: 16px; }
+  .chart-container { height: 300px; position: relative; }
+  .chart-container.short { height: 200px; }
+
+  /* Recommendations */
+  .reco-card { background: var(--card-bg); border-left: 4px solid var(--scoreboard-blue); border-radius: 0 8px 8px 0; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .reco-card.warning { border-left-color: var(--red-card); }
+  .reco-card.success { border-left-color: var(--turf); }
+  .reco-card p { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; }
+  .reco-card strong { color: var(--text-primary); }
+
+  /* Data freshness */
+  .freshness-bar { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); padding: 16px 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .freshness-bar .title { font-size: 13px; font-weight: 700; color: var(--primetime); margin-bottom: 10px; }
+  .freshness-row { display: flex; gap: 24px; flex-wrap: wrap; }
+  .freshness-item { display: flex; align-items: center; gap: 8px; }
+  .freshness-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--turf); }
+  .freshness-label { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+  .freshness-date { font-size: 11px; color: var(--text-secondary); }
+
+  .divider { border: none; border-top: 2px solid var(--border); margin: 32px 0 24px 0; }
+  .footer { text-align: center; padding: 20px 40px; font-size: 11px; color: var(--text-secondary); border-top: 1px solid var(--border); }
+
+  /* Pacing callout */
+  .pacing-callout { background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 14px 16px; margin-bottom: 24px; }
+  .pacing-callout.green { background: #ECFDF5; border-color: #A7F3D0; }
+  .pacing-callout.yellow { background: #FFFBEB; border-color: #FDE68A; }
+  .pacing-callout p { font-size: 12.5px; line-height: 1.5; color: var(--text-primary); }
+
+  .copy-btn { background: var(--scoreboard-blue); color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+  .copy-btn:hover { background: var(--primetime); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Sponsored Social — Campaign Dashboard</h1>
+    <div class="subtitle">Impression Pacing · Engagement · Organic Reach · All Active Campaigns</div>
+  </div>
+  <div class="last-updated">Last updated: March 30, 2026<br><span style="font-size:11px; opacity:0.8">Front Office Sports — Marketing</span></div>
+</div>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab('overview')">Dashboard</div>
+  <div class="tab" onclick="switchTab('adp')">ADP Future of Sports</div>
+  <div class="tab" onclick="switchTab('statefarm')">State Farm Family Assist</div>
+  <div class="tab" onclick="switchTab('etrade')">E*TRADE Portfolio Players</div>
+  <div class="tab" onclick="switchTab('datasources')">Data Sources &amp; Exports</div>
+</div>
+
+<div class="main">
+
+<!-- ==================== MASTER DASHBOARD ==================== -->
+<div id="tab-overview" class="tab-content active">
+
+  <div class="section-header"><div class="section-title">Campaign Pacing Overview</div><div class="section-subtitle">Impressions delivered vs. goal · Green = within 15% of pace · Yellow = 15-30% behind · Red = 30%+ behind</div></div>
+
+  <div class="campaign-cards">
+
+    <!-- ADP -->
+    <div class="campaign-card" onclick="switchTab('adp')">
+      <div class="card-header">
+        <div><div class="partner-name">ADP</div><div class="content-category">Future of Sports</div></div>
+        <span class="status red">Behind Pace</span>
+      </div>
+      <div class="pacing-row">
+        <div class="pacing-label"><span class="label-text">Impressions</span><span class="label-val">2.45M of 6.6M (37.1%)</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:37.1%; background:var(--red-card);"></div></div>
+      </div>
+      <div class="pacing-row">
+        <div class="pacing-label"><span class="label-text">Budget Spend</span><span class="label-val">$3,192 of $10,916 (29.2%)</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:29.2%; background:var(--turf);"></div></div>
+      </div>
+      <div class="card-flight"><span>Oct 1, 2025 – May 31, 2026</span><span>74.5% elapsed</span></div>
+      <div class="card-time">At current pace, projected to finish at ~3.3M of 6.6M goal (50% delivery)</div>
+    </div>
+
+    <!-- State Farm -->
+    <div class="campaign-card" onclick="switchTab('statefarm')">
+      <div class="card-header">
+        <div><div class="partner-name">State Farm</div><div class="content-category">The Family Assist</div></div>
+        <span class="status green">Ahead of Pace</span>
+      </div>
+      <div class="pacing-row">
+        <div class="pacing-label"><span class="label-text">Impressions</span><span class="label-val">6.33M of 11.98M (52.9%)</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:52.9%; background:var(--turf);"></div></div>
+      </div>
+      <div class="pacing-row">
+        <div class="pacing-label"><span class="label-text">Budget Spend</span><span class="label-val">$11,377 of $40,800 (27.9%)</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:27.9%; background:var(--turf);"></div></div>
+      </div>
+      <div class="card-flight"><span>Mar 15, 2026 – TBD</span><span>15 days in</span></div>
+      <div class="card-time">Strong early delivery — 52.9% of goal in first 15 days of flight</div>
+    </div>
+
+
+    <!-- E*TRADE -->
+    <div class="campaign-card" onclick="switchTab('etrade')">
+      <div class="card-header">
+        <div><div class="partner-name">E*TRADE</div><div class="content-category">Portfolio Players S3</div></div>
+        <span class="status red">Behind Pace</span>
+      </div>
+      <div class="pacing-row">
+        <div class="pacing-label"><span class="label-text">Impressions</span><span class="label-val">9.45M of 41.6M (22.7%)</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:22.7%; background:var(--red-card);"></div></div>
+      </div>
+      <div class="pacing-row">
+        <div class="pacing-label"><span class="label-text">Budget Spend</span><span class="label-val">$13,222 of $160K annual (8.3%)</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:8.3%; background:var(--turf);"></div></div>
+      </div>
+      <div class="card-flight"><span>Jan 1 – Jun 30, 2026</span><span>49.2% elapsed</span></div>
+      <div class="card-time">At current pace, projected ~19.2M of 41.6M S3 goal (46% delivery) · Annual: 70M impr / $160K budget</div>
+    </div>
+
+  </div>
+
+  <!-- Data Freshness -->
+  <div class="freshness-bar">
+    <div class="title">Data Sources — Last Updated</div>
+    <div class="freshness-row">
+      <div class="freshness-item"><div class="freshness-dot"></div><div><div class="freshness-label">Measure Studio</div><div class="freshness-date">March 30, 2026</div></div></div>
+      <div class="freshness-item"><div class="freshness-dot"></div><div><div class="freshness-label">Google Ads (ADP)</div><div class="freshness-date">March 30, 2026</div></div></div>
+      <div class="freshness-item"><div class="freshness-dot"></div><div><div class="freshness-label">Google Ads (State Farm)</div><div class="freshness-date">March 30, 2026</div></div></div>
+      <div class="freshness-item"><div class="freshness-dot"></div><div><div class="freshness-label">Measure Studio (E*TRADE)</div><div class="freshness-date">March 30, 2026</div></div></div>
+      <div class="freshness-item"><div class="freshness-dot"></div><div><div class="freshness-label">Google Ads (E*TRADE)</div><div class="freshness-date">March 30, 2026</div></div></div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Top Performers by Engagement Rate -->
+  <div class="section-header"><div class="section-title">Top Performing Assets — Engagement Rate</div><div class="section-subtitle">Highest ER across all active campaigns</div></div>
+  <div class="performers-grid">
+
+    <div class="performer-card">
+      <span class="campaign-tag adp">ADP</span>
+      <div class="platform-badge">LinkedIn</div>
+      <div class="post-title">"You have to be overly prepared, overly thorough, incredibly competent"</div>
+      <div class="hero-metric">6.06% ER</div>
+      <div class="metric-row"><span>Engagements</span><span>519</span></div>
+      <div class="metric-row"><span>Impressions</span><span>8,557</span></div>
+      <div class="metric-row"><span>Organic %</span><span>100%</span></div>
+      <div class="insight">Zero paid spend — pure organic resonance on LinkedIn</div>
+    </div>
+
+    <div class="performer-card">
+      <span class="campaign-tag adp">ADP</span>
+      <div class="platform-badge">LinkedIn</div>
+      <div class="post-title">From player, to manager, to league executive, Joe Torre...</div>
+      <div class="hero-metric">4.91% ER</div>
+      <div class="metric-row"><span>Engagements</span><span>813</span></div>
+      <div class="metric-row"><span>Impressions</span><span>21,333</span></div>
+      <div class="metric-row"><span>Organic %</span><span>100%</span></div>
+      <div class="insight">Consistent LinkedIn organic engagement across ADP series</div>
+    </div>
+
+    <div class="performer-card">
+      <span class="campaign-tag sf">STATE FARM</span>
+      <div class="platform-badge">LinkedIn</div>
+      <div class="post-title">In a new era of college athletics defined by pressure...</div>
+      <div class="hero-metric">4.23% ER</div>
+      <div class="metric-row"><span>Engagements</span><span>1,090</span></div>
+      <div class="metric-row"><span>Impressions</span><span>25,756</span></div>
+      <div class="metric-row"><span>Organic %</span><span>100%</span></div>
+      <div class="insight">Highest State Farm ER — strong organic LinkedIn traction</div>
+    </div>
+
+    <div class="performer-card">
+      <span class="campaign-tag sf">STATE FARM</span>
+      <div class="platform-badge">LinkedIn</div>
+      <div class="post-title">The Boozer twins know each other better than anyone...</div>
+      <div class="hero-metric">3.06% ER</div>
+      <div class="metric-row"><span>Engagements</span><span>494</span></div>
+      <div class="metric-row"><span>Impressions</span><span>16,124</span></div>
+      <div class="metric-row"><span>Organic %</span><span>100%</span></div>
+      <div class="insight">LinkedIn continues to drive quality engagement for FOS</div>
+    </div>
+
+    <div class="performer-card">
+      <span class="campaign-tag sf">STATE FARM</span>
+      <div class="platform-badge">Instagram</div>
+      <div class="post-title">In a new era of college athletics defined by pressure...</div>
+      <div class="hero-metric">2.99% ER</div>
+      <div class="metric-row"><span>Engagements</span><span>5,885</span></div>
+      <div class="metric-row"><span>Views</span><span>197,088</span></div>
+      <div class="metric-row"><span>Organic %</span><span>4.3%</span></div>
+      <div class="insight">Highest total engagements across all posts — paid-amplified reach</div>
+    </div>
+
+    <div class="performer-card">
+      <span class="campaign-tag" style="background:#FFF8E1; color:#92400E;">E*TRADE</span>
+      <div class="platform-badge">LinkedIn</div>
+      <div class="post-title">"There is so much capital that wants to come into sports..."</div>
+      <div class="hero-metric">5.50% ER</div>
+      <div class="metric-row"><span>Engagements</span><span>735</span></div>
+      <div class="metric-row"><span>Impressions</span><span>13,352</span></div>
+      <div class="metric-row"><span>Organic %</span><span>100%</span></div>
+      <div class="insight">Highest ER across all E*TRADE posts — LinkedIn organic</div>
+    </div>
+
+    <div class="performer-card">
+      <span class="campaign-tag" style="background:#FFF8E1; color:#92400E;">E*TRADE</span>
+      <div class="platform-badge">LinkedIn</div>
+      <div class="post-title">50-100x returns in sports ownership. AI-proof assets...</div>
+      <div class="hero-metric">5.00% ER</div>
+      <div class="metric-row"><span>Engagements</span><span>781</span></div>
+      <div class="metric-row"><span>Impressions</span><span>15,610</span></div>
+      <div class="metric-row"><span>Organic %</span><span>100%</span></div>
+      <div class="insight">E*TRADE LinkedIn consistently delivers 4-5% ER</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Top Performers by Organic Reach -->
+  <div class="section-header"><div class="section-title">Top Performing Assets — Organic Reach</div><div class="section-subtitle">Highest organic views / impressions with no or minimal paid support</div></div>
+  <div class="performers-grid">
+
+    <div class="performer-card">
+      <span class="campaign-tag sf">STATE FARM</span>
+      <div class="platform-badge">YouTube</div>
+      <div class="post-title">Cameron Boozer & Cayden Boozer Talk Pressure, Benefit of Playing Together</div>
+      <div class="hero-metric" style="color: var(--turf);">137,728 organic views</div>
+      <div class="metric-row"><span>Total Views</span><span>286,141</span></div>
+      <div class="metric-row"><span>Organic %</span><span>48.1%</span></div>
+      <div class="metric-row"><span>Platform</span><span>YouTube (Full Episode)</span></div>
+      <div class="insight">Nearly half of views came organically — exceptional YouTube discovery</div>
+    </div>
+
+    <div class="performer-card">
+      <span class="campaign-tag adp">ADP</span>
+      <div class="platform-badge">TikTok</div>
+      <div class="post-title">"You have to be overly prepared, overly thorough, incredibly competent"</div>
+      <div class="hero-metric" style="color: var(--turf);">88,575 organic views</div>
+      <div class="metric-row"><span>Total Views</span><span>261,713</span></div>
+      <div class="metric-row"><span>Organic %</span><span>33.8%</span></div>
+      <div class="metric-row"><span>Platform</span><span>TikTok</span></div>
+      <div class="insight">Strong algorithmic distribution — TikTok organic pickup</div>
+    </div>
+
+    <div class="performer-card">
+      <span class="campaign-tag sf">STATE FARM</span>
+      <div class="platform-badge">YouTube</div>
+      <div class="post-title">The Boozer twins know each other better than anyone...</div>
+      <div class="hero-metric" style="color: var(--turf);">65,044 organic views</div>
+      <div class="metric-row"><span>Total Views</span><span>75,712</span></div>
+      <div class="metric-row"><span>Organic %</span><span>85.9%</span></div>
+      <div class="metric-row"><span>Platform</span><span>YouTube (Shorts)</span></div>
+      <div class="insight">85.9% organic — Shorts format driving algorithmic reach</div>
+    </div>
+
+    <div class="performer-card">
+      <span class="campaign-tag sf">STATE FARM</span>
+      <div class="platform-badge">YouTube</div>
+      <div class="post-title">Cameron and Cayden Boozer have continued to build their family's legacy...</div>
+      <div class="hero-metric" style="color: var(--turf);">57,553 organic views</div>
+      <div class="metric-row"><span>Total Views</span><span>72,305</span></div>
+      <div class="metric-row"><span>Organic %</span><span>79.6%</span></div>
+      <div class="metric-row"><span>Platform</span><span>YouTube (Shorts)</span></div>
+      <div class="insight">Sizzle cutdown content performing well organically</div>
+    </div>
+
+    <div class="performer-card">
+      <span class="campaign-tag sf">STATE FARM</span>
+      <div class="platform-badge">X</div>
+      <div class="post-title">In a new era of college athletics defined by pressure...</div>
+      <div class="hero-metric" style="color: var(--turf);">51,634 organic impressions</div>
+      <div class="metric-row"><span>Total Impressions</span><span>51,634</span></div>
+      <div class="metric-row"><span>Organic %</span><span>100%</span></div>
+      <div class="metric-row"><span>Platform</span><span>X (Organic)</span></div>
+      <div class="insight">Fully organic reach — no paid amplification on X</div>
+    </div>
+
+    <div class="performer-card">
+      <span class="campaign-tag" style="background:#FFF8E1; color:#92400E;">E*TRADE</span>
+      <div class="platform-badge">LinkedIn</div>
+      <div class="post-title">Jerry Jones bought the Dallas Cowboys for $140 million in 1989...</div>
+      <div class="hero-metric" style="color: var(--turf);">31,817 organic impressions</div>
+      <div class="metric-row"><span>Total Impressions</span><span>31,817</span></div>
+      <div class="metric-row"><span>Organic %</span><span>100%</span></div>
+      <div class="metric-row"><span>Platform</span><span>LinkedIn (Organic)</span></div>
+      <div class="insight">Top organic reach for E*TRADE — LinkedIn drives discovery</div>
+    </div>
+
+    <div class="performer-card">
+      <span class="campaign-tag" style="background:#FFF8E1; color:#92400E;">E*TRADE</span>
+      <div class="platform-badge">Instagram</div>
+      <div class="post-title">Meet Mike Repole - the sports entrepreneur responsible for building...</div>
+      <div class="hero-metric" style="color: var(--turf);">22,301 organic views</div>
+      <div class="metric-row"><span>Total Views</span><span>22,301</span></div>
+      <div class="metric-row"><span>Organic %</span><span>100%</span></div>
+      <div class="metric-row"><span>Platform</span><span>Instagram (Organic)</span></div>
+      <div class="insight">Fully organic IG Reel — no paid amplification needed</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Cross-Campaign Insights -->
+  <div class="section-header"><div class="section-title">Cross-Campaign Insights</div></div>
+
+  <div class="reco-card warning">
+    <p><strong>ADP is significantly behind on impression pacing.</strong> At 37.1% delivered with 74.5% of flight elapsed, the campaign is projected to finish at ~50% of its 6.6M goal. Recommend accelerating spend on high-efficiency platforms (TikTok CPM ~$2.14, YouTube in-feed CPM ~$0.49).</p>
+  </div>
+
+  <div class="reco-card success">
+    <p><strong>State Farm is pacing well ahead of schedule.</strong> 52.9% of impressions delivered in the first 15 days of flight. YouTube pre-roll is the primary driver (508K impressions from $3,888 spend). Monitor daily spend to ensure budget lasts the full flight.</p>
+  </div>
+
+  <div class="reco-card">
+    <p><strong>LinkedIn is the organic engagement leader across both campaigns.</strong> All four LinkedIn posts (2 ADP, 2 State Farm) achieved 100% organic reach with 3-6% ER — the highest across any platform. Consider increasing LinkedIn posting frequency as a zero-cost impression strategy.</p>
+  </div>
+
+
+  <div class="reco-card warning">
+    <p><strong>E*TRADE Portfolio Players is significantly behind on impression pacing.</strong> At 22.7% delivered with 49.2% of flight elapsed, the campaign is projected to finish at ~46% of the 41.6M goal. With 5 episodes of YouTube content plus social amplification, the biggest opportunity is scaling in-feed YouTube (CPM ~$0.50) and Instagram paid ($4.39 CPM).</p>
+  </div>
+
+  <div class="reco-card">
+    <p><strong>Facebook is underperforming across E*TRADE.</strong> 15 posts with 1.16M views but only 22 total engagements (0.00% ER). Recommend reallocating Facebook spend to higher-performing platforms like Instagram and LinkedIn.</p>
+  </div>
+  <div class="reco-card">
+    <p><strong>YouTube Shorts and TikTok drive the highest organic view volumes.</strong> State Farm YouTube Shorts hit 80-86% organic, and ADP TikTok reached 33.8% organic on 261K views. Short-form vertical video is the strongest organic format in the sponsored social mix.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CPM Benchmarks -->
+  <div class="section-header"><div class="section-title">CPM Benchmarks — Platform & Tactic Averages</div><div class="section-subtitle">Weighted average CPMs across all active campaigns · Paid placements only</div></div>
+
+  <!-- YouTube CPMs by Tactic -->
+  <div class="chart-card">
+    <h3>YouTube CPM by Tactic (All Campaigns)</h3>
+    <div class="chart-container short"><canvas id="cpm-yt-chart"></canvas></div>
+    <table class="data-table" style="margin-top:16px;">
+      <thead><tr><th>Tactic</th><th class="num">ADP</th><th class="num">State Farm</th><th class="num">E*TRADE</th><th class="num" style="background:var(--primetime); color:#fff;">Cross-Campaign Avg</th></tr></thead>
+      <tbody>
+        <tr><td>In-feed</td><td class="num">$0.49</td><td class="num">$0.75</td><td class="num">$0.52</td><td class="num" style="font-weight:700;">$0.61</td></tr>
+        <tr><td>Pre-roll</td><td class="num">$13.31</td><td class="num">$7.65</td><td class="num">$13.91</td><td class="num" style="font-weight:700;">$9.61</td></tr>
+        <tr><td>Cutdowns / Shorts</td><td class="num">$3.80</td><td class="num">$4.13</td><td class="num">$2.72</td><td class="num" style="font-weight:700;">$3.31</td></tr>
+        <tr style="font-weight:700; border-top:2px solid var(--border);"><td>YouTube Overall</td><td class="num">$1.31</td><td class="num">$1.57</td><td class="num">$1.08</td><td class="num" style="font-weight:700;">$1.21</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Social CPMs by Platform -->
+  <div class="chart-card">
+    <h3>Social CPM by Platform (All Campaigns)</h3>
+    <div class="chart-container short"><canvas id="cpm-social-chart"></canvas></div>
+    <table class="data-table" style="margin-top:16px;">
+      <thead><tr><th>Platform</th><th class="num">ADP</th><th class="num">State Farm</th><th class="num">E*TRADE</th><th class="num" style="background:var(--primetime); color:#fff;">Cross-Campaign Avg</th></tr></thead>
+      <tbody>
+        <tr><td>Instagram</td><td class="num">$3.41</td><td class="num">$5.25</td><td class="num">$4.39</td><td class="num" style="font-weight:700;">$4.50</td></tr>
+        <tr><td>TikTok</td><td class="num">$1.43</td><td class="num">$2.13</td><td class="num">—</td><td class="num" style="font-weight:700;">$1.87</td></tr>
+        <tr><td>X</td><td class="num">$0.57</td><td class="num">—</td><td class="num">—</td><td class="num" style="font-weight:700;">$0.57</td></tr>
+        <tr><td>LinkedIn</td><td class="num" colspan="3" style="text-align:center; color:var(--turf);">100% organic across all campaigns</td><td class="num" style="font-weight:700;">—</td></tr>
+        <tr><td>Facebook</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num" style="font-weight:700;">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CPM Outliers & Observations -->
+  <div class="section-header"><div class="section-title">CPM Outliers & Observations</div></div>
+
+  <div class="reco-card success">
+    <p><strong>In-feed YouTube is the clear efficiency champion at $0.61 avg CPM.</strong> E*TRADE Ep 3 (Leslie Osborne) hit $0.46 CPM — the lowest across all campaigns. In-feed consistently delivers 88-89% of YouTube impressions at a fraction of pre-roll cost. This is the #1 lever for catching up on impression pacing.</p>
+  </div>
+
+  <div class="reco-card warning">
+    <p><strong>Pre-roll CPMs vary dramatically — $7.65 to $14.92.</strong> State Farm pre-roll is running at $7.65 (well below the $13+ seen on ADP and E*TRADE). This may reflect audience targeting differences or campaign optimization. ADP pre-roll at $13.31 and E*TRADE at $13.91 are 45-82% more expensive per thousand impressions.</p>
+  </div>
+
+  <div class="reco-card">
+    <p><strong>TikTok delivers the lowest social CPM at $1.87 avg.</strong> ADP TikTok at $1.43 is the most efficient paid social placement across all campaigns. Worth noting E*TRADE doesn't appear to have TikTok paid spend — a potential opportunity given the platform's CPM efficiency.</p>
+  </div>
+
+  <div class="reco-card">
+    <p><strong>Instagram CPMs range from $3.41 (ADP) to $5.25 (State Farm).</strong> State Farm Instagram is 54% more expensive than ADP per thousand views. E*TRADE sits in the middle at $4.39. Despite higher CPMs, Instagram consistently delivers the strongest engagement rates of any paid social platform.</p>
+  </div>
+
+  <div class="reco-card success">
+    <p><strong>E*TRADE YouTube cutdowns are the most efficient shorts at $2.72 avg CPM.</strong> The Ep 1 Trailer at $2.09 CPM is the single cheapest cutdown/shorts placement. ADP cutdowns at $3.80 and State Farm at $4.13 are 40-52% more expensive. This suggests E*TRADE's shorter-form YouTube content is well-optimized for cost efficiency.</p>
+  </div>
+
+</div>
+
+<!-- ==================== ADP CAMPAIGN ==================== -->
+<div id="tab-adp" class="tab-content">
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div>
+      <div class="section-title" style="margin-bottom:4px;">ADP — Future of Sports</div>
+      <div class="section-subtitle">Flight: Oct 1, 2025 – May 31, 2026 · Full Episodes + Cutdowns</div>
+    </div>
+    <span class="status red">Behind Pace</span>
+  </div>
+
+  <!-- Pacing -->
+  <div class="chart-card">
+    <h3>Campaign Pacing</h3>
+    <div class="chart-container short"><canvas id="adp-pacing-chart"></canvas></div>
+    <div class="pacing-callout" style="margin-top:16px;">
+      <p><strong>Status:</strong> Campaign is <strong style="color:var(--red-card);">37pp behind</strong> on impression pacing — 37.1% delivered at 74.5% of flight. Budget spend is at 29.2% ($3,192 of $10,916). At current trajectory, projected to finish at ~50% of the 6.6M impression goal.</p>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-label">Total Impressions</div><div class="kpi-value">2.45M</div><div class="kpi-sub">of 6.6M goal (37.1%)</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total Views</div><div class="kpi-value">512K</div><div class="kpi-sub">across all platforms (Measure Studio)</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total Engagements</div><div class="kpi-value">3.3K</div><div class="kpi-sub">from Measure Studio social posts</div></div>
+    <div class="kpi-card"><div class="kpi-label">Ad Spend</div><div class="kpi-value">$3,192</div><div class="kpi-sub">of $10,916 budget (29.2%)</div></div>
+  </div>
+
+  <!-- YouTube Ad Performance -->
+  <div class="chart-card">
+    <h3>YouTube Ad Performance (Google Ads)</h3>
+    <table class="data-table">
+      <thead><tr><th>Ad Unit</th><th class="num">Impressions</th><th class="num">Spend</th><th class="num">CPM</th></tr></thead>
+      <tbody>
+        <tr><td>Full Episode 1 (in-feed)</td><td class="num">942,525</td><td class="num">$464.55</td><td class="num">$0.49</td></tr>
+        <tr><td>Full Episode 2 (in-feed)</td><td class="num">615,371</td><td class="num">$305.19</td><td class="num">$0.50</td></tr>
+        <tr><td>Full Episode 1 (pre-roll)</td><td class="num">43,686</td><td class="num">$612.27</td><td class="num">$14.02</td></tr>
+        <tr><td>Full Episode 2 (pre-roll)</td><td class="num">32,246</td><td class="num">$398.36</td><td class="num">$12.35</td></tr>
+        <tr><td>Episode 1 Cutdown 1</td><td class="num">66,346</td><td class="num">$272.28</td><td class="num">$4.10</td></tr>
+        <tr><td>Episode 1 Cutdown 2</td><td class="num">76,882</td><td class="num">$272.65</td><td class="num">$3.55</td></tr>
+        <tr style="font-weight:700; border-top:2px solid var(--border);"><td>Total YouTube Ads</td><td class="num">1,777,056</td><td class="num">$2,325.30</td><td class="num">$1.31</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:16px;">
+      <h3 style="font-size:12px; margin-bottom:8px;">YouTube CPM by Tactic</h3>
+      <table class="data-table">
+        <thead><tr><th>Tactic</th><th class="num">Impressions</th><th class="num">Spend</th><th class="num">Avg CPM</th></tr></thead>
+        <tbody>
+          <tr><td>In-feed</td><td class="num">1,557,896</td><td class="num">$769.74</td><td class="num" style="color:var(--turf); font-weight:700;">$0.49</td></tr>
+          <tr><td>Pre-roll</td><td class="num">75,932</td><td class="num">$1,010.63</td><td class="num" style="color:var(--red-card); font-weight:700;">$13.31</td></tr>
+          <tr><td>Cutdowns</td><td class="num">143,228</td><td class="num">$544.93</td><td class="num">$3.80</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Paid vs Organic -->
+  <div class="chart-card">
+    <h3>Reach: Paid vs Organic by Platform</h3>
+    <div class="chart-container"><canvas id="adp-views-chart"></canvas></div>
+    <table class="data-table" style="margin-top:16px;">
+      <thead><tr><th>Platform</th><th class="num">Total Views / Impr</th><th class="num">Organic</th><th class="num">Paid</th><th class="num">% Organic</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Ad Spend</th><th class="num">CPM</th></tr></thead>
+      <tbody>
+        <tr><td>YouTube</td><td class="num">1,777,056</td><td class="num">1,535</td><td class="num">1,775,521</td><td class="num">0.1%</td><td class="num">231</td><td class="num">—</td><td class="num">$2,325.30</td><td class="num">$1.31</td></tr>
+        <tr><td>Instagram</td><td class="num">96,648</td><td class="num">32,739</td><td class="num">63,909</td><td class="num">33.9%</td><td class="num">1,372</td><td class="num">1.42%</td><td class="num">$329.37</td><td class="num">$3.41</td></tr>
+        <tr><td>TikTok</td><td class="num">261,713</td><td class="num">88,575</td><td class="num">173,138</td><td class="num">33.8%</td><td class="num">95</td><td class="num">0.04%</td><td class="num">$374.90</td><td class="num">$1.43</td></tr>
+        <tr><td>X</td><td class="num">285,826</td><td class="num">17,093</td><td class="num">268,733</td><td class="num">6.0%</td><td class="num">174</td><td class="num">0.06%</td><td class="num">$162.08</td><td class="num">$0.57</td></tr>
+        <tr><td>LinkedIn</td><td class="num">29,890</td><td class="num">29,890</td><td class="num">0</td><td class="num">100%</td><td class="num">1,444</td><td class="num">4.83%</td><td class="num">$0.00</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- All Posts -->
+  <div class="chart-card">
+    <h3>All Posts — Cutdowns</h3>
+    <table class="data-table">
+      <thead><tr><th>Platform</th><th>Date</th><th>Title</th><th class="num">Views / Impr</th><th class="num">Organic</th><th class="num">Paid</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Ad Spend</th></tr></thead>
+      <tbody>
+        <tr><td>YouTube</td><td>2026-03-03</td><td>Kim Ng, commissioner of AUSL...</td><td class="num">77,668</td><td class="num">912</td><td class="num">76,756</td><td class="num">83</td><td class="num">0.11%</td><td class="num">$272.65</td></tr>
+        <tr><td>YouTube</td><td>2026-02-28</td><td>"You have to be overly prepared..."</td><td class="num">66,661</td><td class="num">623</td><td class="num">66,038</td><td class="num">148</td><td class="num">0.22%</td><td class="num">$272.28</td></tr>
+        <tr><td>Instagram</td><td>2026-03-03</td><td>From player, to manager, to league executive...</td><td class="num">43,315</td><td class="num">11,578</td><td class="num">31,737</td><td class="num">306</td><td class="num">0.71%</td><td class="num">$164.82</td></tr>
+        <tr><td>Instagram</td><td>2026-02-28</td><td>"You have to be overly prepared..."</td><td class="num">53,333</td><td class="num">21,161</td><td class="num">32,172</td><td class="num">1,066</td><td class="num">2.00%</td><td class="num">$164.55</td></tr>
+        <tr><td>TikTok</td><td>2026-02-28</td><td>"You have to be overly prepared..."</td><td class="num">261,713</td><td class="num">88,575</td><td class="num">173,138</td><td class="num">95</td><td class="num">0.04%</td><td class="num">$374.90</td></tr>
+        <tr><td>X</td><td>2026-03-03</td><td>From player, to manager, to league executive...</td><td class="num">160,737</td><td class="num">8,731</td><td class="num">123,756</td><td class="num">92</td><td class="num">0.06%</td><td class="num">$162.08</td></tr>
+        <tr><td>X</td><td>2026-02-28</td><td>"You have to be overly prepared..."</td><td class="num">125,089</td><td class="num">8,362</td><td class="num">94,995</td><td class="num">82</td><td class="num">0.07%</td><td class="num">$0.00</td></tr>
+        <tr><td>LinkedIn</td><td>2026-03-03</td><td>From player, to manager, to league executive...</td><td class="num">21,333</td><td class="num">21,333</td><td class="num">0</td><td class="num">857</td><td class="num">4.02%</td><td class="num">$0.00</td></tr>
+        <tr><td>LinkedIn</td><td>2026-02-28</td><td>"You have to be overly prepared..."</td><td class="num">8,557</td><td class="num">8,557</td><td class="num">0</td><td class="num">587</td><td class="num">6.86%</td><td class="num">$0.00</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Recommendations -->
+  <div class="section-header"><div class="section-title">Optimization Recommendations</div></div>
+  <div class="reco-card warning"><p><strong>Campaign is 37pp behind on impression pacing.</strong> Recommend accelerating spend on high-efficiency platforms — TikTok at ~$2.14 CPM and YouTube in-feed at ~$0.49 CPM offer the best cost-per-impression for catch-up delivery.</p></div>
+  <div class="reco-card"><p><strong>LinkedIn delivers 4-7% organic ER with zero spend.</strong> Increase posting frequency to build organic impressions toward goal without additional budget.</p></div>
+  <div class="reco-card"><p><strong>YouTube Shorts are 96-99% paid views.</strong> Organic discovery is minimal — consider optimizing titles/thumbnails for organic YouTube search.</p></div>
+  <div class="reco-card success"><p><strong>Instagram Reels show the best organic-to-paid engagement ratio.</strong> The 2/28 Reel drove 1,066 engagements with only $164.55 in spend (2.00% ER).</p></div>
+
+  <!-- Data Footer -->
+  <div class="freshness-bar" style="margin-top:24px;">
+    <div class="title">Data Sources</div>
+    <p style="font-size:12px; color:var(--text-secondary); line-height:1.5;">YouTube impressions and spend from Google Ads Campaign Performance export (Jan 1 – Mar 30, 2026). Social metrics from Measure Studio export (as of March 30, 2026). Pacing calculations based on flight dates Oct 1, 2025 – May 31, 2026. YouTube row shows Google Ads impressions; other platforms show views/impressions from Measure Studio.</p>
+  </div>
+</div>
+
+<!-- ==================== STATE FARM CAMPAIGN ==================== -->
+<div id="tab-statefarm" class="tab-content">
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div>
+      <div class="section-title" style="margin-bottom:4px;">State Farm — The Family Assist</div>
+      <div class="section-subtitle">Flight: Mar 15, 2026 – TBD · Full Episode + Cutdowns</div>
+    </div>
+    <span class="status green">Ahead of Pace</span>
+  </div>
+
+  <!-- Pacing -->
+  <div class="chart-card">
+    <h3>Campaign Pacing</h3>
+    <div class="chart-container short"><canvas id="sf-pacing-chart"></canvas></div>
+    <div class="pacing-callout green" style="margin-top:16px;">
+      <p><strong>Status:</strong> Campaign is <strong style="color:var(--turf);">pacing ahead of schedule</strong> — 52.9% of impressions delivered in the first 15 days of flight. YouTube pre-roll is driving the bulk of delivery. Budget utilization is at 27.9% ($11,377 of $40,800).</p>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-label">Total Impressions</div><div class="kpi-value">6.33M</div><div class="kpi-sub">of 11.98M goal (52.9%)</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total Views</div><div class="kpi-value">1.35M</div><div class="kpi-sub">YouTube + social platforms</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total Engagements</div><div class="kpi-value">13.5K</div><div class="kpi-sub">avg ER: 1.0%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Ad Spend</div><div class="kpi-value">$11,377</div><div class="kpi-sub">of $40,800 budget (27.9%)</div></div>
+  </div>
+
+  <!-- YouTube Ad Performance -->
+  <div class="chart-card">
+    <h3>YouTube Ad Performance</h3>
+    <div class="chart-container"><canvas id="sf-yt-chart"></canvas></div>
+    <table class="data-table" style="margin-top:16px;">
+      <thead><tr><th>Ad Unit</th><th class="num">Impressions</th><th class="num">TrueView Views</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Spend</th><th class="num">CPM</th></tr></thead>
+      <tbody>
+        <tr><td>Full Episode (in-feed)</td><td class="num">4,642,883</td><td class="num">26,673</td><td class="num">45,248</td><td class="num">1.32%</td><td class="num">$3,495.81</td><td class="num">$0.75</td></tr>
+        <tr><td>Full Episode (pre-roll)</td><td class="num">508,495</td><td class="num">263,624</td><td class="num">365,922</td><td class="num">71.96%</td><td class="num">$3,888.06</td><td class="num">$7.65</td></tr>
+        <tr><td>Most Likely (cutdown)</td><td class="num">142,671</td><td class="num">22,478</td><td class="num">44,994</td><td class="num">31.54%</td><td class="num">$557.76</td><td class="num">$3.91</td></tr>
+        <tr><td>Sizzle (cutdown)</td><td class="num">127,440</td><td class="num">19,480</td><td class="num">33,265</td><td class="num">26.10%</td><td class="num">$558.68</td><td class="num">$4.38</td></tr>
+      </tbody>
+
+    <div style="margin-top:16px;">
+      <h3 style="font-size:12px; margin-bottom:8px;">YouTube CPM by Tactic</h3>
+      <table class="data-table">
+        <thead><tr><th>Tactic</th><th class="num">Impressions</th><th class="num">Spend</th><th class="num">Avg CPM</th></tr></thead>
+        <tbody>
+          <tr><td>In-feed</td><td class="num">4,642,883</td><td class="num">$3,495.81</td><td class="num" style="color:var(--turf); font-weight:700;">$0.75</td></tr>
+          <tr><td>Pre-roll</td><td class="num">508,495</td><td class="num">$3,888.06</td><td class="num" style="color:var(--red-card); font-weight:700;">$7.65</td></tr>
+          <tr><td>Cutdowns</td><td class="num">270,111</td><td class="num">$1,116.44</td><td class="num">$4.13</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Social Platform Breakdown -->
+  <div class="chart-card">
+    <h3>Social Platform Breakdown (Measure Studio)</h3>
+    <div class="chart-container"><canvas id="sf-social-chart"></canvas></div>
+    <table class="data-table" style="margin-top:16px;">
+      <thead><tr><th>Platform</th><th class="num">Posts</th><th class="num">Views / Impr</th><th class="num">Organic</th><th class="num">% Organic</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Ad Spend</th><th class="num">CPM</th></tr></thead>
+      <tbody>
+        <tr><td>YouTube</td><td class="num">4</td><td class="num">434,158</td><td class="num">260,325</td><td class="num">60.0%</td><td class="num">492</td><td class="num">0.11%</td><td class="num">$0.00</td><td class="num">—</td></tr>
+        <tr><td>Instagram</td><td class="num">2</td><td class="num">373,015</td><td class="num">16,588</td><td class="num">4.4%</td><td class="num">10,658</td><td class="num">2.86%</td><td class="num">$1,957.74</td><td class="num">$5.25</td></tr>
+        <tr><td>TikTok</td><td class="num">2</td><td class="num">431,114</td><td class="num">43,449</td><td class="num">10.1%</td><td class="num">488</td><td class="num">0.11%</td><td class="num">$919.22</td><td class="num">$2.13</td></tr>
+        <tr><td>X</td><td class="num">2</td><td class="num">66,476</td><td class="num">66,476</td><td class="num">100%</td><td class="num">314</td><td class="num">0.47%</td><td class="num">$0.00</td><td class="num">—</td></tr>
+        <tr><td>LinkedIn</td><td class="num">2</td><td class="num">41,880</td><td class="num">41,880</td><td class="num">100%</td><td class="num">1,584</td><td class="num">3.78%</td><td class="num">$0.00</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Top Performers -->
+  <div class="section-header"><div class="section-title">Top Performers</div></div>
+  <div class="performers-grid">
+    <div class="performer-card">
+      <div class="platform-badge">Instagram</div>
+      <div class="post-title">In a new era of college athletics defined by pressure...</div>
+      <div class="hero-metric">5,885 engagements</div>
+      <div class="metric-row"><span>Views</span><span>197,088</span></div>
+      <div class="metric-row"><span>ER</span><span>2.99%</span></div>
+      <div class="metric-row"><span>Organic %</span><span>4.3%</span></div>
+      <div class="insight">Highest engagement volume across all State Farm social posts</div>
+    </div>
+    <div class="performer-card">
+      <div class="platform-badge">Instagram</div>
+      <div class="post-title">The Boozer twins know each other better than anyone...</div>
+      <div class="hero-metric">4,773 engagements</div>
+      <div class="metric-row"><span>Views</span><span>175,927</span></div>
+      <div class="metric-row"><span>ER</span><span>2.71%</span></div>
+      <div class="metric-row"><span>Organic %</span><span>4.5%</span></div>
+      <div class="insight">Strong paid amplification + genuine audience engagement</div>
+    </div>
+    <div class="performer-card">
+      <div class="platform-badge">YouTube</div>
+      <div class="post-title">Cameron Boozer & Cayden Boozer Talk Pressure...</div>
+      <div class="hero-metric" style="color:var(--turf);">137,728 organic views</div>
+      <div class="metric-row"><span>Total Views</span><span>286,141</span></div>
+      <div class="metric-row"><span>Organic %</span><span>48.1%</span></div>
+      <div class="metric-row"><span>Platform</span><span>YouTube (Full Ep)</span></div>
+      <div class="insight">Highest organic view volume — strong YouTube discovery</div>
+    </div>
+  </div>
+
+  <!-- Recommendations -->
+  <div class="section-header"><div class="section-title">Optimization Recommendations</div></div>
+  <div class="reco-card success"><p><strong>Campaign is pacing well ahead of schedule.</strong> Monitor daily spend to ensure budget lasts the full flight. Consider reducing daily budget caps if the flight has significant runway remaining.</p></div>
+  <div class="reco-card"><p><strong>Instagram is the engagement leader (2.86% ER).</strong> State Farm Instagram Reels are driving the highest absolute engagement numbers — 10,658 engagements from 2 posts with strong paid amplification.</p></div>
+  <div class="reco-card"><p><strong>YouTube Shorts are earning 80-86% organic views.</strong> Short-form cutdown content is getting strong algorithmic distribution — lean into this format for additional content drops.</p></div>
+  <div class="reco-card"><p><strong>LinkedIn again delivers the highest ER at 3.78% with zero spend.</strong> This is consistent across both ADP and State Farm — LinkedIn organic is an untapped lever for impression delivery.</p></div>
+
+  <div class="freshness-bar" style="margin-top:24px;">
+    <div class="title">Data Sources</div>
+    <p style="font-size:12px; color:var(--text-secondary); line-height:1.5;">YouTube ad performance from Google Ads Ad Report (Mar 15 – Mar 30, 2026). Social metrics from Measure Studio export (as of March 30, 2026). YouTube row in social table shows Measure Studio-tracked views (may differ from Google Ads impressions). Total impressions combine Google Ads YouTube impressions + Measure Studio social platform data.</p>
+  </div>
+</div>
+
+
+<!-- ==================== E*TRADE PORTFOLIO PLAYERS ==================== -->
+<div id="tab-etrade" class="tab-content">
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div>
+      <div class="section-title" style="margin-bottom:4px;">E*TRADE — Portfolio Players S3</div>
+      <div class="section-subtitle">S3 Flight: Jan 1 – Jun 30, 2026 · 5 Episodes · Annual Goal: 70M Impressions / $160K Budget</div>
+    </div>
+    <span class="status red">Behind Pace</span>
+  </div>
+
+  <!-- Pacing -->
+  <div class="chart-card">
+    <h3>Campaign Pacing</h3>
+    <div class="chart-container short"><canvas id="et-pacing-chart"></canvas></div>
+    <div class="pacing-callout" style="margin-top:16px;">
+      <p><strong>Status:</strong> Campaign is <strong style="color:var(--red-card);">27pp behind</strong> on impression pacing — 22.7% delivered at 49.2% of flight. Total spend is $13,222 of $160K annual budget (8.3%). At current trajectory, projected to finish S3 at ~46% of the 41.6M impression goal. Budget efficiency is strong — spending well under pace while still delivering impressions.</p>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-label">Total Impressions</div><div class="kpi-value">9.45M</div><div class="kpi-sub">of 41.6M goal (22.7%)</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total Engagements</div><div class="kpi-value">27.3K</div><div class="kpi-sub">across 83 social posts + YouTube ads</div></div>
+    <div class="kpi-card"><div class="kpi-label">Social Posts</div><div class="kpi-value">83</div><div class="kpi-sub">across 6 platforms (YT, IG, FB, X, LI, TikTok)</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total Spend</div><div class="kpi-value">$13,222</div><div class="kpi-sub">of $160K annual budget (8.3%)</div></div>
+  </div>
+
+  <!-- YouTube Ad Performance by Episode -->
+  <div class="chart-card">
+    <h3>YouTube Ad Performance — by Episode</h3>
+    <div class="chart-container"><canvas id="et-yt-chart"></canvas></div>
+    <table class="data-table" style="margin-top:16px;">
+      <thead><tr><th>Episode / Ad Unit</th><th class="num">Impressions</th><th class="num">TrueView Views</th><th class="num">Engagements</th><th class="num">Spend</th><th class="num">CPM</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr style="background:#F9FAFB; font-weight:700;"><td colspan="7">Ep 1: Mike Repole</td></tr>
+        <tr><td style="padding-left:24px;">In-feed</td><td class="num">1,029,710</td><td class="num">2,168</td><td class="num">3,413</td><td class="num">$551.16</td><td class="num">$0.54</td><td>Ended</td></tr>
+        <tr><td style="padding-left:24px;">Pre-roll</td><td class="num">39,729</td><td class="num">21,769</td><td class="num">29,588</td><td class="num">$498.41</td><td class="num">$12.55</td><td>Ended</td></tr>
+        <tr><td style="padding-left:24px;">Cutdown 1 (Shorts)</td><td class="num">90,376</td><td class="num">4,096</td><td class="num">8,567</td><td class="num">$198.83</td><td class="num">$2.20</td><td>Ended</td></tr>
+        <tr><td style="padding-left:24px;">Trailer (Short)</td><td class="num">95,485</td><td class="num">2,141</td><td class="num">5,235</td><td class="num">$199.16</td><td class="num">$2.09</td><td>Ended</td></tr>
+        <tr><td style="padding-left:24px;">Cutdown 2 (Shorts)</td><td class="num">70,370</td><td class="num">11,957</td><td class="num">26,389</td><td class="num">$200.12</td><td class="num">$2.84</td><td>Ended</td></tr>
+
+        <tr style="background:#F9FAFB; font-weight:700;"><td colspan="7">Ep 2: Jon Patricof</td></tr>
+        <tr><td style="padding-left:24px;">In-feed</td><td class="num">1,127,272</td><td class="num">2,591</td><td class="num">3,824</td><td class="num">$597.52</td><td class="num">$0.53</td><td>Ended</td></tr>
+        <tr><td style="padding-left:24px;">Pre-roll</td><td class="num">34,447</td><td class="num">20,584</td><td class="num">26,728</td><td class="num">$498.92</td><td class="num">$14.48</td><td>Ended</td></tr>
+        <tr><td style="padding-left:24px;">Cutdown 1 (Shorts)</td><td class="num">63,394</td><td class="num">10,842</td><td class="num">21,775</td><td class="num">$199.79</td><td class="num">$3.15</td><td>Ended</td></tr>
+        <tr><td style="padding-left:24px;">Cutdown 2</td><td class="num">57,451</td><td class="num">7,142</td><td class="num">14,832</td><td class="num">$179.75</td><td class="num">$3.13</td><td>Ended</td></tr>
+
+        <tr style="background:#F9FAFB; font-weight:700;"><td colspan="7">Ep 3: Leslie Osborne</td></tr>
+        <tr><td style="padding-left:24px;">In-feed</td><td class="num">1,297,774</td><td class="num">3,977</td><td class="num">6,356</td><td class="num">$598.02</td><td class="num">$0.46</td><td>Ended</td></tr>
+        <tr><td style="padding-left:24px;">Pre-roll</td><td class="num">37,040</td><td class="num">21,141</td><td class="num">28,380</td><td class="num">$494.92</td><td class="num">$13.36</td><td>Ended</td></tr>
+        <tr><td style="padding-left:24px;">Cutdown 2 (Shorts)</td><td class="num">81,107</td><td class="num">7,911</td><td class="num">14,973</td><td class="num">$199.88</td><td class="num">$2.46</td><td>Ended</td></tr>
+
+        <tr style="background:#F9FAFB; font-weight:700;"><td colspan="7">Ep 4: Paul Rabil</td></tr>
+        <tr><td style="padding-left:24px;">In-feed</td><td class="num">1,145,983</td><td class="num">3,532</td><td class="num">5,903</td><td class="num">$599.54</td><td class="num">$0.52</td><td>Ended</td></tr>
+        <tr><td style="padding-left:24px;">Pre-roll</td><td class="num">33,440</td><td class="num">19,042</td><td class="num">24,925</td><td class="num">$498.71</td><td class="num">$14.91</td><td>Ended</td></tr>
+        <tr><td style="padding-left:24px;">Cutdown 1</td><td class="num">41,592</td><td class="num">13,598</td><td class="num">18,742</td><td class="num">$179.80</td><td class="num">$4.32</td><td>Ended</td></tr>
+
+        <tr style="background:#F9FAFB; font-weight:700;"><td colspan="7">Ep 5: Assia Grazioli-Venier</td></tr>
+        <tr><td style="padding-left:24px;">In-feed</td><td class="num">649,223</td><td class="num">2,145</td><td class="num">3,411</td><td class="num">$390.47</td><td class="num">$0.60</td><td><span style="color:var(--turf); font-weight:600;">Active</span></td></tr>
+        <tr><td style="padding-left:24px;">Pre-roll</td><td class="num">22,035</td><td class="num">12,175</td><td class="num">16,241</td><td class="num">$328.85</td><td class="num">$14.92</td><td><span style="color:var(--turf); font-weight:600;">Active</span></td></tr>
+
+        <tr style="font-weight:700; border-top:2px solid var(--border);"><td>Total YouTube Ads</td><td class="num">5,916,428</td><td class="num">166,811</td><td class="num">259,282</td><td class="num">$6,413.87</td><td class="num">$1.08</td><td>15 of 17 ended</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:16px;">
+      <h3 style="font-size:12px; margin-bottom:8px;">YouTube CPM by Tactic</h3>
+      <table class="data-table">
+        <thead><tr><th>Tactic</th><th class="num">Ad Units</th><th class="num">Impressions</th><th class="num">Spend</th><th class="num">Avg CPM</th><th class="num">Range</th></tr></thead>
+        <tbody>
+          <tr><td>In-feed</td><td class="num">5</td><td class="num">5,249,962</td><td class="num">$2,736.71</td><td class="num" style="color:var(--turf); font-weight:700;">$0.52</td><td class="num">$0.46 – $0.60</td></tr>
+          <tr><td>Pre-roll</td><td class="num">5</td><td class="num">166,691</td><td class="num">$2,319.81</td><td class="num" style="color:var(--red-card); font-weight:700;">$13.91</td><td class="num">$12.55 – $14.92</td></tr>
+          <tr><td>Cutdowns / Shorts</td><td class="num">7</td><td class="num">499,775</td><td class="num">$1,357.33</td><td class="num">$2.72</td><td class="num">$2.09 – $4.32</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Social Platform Breakdown -->
+  <div class="chart-card">
+    <h3>Social Platform Breakdown (Measure Studio)</h3>
+    <div class="chart-container"><canvas id="et-social-chart"></canvas></div>
+    <table class="data-table" style="margin-top:16px;">
+      <thead><tr><th>Platform</th><th class="num">Posts</th><th class="num">Views / Impr</th><th class="num">Organic</th><th class="num">% Organic</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Ad Spend</th><th class="num">CPM</th></tr></thead>
+      <tbody>
+        <tr><td>YouTube (MS)</td><td class="num">19</td><td class="num">830,732</td><td class="num">43,414</td><td class="num">5.2%</td><td class="num">1,287</td><td class="num">0.15%</td><td class="num">$0.00</td><td class="num">—</td></tr>
+        <tr><td>Instagram</td><td class="num">16</td><td class="num">1,550,669</td><td class="num">227,289</td><td class="num">14.7%</td><td class="num">13,667</td><td class="num">0.88%</td><td class="num">$6,808.45</td><td class="num">$4.39</td></tr>
+        <tr><td>Facebook</td><td class="num">15</td><td class="num">1,160,608</td><td class="num">3,568</td><td class="num">0.3%</td><td class="num">22</td><td class="num">0.00%</td><td class="num">$0.00</td><td class="num">—</td></tr>
+        <tr><td>X</td><td class="num">17</td><td class="num">563,805</td><td class="num">174,984</td><td class="num">31.0%</td><td class="num">842</td><td class="num">0.15%</td><td class="num">$0.00</td><td class="num">—</td></tr>
+        <tr><td>LinkedIn</td><td class="num">16</td><td class="num">259,073</td><td class="num">259,073</td><td class="num">100%</td><td class="num">11,512</td><td class="num">4.44%</td><td class="num">$0.00</td><td class="num">—</td></tr>
+        <tr style="font-weight:700; border-top:2px solid var(--border);"><td>Total (non-YouTube)</td><td class="num">64</td><td class="num">3,534,155</td><td class="num">664,914</td><td class="num">18.8%</td><td class="num">26,043</td><td class="num">0.74%</td><td class="num">$6,808.45</td><td class="num">$1.93</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:11px; color:var(--text-secondary); margin-top:8px;">Note: YouTube row shows Measure Studio-tracked views (organic discovery). YouTube ad impressions (5.92M) are from Google Ads and counted separately in the total impression number.</p>
+  </div>
+
+  <!-- Top Performers -->
+  <div class="section-header"><div class="section-title">Top Performers</div></div>
+  <div class="performers-grid">
+    <div class="performer-card">
+      <div class="platform-badge">LinkedIn</div>
+      <div class="post-title">"There is so much capital that wants to come into sports..."</div>
+      <div class="hero-metric">5.50% ER</div>
+      <div class="metric-row"><span>Engagements</span><span>735</span></div>
+      <div class="metric-row"><span>Impressions</span><span>13,352</span></div>
+      <div class="metric-row"><span>Organic %</span><span>100%</span></div>
+      <div class="insight">Highest ER across all E*TRADE social posts</div>
+    </div>
+    <div class="performer-card">
+      <div class="platform-badge">LinkedIn</div>
+      <div class="post-title">Jerry Jones bought the Dallas Cowboys for $140 million in 1989...</div>
+      <div class="hero-metric">4.64% ER</div>
+      <div class="metric-row"><span>Engagements</span><span>1,475</span></div>
+      <div class="metric-row"><span>Impressions</span><span>31,817</span></div>
+      <div class="metric-row"><span>Organic %</span><span>100%</span></div>
+      <div class="insight">Highest organic reach + strong engagement — Mike Repole episode</div>
+    </div>
+    <div class="performer-card">
+      <div class="platform-badge">Instagram</div>
+      <div class="post-title">"It's hard to understand historically what it's like to be a..."</div>
+      <div class="hero-metric">146,605 views</div>
+      <div class="metric-row"><span>Engagements</span><span>1,502</span></div>
+      <div class="metric-row"><span>Organic %</span><span>12.7%</span></div>
+      <div class="metric-row"><span>Ad Spend</span><span>$564.83</span></div>
+      <div class="insight">Highest total IG view volume — strong paid amplification</div>
+    </div>
+    <div class="performer-card">
+      <div class="platform-badge">YouTube (Ads)</div>
+      <div class="post-title">Ep 3: Leslie Osborne (in-feed)</div>
+      <div class="hero-metric">1.30M impressions</div>
+      <div class="metric-row"><span>TrueView Views</span><span>3,977</span></div>
+      <div class="metric-row"><span>CPM</span><span>$0.46</span></div>
+      <div class="metric-row"><span>Spend</span><span>$598.02</span></div>
+      <div class="insight">Best CPM across all YouTube in-feed ads — highest efficiency</div>
+    </div>
+  </div>
+
+  <!-- Platform Insights -->
+  <div class="section-header"><div class="section-title">Key Observations</div></div>
+
+  <div class="pacing-callout" style="margin-bottom:16px;">
+    <p><strong>Facebook is dramatically underperforming.</strong> 15 posts generated 1.16M views but only 22 total engagements (0.00% ER). This platform is delivering impressions but zero meaningful engagement. Recommend reallocating Facebook spend/effort to Instagram and LinkedIn.</p>
+  </div>
+
+  <!-- Recommendations -->
+  <div class="section-header"><div class="section-title">Optimization Recommendations</div></div>
+  <div class="reco-card warning"><p><strong>Campaign is 27pp behind on impression pacing.</strong> With 50.8% of S3 flight remaining and only 22.7% of impressions delivered, significant acceleration is needed. Budget utilization is extremely low (8.3% of $160K annual) — there is ample budget to scale. In-feed YouTube at $0.46-$0.60 CPM is the most cost-efficient lever — scaling Ep 5 in-feed budget would add the most impressions per dollar.</p></div>
+  <div class="reco-card warning"><p><strong>Only 2 of 17 YouTube ad units are still active.</strong> Ep 5 (Assia Grazioli-Venier) is the only episode still running. To hit the 41.6M goal, consider re-activating top-performing in-feed campaigns or launching new cutdown content.</p></div>
+  <div class="reco-card"><p><strong>LinkedIn is the clear engagement winner at 4.44% ER with zero spend.</strong> 16 posts with 100% organic reach and 11.5K engagements. Increase posting frequency and consider LinkedIn-native content formats for remaining episodes.</p></div>
+  <div class="reco-card"><p><strong>Instagram paid amplification is delivering volume but modest ER (0.88%).</strong> $6,808 in spend drove 1.55M views — efficient at $4.39 CPM. Consider shifting some budget toward high-ER organic posts to boost proven content.</p></div>
+  <div class="reco-card success"><p><strong>X is earning 31% organic impressions.</strong> 174K of 564K impressions came organically — the second-best organic percentage after LinkedIn. This suggests strong content-market fit on X for sports investment content.</p></div>
+
+  <div class="freshness-bar" style="margin-top:24px;">
+    <div class="title">Data Sources</div>
+    <p style="font-size:12px; color:var(--text-secondary); line-height:1.5;">YouTube ad performance from Google Ads Campaign Report (Jan 1 – Mar 30, 2026). Social metrics from Measure Studio export (83 posts, as of March 30, 2026). Total impressions = Google Ads YouTube impressions (5.92M) + non-YouTube Measure Studio views/impressions (3.53M). YouTube Measure Studio views tracked separately to avoid double-counting with Google Ads. Annual budget: $160K. Annual impression goal: 70M. S3 impression goal: 41.6M (Jan 1 – Jun 30, 2026).</p>
+  </div>
+</div>
+
+<!-- ==================== DATA SOURCES & EXPORTS ==================== -->
+<div id="tab-datasources" class="tab-content">
+
+  <div class="section-header">
+    <div class="section-title">Data Sources & Export Instructions</div>
+    <div class="section-subtitle">Where to pull data for each campaign — follow these steps to update the dashboard</div>
+  </div>
+
+  <!-- How It Works -->
+  <div class="chart-card" style="border-left: 4px solid var(--scoreboard-blue);">
+    <h3>How This Dashboard Gets Its Data</h3>
+    <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:12px;">This dashboard is built from two data sources per campaign: <strong>Measure Studio</strong> (organic + boosted social post performance) and <strong>Google Ads</strong> (YouTube paid ad impressions, spend, and views). Both exports need to be current for the dashboard to be accurate.</p>
+    <p style="font-size:13px; color:var(--text-secondary); line-height:1.6;">Export both files, then provide them to update the dashboard. File naming convention: <code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">[Campaign] - [Series Name] [Source] (date).csv</code></p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ADP Exports -->
+  <div class="section-header"><div class="section-title">ADP — Future of Sports</div></div>
+
+  <div class="chart-card">
+    <h3>1. Measure Studio Export — Cutdowns (Social Posts)</h3>
+    <table class="data-table">
+      <tbody>
+        <tr><td style="font-weight:700; width:180px;">Source</td><td>Measure Studio → Posts tab</td></tr>
+        <tr><td style="font-weight:700;">Account(s)</td><td>Front Office Sports (all platforms: YouTube, Instagram, TikTok, X, LinkedIn)</td></tr>
+        <tr><td style="font-weight:700;">Filter / Group</td><td>Filter to the ADP Future of Sports cutdown posts only (use Post Groups or keyword search for "ADP" or content titles)</td></tr>
+        <tr><td style="font-weight:700;">Date range</td><td>Lifetime (covers all posts regardless of publish date)</td></tr>
+        <tr><td style="font-weight:700;">Export format</td><td>CSV — use the full export with all available columns (do NOT customize columns)</td></tr>
+        <tr><td style="font-weight:700;">Key columns used</td><td>Platform, Date Published, Views (Total/Organic/Paid), Engagements, Ad Spend per platform</td></tr>
+        <tr><td style="font-weight:700;">File name</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">ADP - Future of Sports Cutdowns (Posts with Data).csv</code></td></tr>
+        <tr><td style="font-weight:700;">Notes</td><td>Header row is on <strong>row 8</strong> in Measure Studio exports. Rows 1-7 contain metadata. The export will have 300+ columns — that's expected.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chart-card">
+    <h3>2. Google Ads Export — YouTube Campaign Performance</h3>
+    <table class="data-table">
+      <tbody>
+        <tr><td style="font-weight:700; width:180px;">Source</td><td>Google Ads → Campaigns tab</td></tr>
+        <tr><td style="font-weight:700;">Account</td><td>FOS Google Ads account (the one running ADP YouTube campaigns)</td></tr>
+        <tr><td style="font-weight:700;">Filter</td><td>Filter campaign names containing "ADP" — include both Full Episode and Cutdown campaigns</td></tr>
+        <tr><td style="font-weight:700;">Date range</td><td>Full flight: Oct 1, 2025 – current date</td></tr>
+        <tr><td style="font-weight:700;">Report type</td><td><strong>Option A:</strong> Campaign Performance report (Campaigns tab → Download)<br><strong>Option B:</strong> Ad-level report (Ads tab → Download) — this includes TrueView views and engagement data</td></tr>
+        <tr><td style="font-weight:700;">Key columns used</td><td>Campaign name, Impressions, Cost, Clicks (and if Ad report: TrueView Views, Engagements, Watch Time)</td></tr>
+        <tr><td style="font-weight:700;">File name</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">ADP - Future of Sports YouTube.csv</code> or <code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">Campaign performance.csv</code></td></tr>
+        <tr><td style="font-weight:700;">Notes</td><td>The Ad-level report is preferred as it includes TrueView views and engagement breakdowns. The Campaign report only has impressions and spend. Either works but Ad report gives richer data.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="divider">
+
+  <!-- State Farm Exports -->
+  <div class="section-header"><div class="section-title">State Farm — The Family Assist</div></div>
+
+  <div class="chart-card">
+    <h3>1. Measure Studio Export — Social Posts</h3>
+    <table class="data-table">
+      <tbody>
+        <tr><td style="font-weight:700; width:180px;">Source</td><td>Measure Studio → Posts tab</td></tr>
+        <tr><td style="font-weight:700;">Account(s)</td><td>Front Office Sports (all platforms: YouTube, Instagram, TikTok, X, LinkedIn)</td></tr>
+        <tr><td style="font-weight:700;">Filter / Group</td><td>Filter to State Farm / Family Assist posts (use Post Groups or keyword search for "Boozer", "Family Assist", or relevant content titles)</td></tr>
+        <tr><td style="font-weight:700;">Date range</td><td>Lifetime</td></tr>
+        <tr><td style="font-weight:700;">Export format</td><td>CSV — full export with all columns</td></tr>
+        <tr><td style="font-weight:700;">File name</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">State Farm - The Family Assist (MM.DD).csv</code></td></tr>
+        <tr><td style="font-weight:700;">Notes</td><td>Same format as ADP — header on row 8, 300+ columns. Include the date in the filename so we can track freshness.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chart-card">
+    <h3>2. Google Ads Export — YouTube Ad Report</h3>
+    <table class="data-table">
+      <tbody>
+        <tr><td style="font-weight:700; width:180px;">Source</td><td>Google Ads → Ads tab (Ad-level report preferred)</td></tr>
+        <tr><td style="font-weight:700;">Account</td><td>FOS Google Ads account (the one running State Farm YouTube campaigns)</td></tr>
+        <tr><td style="font-weight:700;">Filter</td><td>Filter campaign names containing "State Farm" or "Family Assist" — include Full Episode, Most Likely, and Sizzle ad units</td></tr>
+        <tr><td style="font-weight:700;">Date range</td><td>Full flight: Mar 15, 2026 – current date</td></tr>
+        <tr><td style="font-weight:700;">Report type</td><td>Ad-level report (preferred) — includes TrueView views, engagements, watch time</td></tr>
+        <tr><td style="font-weight:700;">Key columns used</td><td>Ad name, Campaign, Impressions, Cost, TrueView Views, Engagements, Engagement Rate</td></tr>
+        <tr><td style="font-weight:700;">File name</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">State Farm - The Family Assist YouTube.csv</code></td></tr>
+        <tr><td style="font-weight:700;">Notes</td><td>Current data covers Mar 15 – Mar 30. Re-export to capture the latest spend and impression delivery.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="divider">
+
+  <!-- E*TRADE Exports -->
+  <div class="section-header"><div class="section-title">E*TRADE — Portfolio Players S3</div></div>
+
+  <div class="chart-card">
+    <h3>1. Measure Studio Export — Social Posts (All Platforms)</h3>
+    <table class="data-table">
+      <tbody>
+        <tr><td style="font-weight:700; width:180px;">Source</td><td>Measure Studio → Posts tab</td></tr>
+        <tr><td style="font-weight:700;">Account(s)</td><td>Front Office Sports (all platforms: YouTube, Instagram, Facebook, TikTok, X, LinkedIn)</td></tr>
+        <tr><td style="font-weight:700;">Filter / Group</td><td>Filter to Portfolio Players S3 posts (use Post Groups "Portfolio Players S3" + "Portfolio Players S3 x E*TRADE" or keyword search)</td></tr>
+        <tr><td style="font-weight:700;">Date range</td><td>Lifetime</td></tr>
+        <tr><td style="font-weight:700;">Export format</td><td>CSV — full export with all columns</td></tr>
+        <tr><td style="font-weight:700;">File name</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">ETRADE x Portfolio Players (MM.DD).csv</code></td></tr>
+        <tr><td style="font-weight:700;">Notes</td><td>Header on row 8. This campaign includes <strong>Facebook</strong> (unlike ADP and State Farm). 83 posts currently tracked across 6 platforms. Include the date in the filename.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chart-card">
+    <h3>2. Google Ads Export — YouTube Campaign Performance</h3>
+    <table class="data-table">
+      <tbody>
+        <tr><td style="font-weight:700; width:180px;">Source</td><td>Google Ads → Campaigns tab</td></tr>
+        <tr><td style="font-weight:700;">Account</td><td>FOS Google Ads account</td></tr>
+        <tr><td style="font-weight:700;">Filter</td><td>Filter campaign names containing "Portfolio Players S3" — includes 17 ad units across 5 episodes (in-feed, pre-roll, cutdowns/shorts)</td></tr>
+        <tr><td style="font-weight:700;">Date range</td><td>Full flight: Jan 1, 2026 – current date</td></tr>
+        <tr><td style="font-weight:700;">Report type</td><td>Campaign Performance report — includes impressions, TrueView views, engagements, spend, budget per campaign</td></tr>
+        <tr><td style="font-weight:700;">Key columns used</td><td>Campaign name, Budget, Impressions, TrueView Views, Engagements, Cost, Status</td></tr>
+        <tr><td style="font-weight:700;">File name</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">ETRADE Portfolio Players (MM.DD).csv</code></td></tr>
+        <tr><td style="font-weight:700;">Notes</td><td>Currently 15 of 17 campaigns have ended (Ep 5 still active). Re-export captures any new campaigns or reactivated spend.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Adding New Campaigns -->
+  <div class="section-header"><div class="section-title">Adding New Campaigns</div></div>
+
+  <div class="chart-card">
+    <h3>What's Needed for Each New Campaign</h3>
+    <table class="data-table">
+      <tbody>
+        <tr><td style="font-weight:700; width:30px;">1</td><td><strong>Campaign metadata:</strong> Partner name, campaign/series name, flight start and end dates, total impression goal, total budget</td></tr>
+        <tr><td style="font-weight:700;">2</td><td><strong>Measure Studio CSV:</strong> Full export of all social posts for the campaign (filtered by Post Group or keyword search)</td></tr>
+        <tr><td style="font-weight:700;">3</td><td><strong>Google Ads CSV:</strong> YouTube ad performance — either Campaign-level or Ad-level report, filtered to the campaign name</td></tr>
+        <tr><td style="font-weight:700;">4</td><td><strong>Content type breakdown (if applicable):</strong> Separate impression goals and budgets for Full Episodes vs. Cutdowns</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px; color:var(--text-secondary); margin-top:12px; line-height:1.5;">Once you have these files and info, share them and I'll add the campaign to this dashboard with full pacing, platform breakdown, top performers, and optimization recommendations.</p>
+  </div>
+
+  <!-- Quick Reference -->
+  <div class="chart-card" style="border-left: 4px solid var(--eats-yellow);">
+    <h3>Quick Reference — Export Checklist</h3>
+    <table class="data-table">
+      <thead><tr><th>Campaign</th><th>Export 1: Measure Studio</th><th>Export 2: Google Ads</th><th>Refresh Cadence</th></tr></thead>
+      <tbody>
+        <tr><td><strong>ADP Future of Sports</strong></td><td>Cutdowns social posts (all platforms)</td><td>YouTube campaigns containing "ADP"</td><td>Weekly or as needed for reporting</td></tr>
+        <tr><td><strong>State Farm Family Assist</strong></td><td>Family Assist social posts (all platforms)</td><td>YouTube campaigns containing "State Farm"</td><td>Weekly or as needed for reporting</td></tr>
+        <tr><td><strong>E*TRADE Portfolio Players</strong></td><td>Portfolio Players social posts (all platforms incl. Facebook)</td><td>YouTube campaigns containing "Portfolio Players"</td><td>Weekly or as needed for reporting</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+</div><!-- /main -->
+
+<div class="footer">Front Office Sports — Sponsored Social Campaign Dashboard · March 30, 2026 · Measure Studio + Google Ads</div>
+
+<script>
+// Tab switching
+function switchTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  // Find and activate the matching tab button
+  document.querySelectorAll('.tab').forEach(t => {
+    if ((id === 'overview' && t.textContent === 'Dashboard') ||
+        (id === 'adp' && t.textContent.includes('ADP')) ||
+        (id === 'statefarm' && t.textContent.includes('State Farm')) ||
+        (id === 'etrade' && t.textContent.includes('E*TRADE')) ||
+        (id === 'datasources' && t.textContent.includes('Data Sources'))) {
+      t.classList.add('active');
+    }
+  });
+  // Draw charts after tab switch
+  setTimeout(() => { drawAllCharts(); }, 100);
+}
+
+// Chart instances
+let charts = {};
+
+function destroyChart(name) {
+  if (charts[name]) { charts[name].destroy(); charts[name] = null; }
+}
+
+function drawAllCharts() {
+  drawADPPacing();
+  drawADPViews();
+  drawSFPacing();
+  drawSFYouTube();
+  drawSFSocial();
+  drawETPacing();
+  drawETYouTube();
+  drawETSocial();
+  drawCPMYouTube();
+  drawCPMSocial();
+}
+
+function drawADPPacing() {
+  const ctx = document.getElementById('adp-pacing-chart');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('adpPacing');
+  charts.adpPacing = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Time Elapsed (181 of 243 days)', 'Impressions: 2.45M of 6.6M goal', 'Budget: $3,192 of $10,916 spent'],
+      datasets: [{
+        label: 'Actual', data: [74.5, 37.1, 29.2],
+        backgroundColor: ['#0D1D64', '#196CFC', '#007640'], borderRadius: 2
+      }, {
+        label: 'Remaining', data: [25.5, 62.9, 70.8],
+        backgroundColor: ['#e5e5e5', '#e5e5e5', '#e5e5e5'], borderRadius: 2
+      }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.raw.toFixed(1) + '%' } }
+      },
+      scales: { x: { stacked: true, max: 100, ticks: { callback: v => v + '%' } }, y: { stacked: true } }
+    }
+  });
+}
+
+function drawADPViews() {
+  const ctx = document.getElementById('adp-views-chart');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('adpViews');
+  charts.adpViews = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['YouTube (Ads)', 'Instagram', 'TikTok', 'X', 'LinkedIn'],
+      datasets: [{
+        label: 'Organic', data: [1535, 32739, 88575, 17093, 29890],
+        backgroundColor: '#196CFC', stack: 'Stack 0'
+      }, {
+        label: 'Paid', data: [1775521, 63909, 173138, 268733, 0],
+        backgroundColor: '#0D1D64', stack: 'Stack 0'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom' } },
+      scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: v => v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'K' : v } } }
+    }
+  });
+}
+
+function drawSFPacing() {
+  const ctx = document.getElementById('sf-pacing-chart');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('sfPacing');
+  charts.sfPacing = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Impressions: 6.33M of 11.98M goal', 'Budget: $11,377 of $40,800 spent'],
+      datasets: [{
+        label: 'Actual', data: [52.9, 27.9],
+        backgroundColor: ['#196CFC', '#007640'], borderRadius: 2
+      }, {
+        label: 'Remaining', data: [47.1, 72.1],
+        backgroundColor: ['#e5e5e5', '#e5e5e5'], borderRadius: 2
+      }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.raw.toFixed(1) + '%' } }
+      },
+      scales: { x: { stacked: true, max: 100, ticks: { callback: v => v + '%' } }, y: { stacked: true } }
+    }
+  });
+}
+
+function drawSFYouTube() {
+  const ctx = document.getElementById('sf-yt-chart');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('sfYT');
+  charts.sfYT = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Full Ep (in-feed)', 'Full Ep (pre-roll)', 'Most Likely', 'Sizzle'],
+      datasets: [{
+        label: 'Impressions', data: [4642883, 508495, 142671, 127440],
+        backgroundColor: '#0D1D64'
+      }, {
+        label: 'TrueView Views', data: [26673, 263624, 22478, 19480],
+        backgroundColor: '#196CFC'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom' } },
+      scales: { y: { ticks: { callback: v => v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'K' : v } } }
+    }
+  });
+}
+
+function drawSFSocial() {
+  const ctx = document.getElementById('sf-social-chart');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('sfSocial');
+  charts.sfSocial = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['YouTube', 'Instagram', 'TikTok', 'X', 'LinkedIn'],
+      datasets: [{
+        label: 'Organic', data: [260325, 16588, 43449, 66476, 41880],
+        backgroundColor: '#196CFC', stack: 'Stack 0'
+      }, {
+        label: 'Paid', data: [173833, 356427, 387665, 0, 0],
+        backgroundColor: '#0D1D64', stack: 'Stack 0'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom' } },
+      scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0)+'K' : v } } }
+    }
+  });
+}
+
+
+
+function drawCPMYouTube() {
+  const ctx = document.getElementById('cpm-yt-chart');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('cpmYT');
+  charts.cpmYT = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['In-feed', 'Pre-roll', 'Cutdowns/Shorts'],
+      datasets: [{
+        label: 'ADP', data: [0.49, 13.31, 3.80],
+        backgroundColor: '#196CFC'
+      }, {
+        label: 'State Farm', data: [0.75, 7.65, 4.13],
+        backgroundColor: '#E00922'
+      }, {
+        label: 'E*TRADE', data: [0.52, 13.91, 2.72],
+        backgroundColor: '#CFA677'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.raw.toFixed(2) } }
+      },
+      scales: { y: { ticks: { callback: v => '$' + v.toFixed(0) } } }
+    }
+  });
+}
+
+function drawCPMSocial() {
+  const ctx = document.getElementById('cpm-social-chart');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('cpmSocial');
+  charts.cpmSocial = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Instagram', 'TikTok', 'X'],
+      datasets: [{
+        label: 'ADP', data: [3.41, 1.43, 0.57],
+        backgroundColor: '#196CFC'
+      }, {
+        label: 'State Farm', data: [5.25, 2.13, 0],
+        backgroundColor: '#E00922'
+      }, {
+        label: 'E*TRADE', data: [4.39, 0, 0],
+        backgroundColor: '#CFA677'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: ctx => ctx.raw > 0 ? ctx.dataset.label + ': $' + ctx.raw.toFixed(2) : ctx.dataset.label + ': N/A' } }
+      },
+      scales: { y: { ticks: { callback: v => '$' + v.toFixed(0) } } }
+    }
+  });
+}
+
+function drawETPacing() {
+  const ctx = document.getElementById('et-pacing-chart');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('etPacing');
+  charts.etPacing = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Time Elapsed (89 of 181 days)', 'Impressions: 9.45M of 41.6M S3 goal', 'Budget: $13,222 of $160K annual'],
+      datasets: [{
+        label: 'Actual', data: [49.2, 22.7, 8.3],
+        backgroundColor: ['#0D1D64', '#196CFC', '#007640'], borderRadius: 2
+      }, {
+        label: 'Remaining', data: [50.8, 77.3, 91.7],
+        backgroundColor: ['#e5e5e5', '#e5e5e5', '#e5e5e5'], borderRadius: 2
+      }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.raw.toFixed(1) + '%' } }
+      },
+      scales: { x: { stacked: true, max: 100, ticks: { callback: v => v + '%' } }, y: { stacked: true } }
+    }
+  });
+}
+
+function drawETYouTube() {
+  const ctx = document.getElementById('et-yt-chart');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('etYT');
+  charts.etYT = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Ep1: Repole', 'Ep2: Patricof', 'Ep3: Osborne', 'Ep4: Rabil', 'Ep5: Grazioli-Venier'],
+      datasets: [{
+        label: 'In-feed Impressions', data: [1029710, 1127272, 1297774, 1145983, 649223],
+        backgroundColor: '#0D1D64'
+      }, {
+        label: 'Pre-roll Impressions', data: [39729, 34447, 37040, 33440, 22035],
+        backgroundColor: '#196CFC'
+      }, {
+        label: 'Cutdown Impressions', data: [256231, 120845, 81107, 41592, 0],
+        backgroundColor: '#CFA677'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom' } },
+      scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: v => v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'K' : v } } }
+    }
+  });
+}
+
+function drawETSocial() {
+  const ctx = document.getElementById('et-social-chart');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('etSocial');
+  charts.etSocial = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Instagram', 'Facebook', 'X', 'LinkedIn'],
+      datasets: [{
+        label: 'Organic', data: [227289, 3568, 174984, 259073],
+        backgroundColor: '#196CFC', stack: 'Stack 0'
+      }, {
+        label: 'Paid', data: [1323380, 1157040, 388821, 0],
+        backgroundColor: '#0D1D64', stack: 'Stack 0'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom' } },
+      scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: v => v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'K' : v } } }
+    }
+  });
+}
+
+// Initial draw
+drawAllCharts();
+</script>
+</body>
+</html>

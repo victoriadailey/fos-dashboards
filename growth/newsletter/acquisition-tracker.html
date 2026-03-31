@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOS Newsletter Acquisition — Meta Campaign Tracker</title>
+<style>
+  :root {
+    --scoreboard-blue: #196CFC;
+    --turf: #007640;
+    --red-card: #E00922;
+    --eats-yellow: #F5A623;
+    --primetime: #0D1D64;
+    --center-court: #CFA677;
+    --deep-rough: #044928;
+    --infield: #B47E41;
+    --seams: #800B14;
+    --memo-black: #111111;
+    --bg: #F7F8FA;
+    --card-bg: #FFFFFF;
+    --border: #E5E7EB;
+    --text-primary: #111111;
+    --text-secondary: #6B7280;
+    --text-muted: #9CA3AF;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text-primary); line-height: 1.15; -webkit-font-smoothing: antialiased; }
+
+  .header { background: var(--memo-black); color: white; padding: 32px 40px 28px; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .title { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+  .subtitle { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+  .last-updated { font-size: 12px; color: rgba(255,255,255,0.5); text-align: right; }
+
+  .tab-bar { display: flex; gap: 0; background: white; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+  .tab { padding: 14px 24px; font-size: 13px; font-weight: 600; color: var(--text-secondary); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; user-select: none; }
+  .tab:hover { color: var(--text-primary); }
+  .tab.active[data-color="black"] { color: var(--memo-black); border-bottom-color: var(--memo-black); }
+  .tab.active[data-color="turf"] { color: var(--turf); border-bottom-color: var(--turf); }
+  .tab.active[data-color="blue"] { color: var(--scoreboard-blue); border-bottom-color: var(--scoreboard-blue); }
+  .tab.active[data-color="overview"] { color: var(--primetime); border-bottom-color: var(--primetime); }
+
+  .main { padding: 28px 40px 60px; max-width: 1320px; margin: 0 auto; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .section-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+  .section-title { font-size: 17px; font-weight: 700; }
+  .section-subtitle { font-size: 12px; color: var(--text-secondary); }
+
+  /* KPI Row */
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .kpi-card { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .kpi-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .kpi-val { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .kpi-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+  /* Campaign Cards */
+  .campaign-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .campaign-card { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); padding: 20px; cursor: pointer; transition: box-shadow 0.2s, transform 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .campaign-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }
+  .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .partner-name { font-size: 16px; font-weight: 700; }
+  .content-category { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .status { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+  .status.green { background: #E8F5EE; color: var(--turf); }
+  .status.yellow { background: #FFF8E6; color: #B8860B; }
+  .status.red { background: #FDE8EA; color: var(--red-card); }
+  .card-metrics { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .card-metrics .metric-label { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
+  .card-metrics .metric-val { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .card-flight { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+  .progress-bar { height: 4px; background: #F0F0F0; border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+
+  /* Tables */
+  .table-wrap { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); overflow-x: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 24px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th { text-align: left; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); padding: 12px 16px; border-bottom: 2px solid var(--border); background: #FAFBFC; }
+  td { padding: 11px 16px; border-bottom: 1px solid #F3F4F6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #F9FAFB; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  th.num { text-align: right; }
+  .bold-row td { font-weight: 700; background: #FAFBFC; }
+
+  /* Performance Badges */
+  .perf { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .perf.green { background: #E8F5EE; color: var(--turf); }
+  .perf.yellow { background: #FFF8E6; color: #B8860B; }
+  .perf.red { background: #FDE8EA; color: var(--red-card); }
+
+  /* Recommendation Cards */
+  .reco-section { margin-top: 32px; }
+  .reco-card { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); padding: 20px 24px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .reco-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .reco-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 6px; }
+  .reco-icon { font-size: 16px; }
+  .reco-tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.3px; margin-right: 6px; }
+  .reco-tag.scale { background: #E8F5EE; color: var(--turf); }
+  .reco-tag.test { background: #EBF1FF; color: var(--scoreboard-blue); }
+  .reco-tag.pause { background: #FDE8EA; color: var(--red-card); }
+  .reco-tag.monitor { background: #FFF8E6; color: #B8860B; }
+  .mc { display: inline-block; background: #F3F4F6; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-variant-numeric: tabular-nums; margin: 2px 2px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* Color accents per newsletter */
+  .accent-memo { border-left: 4px solid var(--memo-black); }
+  .accent-asset { border-left: 4px solid var(--turf); }
+  .accent-tuned { border-left: 4px solid var(--scoreboard-blue); }
+
+  .newsletter-badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; color: white; }
+  .badge-memo { background: var(--memo-black); }
+  .badge-asset { background: var(--turf); }
+  .badge-tuned { background: var(--scoreboard-blue); }
+
+  /* Sparkline-style bar charts */
+  .bar-chart { display: flex; align-items: flex-end; gap: 3px; height: 48px; margin-top: 8px; }
+  .bar { border-radius: 3px 3px 0 0; min-width: 28px; transition: height 0.3s; position: relative; }
+  .bar-label { font-size: 9px; text-align: center; color: var(--text-muted); margin-top: 4px; }
+
+  .insight-box { background: #F0F4FF; border: 1px solid #D6E0F5; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; }
+  .insight-box p { font-size: 13px; color: var(--primetime); line-height: 1.5; margin: 0; }
+  .insight-box strong { color: var(--text-primary); }
+
+  /* Chart styles */
+  .chart-container { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 24px; }
+  .chart-title { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
+  .svg-chart { width: 100%; height: 300px; }
+  .chart-label { font-size: 10px; fill: var(--text-secondary); }
+  .chart-value { font-size: 11px; fill: var(--text-primary); font-weight: 600; }
+  .gridline { stroke: #F0F0F0; stroke-width: 1; }
+  .threshold-line { stroke: var(--red-card); stroke-width: 1.5; stroke-dasharray: 6 4; }
+  .threshold-label { font-size: 10px; fill: var(--red-card); font-weight: 600; }
+  .data-line { fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .data-dot { r: 3; }
+  .area-fill { opacity: 0.08; }
+  .annotation { font-size: 10px; fill: var(--text-secondary); }
+  .annotation-bold { font-size: 10px; fill: var(--text-primary); font-weight: 700; }
+  .legend { display: flex; gap: 20px; margin-bottom: 12px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .year-label { font-size: 11px; font-weight: 700; fill: var(--text-primary); }
+
+  .stat-highlight { display: inline-flex; align-items: center; gap: 6px; background: #FDE8EA; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--red-card); }
+  .stat-highlight.positive { background: #E8F5EE; color: var(--turf); }
+
+  .timeline-table td { font-size: 12px; }
+  .timeline-table .year-header td { background: var(--primetime); color: white; font-weight: 700; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="title">Newsletter Acquisition — Meta Campaign Tracker</div>
+      <div class="subtitle">Meta Lead Gen Campaigns → Newsletter Subscribers → Creative Performance</div>
+    </div>
+    <div class="last-updated">Last updated: March 30, 2026<br><span style="font-size:11px; opacity:0.8">Front Office Sports — Marketing & Strategy</span></div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <div class="tab active" data-color="overview" onclick="switchTab('overview')">Overview</div>
+  <div class="tab" data-color="black" onclick="switchTab('memo')">The Memo</div>
+  <div class="tab" data-color="turf" onclick="switchTab('asset')">Asset Class</div>
+  <div class="tab" data-color="blue" onclick="switchTab('tuned')">Tuned In</div>
+  <div class="tab" data-color="overview" onclick="switchTab('history')">Historical Data</div>
+</div>
+
+<div class="main">
+
+<!-- ==================== OVERVIEW TAB ==================== -->
+<div id="tab-overview" class="tab-content active">
+
+  <div class="section-header"><div class="section-title">Active Newsletter Campaigns</div><div class="section-subtitle">March 2026 · Meta Lead Gen</div></div>
+
+  <div class="campaign-cards">
+    <div class="campaign-card accent-memo" onclick="switchTab('memo')">
+      <div class="card-header">
+        <div><div class="partner-name">The Memo</div><div class="content-category">NBA + WNBA Audiences · Lead Forms</div></div>
+        <span class="status yellow">$3.59 CPL</span>
+      </div>
+      <div class="card-metrics">
+        <div><div class="metric-label">Spend</div><div class="metric-val">$1,950</div></div>
+        <div><div class="metric-label">Leads</div><div class="metric-val">544</div></div>
+        <div><div class="metric-label">CPL</div><div class="metric-val">$3.59</div></div>
+        <div><div class="metric-label">Impressions</div><div class="metric-val">78.1K</div></div>
+      </div>
+      <div class="card-flight"><span>Mar 6 – Mar 31</span><span>Source: Meta Ads</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:72%; background:var(--memo-black);"></div></div>
+    </div>
+
+    <div class="campaign-card accent-asset" onclick="switchTab('asset')">
+      <div class="card-header">
+        <div><div class="partner-name">Asset Class</div><div class="content-category">Interest + Lookalike Targeting · Lead Forms</div></div>
+        <span class="status green">$2.94 CPL</span>
+      </div>
+      <div class="card-metrics">
+        <div><div class="metric-label">Spend</div><div class="metric-val">$367</div></div>
+        <div><div class="metric-label">Leads</div><div class="metric-val">125</div></div>
+        <div><div class="metric-label">CPL</div><div class="metric-val">$2.94</div></div>
+        <div><div class="metric-label">Impressions</div><div class="metric-val">18.0K</div></div>
+      </div>
+      <div class="card-flight"><span>Mar 24 – Mar 31</span><span>Source: Meta Ads</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:28%; background:var(--turf);"></div></div>
+    </div>
+
+    <div class="campaign-card accent-tuned" onclick="switchTab('tuned')">
+      <div class="card-header">
+        <div><div class="partner-name">Tuned In</div><div class="content-category">Interest + Lookalike Targeting · Lead Forms</div></div>
+        <span class="status yellow">$4.69 CPL</span>
+      </div>
+      <div class="card-metrics">
+        <div><div class="metric-label">Spend</div><div class="metric-val">$366</div></div>
+        <div><div class="metric-label">Leads</div><div class="metric-val">78</div></div>
+        <div><div class="metric-label">CPL</div><div class="metric-val">$4.69</div></div>
+        <div><div class="metric-label">Impressions</div><div class="metric-val">12.8K</div></div>
+      </div>
+      <div class="card-flight"><span>Mar 24 – Mar 31</span><span>Source: Meta Ads</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:28%; background:var(--scoreboard-blue);"></div></div>
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <p><strong>Key Takeaway:</strong> Asset Class is the efficiency leader at $2.94 CPL — largely driven by lookalike targeting outperforming interest-based audiences. The Memo has the most volume (544 leads) but WNBA audiences are doing the heavy lifting. Tuned In is the newest and most expensive at $4.69 CPL; Savannah Bananas creative via lookalikes is a bright spot worth scaling.</p>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-header"><div class="section-title">Aggregate Performance</div><div class="section-subtitle">All three newsletter campaigns combined</div></div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Spend</div>
+      <div class="kpi-val">$2,684</div>
+      <div class="kpi-sub">Mar 1 – 30, 2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Leads</div>
+      <div class="kpi-val">747</div>
+      <div class="kpi-sub">Newsletter sign-ups via lead forms</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Avg. CPL</div>
+      <div class="kpi-val" style="color:var(--eats-yellow);">$3.59</div>
+      <div class="kpi-sub">Benchmark: &lt;$3 green · $3-6 yellow · $6+ red</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Impressions</div>
+      <div class="kpi-val">109.0K</div>
+      <div class="kpi-sub">$24.63 avg CPM</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Reach</div>
+      <div class="kpi-val">73.4K</div>
+      <div class="kpi-sub">Unique users reached</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Outbound CTR</div>
+      <div class="kpi-val">0.31%</div>
+      <div class="kpi-sub">336 outbound clicks</div>
+    </div>
+  </div>
+
+  <div class="section-header"><div class="section-title">CPL by Newsletter</div></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Newsletter</th><th class="num">Spend</th><th class="num">Leads</th><th class="num">CPL</th><th class="num">Impressions</th><th class="num">Reach</th><th class="num">CPM</th><th class="num">CTR</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="newsletter-badge badge-memo">The Memo</span></td>
+          <td class="num">$1,950.41</td><td class="num">544</td><td class="num">$3.59</td><td class="num">78,111</td><td class="num">50,095</td><td class="num">$24.97</td><td class="num">0.36%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr>
+          <td><span class="newsletter-badge badge-asset">Asset Class</span></td>
+          <td class="num">$367.29</td><td class="num">125</td><td class="num">$2.94</td><td class="num">18,029</td><td class="num">13,798</td><td class="num">$20.37</td><td class="num">0.17%</td>
+          <td><span class="perf green">Strong</span></td>
+        </tr>
+        <tr>
+          <td><span class="newsletter-badge badge-tuned">Tuned In</span></td>
+          <td class="num">$366.16</td><td class="num">78</td><td class="num">$4.69</td><td class="num">12,828</td><td class="num">9,552</td><td class="num">$28.54</td><td class="num">0.22%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr class="bold-row">
+          <td>Total</td>
+          <td class="num">$2,683.86</td><td class="num">747</td><td class="num">$3.59</td><td class="num">108,968</td><td class="num">73,445</td><td class="num">$24.63</td><td class="num">0.31%</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-header"><div class="section-title">Recommended Optimizations</div><div class="section-subtitle">Cross-campaign strategic actions</div></div>
+
+  <div class="reco-card">
+    <h3><span class="reco-icon">&#9889;</span> Shift Budget Toward Asset Class — Best Efficiency at Scale</h3>
+    <p>Asset Class is delivering leads at <span class="mc">$2.94 CPL</span> — the lowest across all three newsletters — and its lookalike audiences (<span class="mc">$2.89 CPL</span>) are outperforming interest targeting (<span class="mc">$3.01 CPL</span>). With only $367 spent so far, there's clear headroom to scale this campaign while maintaining sub-$3 CPLs.</p>
+    <p><span class="reco-tag scale">Scale</span> Increase daily budget for Asset Class lookalike ad sets. Test expanding lookalike percentage (1% → 2-3%) to grow the addressable pool.</p>
+  </div>
+
+  <div class="two-col">
+    <div class="reco-card">
+      <h3><span class="reco-icon">&#128161;</span> The Memo: Double Down on WNBA Audiences</h3>
+      <p>WNBA audiences are driving 81% of Memo leads at a <span class="mc">$3.12 CPL</span> vs. NBA at <span class="mc">$5.04 CPL</span>. The "Full Bleed Image" creative is the clear winner at <span class="mc">$2.84 CPL</span> with 285 leads — the single best-performing ad across all campaigns.</p>
+      <p><span class="reco-tag scale">Scale</span> WNBA core audiences<br><span class="reco-tag pause">Pause</span> NBA "We Cover What Moves It" and "Get Depth" (0 leads combined)</p>
+    </div>
+    <div class="reco-card">
+      <h3><span class="reco-icon">&#128161;</span> Tuned In: Bananas Creative + Lookalikes = Best Path</h3>
+      <p>Savannah Bananas via lookalike targeting is delivering <span class="mc">$3.93 CPL</span> with 17 leads — the best combo for Tuned In. Meanwhile, Travis Kelce via lookalikes is at <span class="mc">$13.48 CPL</span> (only 2 leads). Interest targeting overall is slightly cheaper (<span class="mc">$4.51 CPL</span>) but lower volume.</p>
+      <p><span class="reco-tag scale">Scale</span> Bananas + Rapoport lookalikes<br><span class="reco-tag pause">Pause</span> Kelce lookalike (insufficient volume, high CPL)</p>
+    </div>
+  </div>
+
+  <div class="reco-card">
+    <h3><span class="reco-icon">&#128202;</span> Creative Strategy: Full Bleed Images Win Across the Board</h3>
+    <p>Across The Memo and Asset Class, the full bleed image format and personality-driven creatives (Reggie Bush, WNBA branding) consistently outperform text-heavy or generic messaging. Apply this learning to Tuned In — test a full bleed treatment for the Savannah Bananas and Rapoport creatives that are already performing.</p>
+    <p><span class="reco-tag test">Test</span> Full bleed image variants for Tuned In's top creatives<br><span class="reco-tag test">Test</span> Personality-led creative for Asset Class (beyond Reggie Bush — consider emerging names in NIL / business of sports)</p>
+  </div>
+
+</div>
+
+<!-- ==================== THE MEMO TAB ==================== -->
+<div id="tab-memo" class="tab-content">
+
+  <div class="section-header">
+    <div class="section-title"><span class="newsletter-badge badge-memo">The Memo</span> &nbsp;Campaign Performance</div>
+    <div class="section-subtitle">Mar 6 – Mar 31, 2026 · Meta Lead Gen</div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card" style="border-top: 3px solid var(--memo-black);">
+      <div class="kpi-label">Total Spend</div>
+      <div class="kpi-val">$1,950</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--memo-black);">
+      <div class="kpi-label">Total Leads</div>
+      <div class="kpi-val">544</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--memo-black);">
+      <div class="kpi-label">CPL</div>
+      <div class="kpi-val" style="color:var(--eats-yellow);">$3.59</div>
+      <div class="kpi-sub">Benchmark: &lt;$3</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--memo-black);">
+      <div class="kpi-label">Impressions</div>
+      <div class="kpi-val">78.1K</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--memo-black);">
+      <div class="kpi-label">Reach</div>
+      <div class="kpi-val">50.1K</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--memo-black);">
+      <div class="kpi-label">Outbound CTR</div>
+      <div class="kpi-val">0.36%</div>
+    </div>
+  </div>
+
+  <div class="insight-box" style="border-color: #333; background: #F5F5F5;">
+    <p><strong>Campaign Insight:</strong> WNBA audiences are the engine here — delivering 443 of 544 leads (81%) at a significantly lower CPL ($3.12 vs. $5.04 for NBA). The "WNBA Full Bleed Image" creative alone has generated 285 leads at $2.84 CPL, making it the single most efficient ad across all FOS newsletter campaigns.</p>
+  </div>
+
+  <div class="section-header"><div class="section-title">Performance by Ad Set</div></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Ad Set</th><th class="num">Spend</th><th class="num">Leads</th><th class="num">CPL</th><th class="num">Impressions</th><th class="num">CPM</th><th class="num">CTR</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>WNBA (Core)</td>
+          <td class="num">$1,380.17</td><td class="num">443</td><td class="num">$3.12</td><td class="num">57,637</td><td class="num">$23.95</td><td class="num">0.40%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr>
+          <td>NBA (Core)</td>
+          <td class="num">$216.76</td><td class="num">43</td><td class="num">$5.04</td><td class="num">8,316</td><td class="num">$26.06</td><td class="num">0.18%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr>
+          <td>WNBA — Lookalike</td>
+          <td class="num">$303.74</td><td class="num">48</td><td class="num">$6.33</td><td class="num">10,557</td><td class="num">$28.77</td><td class="num">0.24%</td>
+          <td><span class="perf red">High CPL</span></td>
+        </tr>
+        <tr>
+          <td>NBA — Lookalike</td>
+          <td class="num">$49.74</td><td class="num">10</td><td class="num">$4.97</td><td class="num">1,601</td><td class="num">$31.07</td><td class="num">0.37%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr class="bold-row">
+          <td>Total</td>
+          <td class="num">$1,950.41</td><td class="num">544</td><td class="num">$3.59</td><td class="num">78,111</td><td class="num">$24.97</td><td class="num">0.36%</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-header"><div class="section-title">Creative Performance</div></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Creative</th><th>Ad Set</th><th class="num">Spend</th><th class="num">Leads</th><th class="num">CPL</th><th class="num">Impr.</th><th class="num">CTR</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>WNBA Full Bleed Image</strong></td><td>WNBA</td>
+          <td class="num">$809.14</td><td class="num">285</td><td class="num">$2.84</td><td class="num">34,894</td><td class="num">0.45%</td>
+          <td><span class="perf green">Top Performer</span></td>
+        </tr>
+        <tr>
+          <td>WNBA — Get Depth Like Never Before</td><td>WNBA</td>
+          <td class="num">$504.69</td><td class="num">136</td><td class="num">$3.71</td><td class="num">19,544</td><td class="num">0.35%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr>
+          <td>WNBA Full Bleed Image V2</td><td>WNBA — Lookalike</td>
+          <td class="num">$215.54</td><td class="num">36</td><td class="num">$5.99</td><td class="num">7,568</td><td class="num">0.22%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr>
+          <td>NBA — Full Bleed Image</td><td>NBA</td>
+          <td class="num">$203.51</td><td class="num">43</td><td class="num">$4.73</td><td class="num">7,685</td><td class="num">0.20%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr>
+          <td>WNBA Full Bleed Image</td><td>WNBA — Lookalike</td>
+          <td class="num">$88.20</td><td class="num">12</td><td class="num">$7.35</td><td class="num">2,989</td><td class="num">0.27%</td>
+          <td><span class="perf red">High CPL</span></td>
+        </tr>
+        <tr>
+          <td>NBA — Full Bleed Image</td><td>NBA — Lookalike</td>
+          <td class="num">$49.74</td><td class="num">10</td><td class="num">$4.97</td><td class="num">1,601</td><td class="num">0.37%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr>
+          <td>WNBA — We Cover What Moves It</td><td>WNBA</td>
+          <td class="num">$44.43</td><td class="num">16</td><td class="num">$2.78</td><td class="num">2,259</td><td class="num">0.22%</td>
+          <td><span class="perf green">Low CPL</span></td>
+        </tr>
+        <tr>
+          <td>WNBA Full Bleed Image V2</td><td>WNBA</td>
+          <td class="num">$21.91</td><td class="num">6</td><td class="num">$3.65</td><td class="num">940</td><td class="num">0.21%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr>
+          <td style="color:var(--red-card);">NBA — We Cover What Moves It</td><td>NBA</td>
+          <td class="num">$9.68</td><td class="num">0</td><td class="num">—</td><td class="num">511</td><td class="num">0.00%</td>
+          <td><span class="perf red">No Leads</span></td>
+        </tr>
+        <tr>
+          <td style="color:var(--red-card);">NBA — Get Depth Like Never Before</td><td>NBA</td>
+          <td class="num">$3.57</td><td class="num">0</td><td class="num">—</td><td class="num">120</td><td class="num">0.00%</td>
+          <td><span class="perf red">No Leads</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="reco-section">
+    <div class="section-header"><div class="section-title">Recommendations — The Memo</div></div>
+
+    <div class="reco-card accent-memo">
+      <h3><span class="reco-tag scale">Scale</span> WNBA Full Bleed Image — Your Best Ad</h3>
+      <p>At <span class="mc">$2.84 CPL</span> and <span class="mc">285 leads</span>, this is the most efficient creative in your entire newsletter portfolio. It has the highest CTR (0.45%) and lowest CPM in the campaign. Increase its budget allocation and consider testing variations (different WNBA athlete imagery, updated copy) to extend its runway before creative fatigue sets in.</p>
+    </div>
+
+    <div class="reco-card accent-memo">
+      <h3><span class="reco-tag pause">Pause</span> NBA "We Cover What Moves It" + "Get Depth" Creatives</h3>
+      <p>These two NBA creatives have generated <span class="mc">0 leads</span> combined on <span class="mc">$13.25 spend</span> and <span class="mc">631 impressions</span>. While spend is small, the signal is clear — they aren't converting. Reallocate this budget to the performing WNBA creatives or the NBA Full Bleed Image (which did convert at $4.73 CPL).</p>
+    </div>
+
+    <div class="reco-card accent-memo">
+      <h3><span class="reco-tag monitor">Monitor</span> WNBA Lookalike Audiences — CPL Trending High</h3>
+      <p>Lookalike targeting for WNBA is running at <span class="mc">$6.33 CPL</span> — more than double the core WNBA audience ($3.12). This is common for lookalikes early on, but keep a close eye. If CPL doesn't come down over the next 3-5 days as the algorithm optimizes, consider pausing and redirecting budget to core audiences.</p>
+    </div>
+
+    <div class="reco-card accent-memo">
+      <h3><span class="reco-tag test">Test</span> "We Cover What Moves It" Messaging with WNBA Creative Format</h3>
+      <p>The "We Cover What Moves It" copy is working for WNBA audiences (<span class="mc">$2.78 CPL</span>, 16 leads) but failing for NBA (<span class="mc">0 leads</span>). This suggests the message resonates but the NBA visual treatment isn't landing. Test pairing this copy with the WNBA full bleed image style for NBA audiences.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ASSET CLASS TAB ==================== -->
+<div id="tab-asset" class="tab-content">
+
+  <div class="section-header">
+    <div class="section-title"><span class="newsletter-badge badge-asset">Asset Class</span> &nbsp;Campaign Performance</div>
+    <div class="section-subtitle">Mar 24 – Mar 31, 2026 · Meta Lead Gen</div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card" style="border-top: 3px solid var(--turf);">
+      <div class="kpi-label">Total Spend</div>
+      <div class="kpi-val">$367</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--turf);">
+      <div class="kpi-label">Total Leads</div>
+      <div class="kpi-val">125</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--turf);">
+      <div class="kpi-label">CPL</div>
+      <div class="kpi-val" style="color:var(--turf);">$2.94</div>
+      <div class="kpi-sub">Below $3 benchmark</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--turf);">
+      <div class="kpi-label">Impressions</div>
+      <div class="kpi-val">18.0K</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--turf);">
+      <div class="kpi-label">Reach</div>
+      <div class="kpi-val">13.8K</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--turf);">
+      <div class="kpi-label">Outbound CTR</div>
+      <div class="kpi-val">0.17%</div>
+    </div>
+  </div>
+
+  <div class="insight-box" style="border-color: var(--turf); background: #E8F5EE;">
+    <p><strong>Campaign Insight:</strong> Asset Class is your most cost-efficient newsletter campaign at $2.94 CPL — and it's only been running for 6 days. Lookalike audiences are slightly outperforming interest targeting ($2.89 vs. $3.01 CPL), and the Reggie Bush creative is the volume driver with 96 of 125 total leads. There's meaningful room to scale here.</p>
+  </div>
+
+  <div class="section-header"><div class="section-title">Performance by Ad Set</div></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Ad Set</th><th class="num">Spend</th><th class="num">Leads</th><th class="num">CPL</th><th class="num">Impressions</th><th class="num">CPM</th><th class="num">CTR</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Lookalike Targeting</td>
+          <td class="num">$222.81</td><td class="num">77</td><td class="num">$2.89</td><td class="num">11,429</td><td class="num">$19.50</td><td class="num">0.17%</td>
+          <td><span class="perf green">Strong</span></td>
+        </tr>
+        <tr>
+          <td>Interest Targeting</td>
+          <td class="num">$144.48</td><td class="num">48</td><td class="num">$3.01</td><td class="num">6,600</td><td class="num">$21.89</td><td class="num">0.15%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr class="bold-row">
+          <td>Total</td>
+          <td class="num">$367.29</td><td class="num">125</td><td class="num">$2.94</td><td class="num">18,029</td><td class="num">$20.37</td><td class="num">0.17%</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-header"><div class="section-title">Creative Performance</div></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Creative</th><th>Ad Set</th><th class="num">Spend</th><th class="num">Leads</th><th class="num">CPL</th><th class="num">Impr.</th><th class="num">CTR</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Reggie Bush</strong></td><td>Lookalike</td>
+          <td class="num">$174.61</td><td class="num">56</td><td class="num">$3.12</td><td class="num">9,664</td><td class="num">0.13%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr>
+          <td><strong>Reggie Bush</strong></td><td>Interest</td>
+          <td class="num">$110.49</td><td class="num">40</td><td class="num">$2.76</td><td class="num">5,463</td><td class="num">0.13%</td>
+          <td><span class="perf green">Strong</span></td>
+        </tr>
+        <tr>
+          <td>WNBA</td><td>Lookalike</td>
+          <td class="num">$35.28</td><td class="num">16</td><td class="num">$2.21</td><td class="num">1,265</td><td class="num">0.32%</td>
+          <td><span class="perf green">Top Performer</span></td>
+        </tr>
+        <tr>
+          <td>WNBA</td><td>Interest</td>
+          <td class="num">$27.35</td><td class="num">5</td><td class="num">$5.47</td><td class="num">853</td><td class="num">0.23%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr>
+          <td>NFL</td><td>Lookalike</td>
+          <td class="num">$12.92</td><td class="num">5</td><td class="num">$2.58</td><td class="num">500</td><td class="num">0.60%</td>
+          <td><span class="perf green">Strong</span></td>
+        </tr>
+        <tr>
+          <td>NFL</td><td>Interest</td>
+          <td class="num">$6.64</td><td class="num">3</td><td class="num">$2.21</td><td class="num">284</td><td class="num">0.35%</td>
+          <td><span class="perf green">Strong</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="reco-section">
+    <div class="section-header"><div class="section-title">Recommendations — Asset Class</div></div>
+
+    <div class="reco-card accent-asset">
+      <h3><span class="reco-tag scale">Scale</span> Increase Budget — This Campaign Has Room to Run</h3>
+      <p>At $2.94 CPL with only $367 spent in 6 days, Asset Class has the best unit economics of any newsletter campaign. The lookalike audiences are delivering at <span class="mc">$2.89 CPL</span> with a lower CPM (<span class="mc">$19.50</span>) than any other ad set across all campaigns. Scale budget by 50-100% and monitor whether CPL holds.</p>
+    </div>
+
+    <div class="reco-card accent-asset">
+      <h3><span class="reco-tag scale">Scale</span> WNBA Lookalike — Hidden Gem at $2.21 CPL</h3>
+      <p>The WNBA creative via lookalike targeting is delivering <span class="mc">$2.21 CPL</span> with the highest CTR in the campaign (0.32%). It's only received $35 in spend — massively underfunded relative to its efficiency. Increase its budget share and test WNBA creative variations to keep the momentum going.</p>
+    </div>
+
+    <div class="reco-card accent-asset">
+      <h3><span class="reco-tag test">Test</span> Diversify Beyond Reggie Bush Before Creative Fatigue</h3>
+      <p>Reggie Bush is driving 77% of all Asset Class leads (96 of 125). That's great now, but creates concentration risk. Start testing new personality-driven creatives — consider business-of-sports figures in NIL, ownership, or media deals that align with the Asset Class editorial identity. The WNBA and NFL creatives are already showing strong CPL signals at lower spend levels.</p>
+    </div>
+
+    <div class="reco-card accent-asset">
+      <h3><span class="reco-tag monitor">Monitor</span> WNBA Interest Targeting — Highest CPL in Campaign</h3>
+      <p>WNBA via interest targeting is at <span class="mc">$5.47 CPL</span> — nearly 2.5x the WNBA lookalike performance. Small sample (5 leads), so give it another few days. But if it doesn't improve, shift that budget to the lookalike version which is delivering the same creative at $2.21 CPL.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TUNED IN TAB ==================== -->
+<div id="tab-tuned" class="tab-content">
+
+  <div class="section-header">
+    <div class="section-title"><span class="newsletter-badge badge-tuned">Tuned In</span> &nbsp;Campaign Performance</div>
+    <div class="section-subtitle">Mar 24 – Mar 31, 2026 · Meta Lead Gen</div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card" style="border-top: 3px solid var(--scoreboard-blue);">
+      <div class="kpi-label">Total Spend</div>
+      <div class="kpi-val">$366</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--scoreboard-blue);">
+      <div class="kpi-label">Total Leads</div>
+      <div class="kpi-val">78</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--scoreboard-blue);">
+      <div class="kpi-label">CPL</div>
+      <div class="kpi-val" style="color:var(--eats-yellow);">$4.69</div>
+      <div class="kpi-sub">Above $3 benchmark</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--scoreboard-blue);">
+      <div class="kpi-label">Impressions</div>
+      <div class="kpi-val">12.8K</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--scoreboard-blue);">
+      <div class="kpi-label">Reach</div>
+      <div class="kpi-val">9.6K</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--scoreboard-blue);">
+      <div class="kpi-label">Outbound CTR</div>
+      <div class="kpi-val">0.22%</div>
+    </div>
+  </div>
+
+  <div class="insight-box" style="border-color: var(--scoreboard-blue); background: #EBF1FF;">
+    <p><strong>Campaign Insight:</strong> Tuned In is the newest campaign (6 days live) and the most expensive at $4.69 CPL. Lookalike audiences are generating more volume (52 leads) but at a slightly higher CPL ($4.79) than interest targeting ($4.51, 26 leads). The Savannah Bananas creative via lookalikes is the standout at $3.93 CPL — while Travis Kelce via lookalikes is a clear underperformer at $13.48 CPL.</p>
+  </div>
+
+  <div class="section-header"><div class="section-title">Performance by Ad Set</div></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Ad Set</th><th class="num">Spend</th><th class="num">Leads</th><th class="num">CPL</th><th class="num">Impressions</th><th class="num">CPM</th><th class="num">CTR</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Lookalike Targeting</td>
+          <td class="num">$248.98</td><td class="num">52</td><td class="num">$4.79</td><td class="num">8,422</td><td class="num">$29.56</td><td class="num">0.25%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr>
+          <td>Interest Targeting</td>
+          <td class="num">$117.18</td><td class="num">26</td><td class="num">$4.51</td><td class="num">4,406</td><td class="num">$26.60</td><td class="num">0.16%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr class="bold-row">
+          <td>Total</td>
+          <td class="num">$366.16</td><td class="num">78</td><td class="num">$4.69</td><td class="num">12,828</td><td class="num">$28.54</td><td class="num">0.22%</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-header"><div class="section-title">Creative Performance</div></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Creative</th><th>Ad Set</th><th class="num">Spend</th><th class="num">Leads</th><th class="num">CPL</th><th class="num">Impr.</th><th class="num">CTR</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>NFL — Ian Rapoport</strong></td><td>Lookalike</td>
+          <td class="num">$155.23</td><td class="num">33</td><td class="num">$4.70</td><td class="num">5,370</td><td class="num">0.24%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr>
+          <td><strong>Baseball — Savannah Bananas</strong></td><td>Lookalike</td>
+          <td class="num">$66.80</td><td class="num">17</td><td class="num">$3.93</td><td class="num">2,237</td><td class="num">0.36%</td>
+          <td><span class="perf yellow">Best in Campaign</span></td>
+        </tr>
+        <tr>
+          <td>NFL — Ian Rapoport</td><td>Interest</td>
+          <td class="num">$62.06</td><td class="num">15</td><td class="num">$4.14</td><td class="num">2,360</td><td class="num">0.08%</td>
+          <td><span class="perf yellow">OK</span></td>
+        </tr>
+        <tr>
+          <td>Baseball — Savannah Bananas</td><td>Interest</td>
+          <td class="num">$37.99</td><td class="num">5</td><td class="num">$7.60</td><td class="num">1,409</td><td class="num">0.28%</td>
+          <td><span class="perf red">High CPL</span></td>
+        </tr>
+        <tr>
+          <td>NFL — Travis Kelce</td><td>Lookalike</td>
+          <td class="num">$26.95</td><td class="num">2</td><td class="num">$13.48</td><td class="num">815</td><td class="num">0.00%</td>
+          <td><span class="perf red">Underperforming</span></td>
+        </tr>
+        <tr>
+          <td>NFL — Travis Kelce</td><td>Interest</td>
+          <td class="num">$17.13</td><td class="num">6</td><td class="num">$2.86</td><td class="num">637</td><td class="num">0.16%</td>
+          <td><span class="perf green">Low CPL</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="reco-section">
+    <div class="section-header"><div class="section-title">Recommendations — Tuned In</div></div>
+
+    <div class="reco-card accent-tuned">
+      <h3><span class="reco-tag scale">Scale</span> Savannah Bananas Lookalike — Best Tuned In Performer</h3>
+      <p>Bananas via lookalikes is delivering <span class="mc">$3.93 CPL</span> with the highest CTR in the campaign (0.36%) and 17 leads. This creative has the most efficient path to sub-$3 territory. Scale budget and test creative variations — the playful, entertainment-forward angle clearly resonates with the Tuned In audience.</p>
+    </div>
+
+    <div class="reco-card accent-tuned">
+      <h3><span class="reco-tag pause">Pause</span> Travis Kelce Lookalike — $13.48 CPL, Only 2 Leads</h3>
+      <p>This is the worst-performing ad-audience combo across all three newsletter campaigns. <span class="mc">$26.95 spent</span> for just <span class="mc">2 leads</span> with <span class="mc">0.00% outbound CTR</span>. Interestingly, Kelce via interest targeting is performing well at $2.86 CPL — suggesting the creative works but the lookalike audience doesn't match. Pause the lookalike, keep interest running.</p>
+    </div>
+
+    <div class="reco-card accent-tuned">
+      <h3><span class="reco-tag test">Test</span> Broader Creative Mix — Tuned In Needs More Variety</h3>
+      <p>With only 3 creatives, Tuned In has the narrowest creative set. Consider testing: entertainment-crossover angles (athlete media deals, sports x culture), additional personality-driven creatives beyond NFL (NBA media figures, sports business personalities), and the full bleed image format that's crushing it for The Memo and Asset Class.</p>
+    </div>
+
+    <div class="reco-card accent-tuned">
+      <h3><span class="reco-tag monitor">Monitor</span> Overall CPL Trajectory — Campaign Still in Learning Phase</h3>
+      <p>At $4.69 CPL, Tuned In is the least efficient newsletter campaign — but it's also the youngest (6 days). Meta's algorithm typically needs 50+ conversions per ad set per week to exit learning phase. With 52 leads across lookalikes and 26 via interest, you're approaching that threshold. Give it another week before making major structural changes, but act on the clear wins and losses above now.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== HISTORICAL DATA TAB ==================== -->
+<div id="tab-history" class="tab-content">
+
+  <div class="section-header">
+    <div class="section-title">The Memo — Historical Subscriber & Performance Data</div>
+    <div class="section-subtitle">Jan 2023 – Mar 2026 · Sources: KPI Dashboard, Growth Scorecard</div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card" style="border-top: 3px solid var(--red-card);">
+      <div class="kpi-label">Current Active Subs</div>
+      <div class="kpi-val" style="color:var(--red-card);">663,358</div>
+      <div class="kpi-sub">Week of Mar 23, 2026</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--red-card);">
+      <div class="kpi-label">Q1 2026 Net Loss</div>
+      <div class="kpi-val" style="color:var(--red-card);">-87,633</div>
+      <div class="kpi-sub">From 750,991 → 663,358 (−11.7%)</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--eats-yellow);">
+      <div class="kpi-label">All-Time Peak</div>
+      <div class="kpi-val">787,388</div>
+      <div class="kpi-sub">Feb 26, 2024</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--primetime);">
+      <div class="kpi-label">Decline from Peak</div>
+      <div class="kpi-val" style="color:var(--red-card);">-124,030</div>
+      <div class="kpi-sub">−15.7% since Feb 2024</div>
+    </div>
+  </div>
+
+  <div class="insight-box" style="border-color: var(--red-card); background: #FDE8EA;">
+    <p><strong>The trend is clear and accelerating.</strong> The Memo peaked at 787K active subscribers in Feb 2024. After a slow decline through mid-2024, there was a brief recovery in late 2025 back to ~757K. But Q1 2026 has been the steepest drop yet: 88K subscribers lost in 13 weeks. The most recent week (Mar 23-29) saw the largest single-week loss of the year at -11,742 subs, with an unsubscribe rate of 1.8%. At this trajectory, the 550K open guarantee is at serious risk.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- MONTHLY SUBSCRIBER CHART -->
+  <div class="chart-container">
+    <div class="chart-title">Active Subscribers Over Time — Monthly View</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--primetime);"></div> Active Subscribers (EoM)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red-card);"></div> 550K Open Threshold (est.)</div>
+    </div>
+    <svg viewBox="0 0 900 320" class="svg-chart" preserveAspectRatio="xMidYMid meet">
+      <!-- Grid -->
+      <line x1="60" y1="30" x2="60" y2="270" stroke="#E5E7EB" stroke-width="1"/>
+      <line x1="60" y1="270" x2="880" y2="270" stroke="#E5E7EB" stroke-width="1"/>
+      <!-- Gridlines -->
+      <line x1="60" y1="70" x2="880" y2="70" class="gridline"/>
+      <line x1="60" y1="120" x2="880" y2="120" class="gridline"/>
+      <line x1="60" y1="170" x2="880" y2="170" class="gridline"/>
+      <line x1="60" y1="220" x2="880" y2="220" class="gridline"/>
+      <!-- Y-axis labels -->
+      <text x="55" y="34" text-anchor="end" class="chart-label">800K</text>
+      <text x="55" y="74" text-anchor="end" class="chart-label">775K</text>
+      <text x="55" y="124" text-anchor="end" class="chart-label">750K</text>
+      <text x="55" y="174" text-anchor="end" class="chart-label">725K</text>
+      <text x="55" y="224" text-anchor="end" class="chart-label">700K</text>
+      <text x="55" y="274" text-anchor="end" class="chart-label">675K</text>
+
+      <!-- 550K threshold line (estimated at open rate ~80%) = ~688K subs needed
+           But let's show it as the danger zone. At ~80% open rate, 550K opens needs ~688K subs.
+           At current ~76% open rate, needs ~724K subs.
+           Let's mark ~700K as the danger zone -->
+      <!-- Danger zone fill -->
+      <rect x="60" y="220" width="820" height="50" fill="#FDE8EA" opacity="0.3"/>
+      <line x1="60" y1="220" x2="880" y2="220" class="threshold-line"/>
+      <text x="882" y="216" class="threshold-label" text-anchor="start" font-size="9">~700K danger zone</text>
+
+      <!-- Year markers -->
+      <text x="80" y="290" class="year-label">2023</text>
+      <line x1="80" y1="265" x2="80" y2="275" stroke="#333" stroke-width="1"/>
+      <text x="365" y="290" class="year-label">2024</text>
+      <line x1="365" y1="265" x2="365" y2="275" stroke="#333" stroke-width="1"/>
+      <text x="650" y="290" class="year-label">2025</text>
+      <line x1="650" y1="265" x2="650" y2="275" stroke="#333" stroke-width="1"/>
+      <text x="838" y="290" class="year-label">2026</text>
+
+      <!-- Monthly data points: scale 650K=270, 800K=30 => range 150K over 240px => 1K = 1.6px
+           y = 270 - (subs - 650000) * (240/150000) = 270 - (subs-650000)*0.0016 -->
+
+      <!-- 2023 Monthly: Jan-Dec, x from 80 to 345 (24px spacing) -->
+      <!-- Jan 767,560  y=270-(117560*0.0016)=270-188=82 -->
+      <!-- Feb 756,522  y=270-(106522*0.0016)=270-170=100 -->
+      <!-- Mar 752,788  y=270-(102788*0.0016)=270-164=106 -->
+      <!-- Apr 749,541  y=270-(99541*0.0016)=270-159=111 -->
+      <!-- May 741,743  y=270-(91743*0.0016)=270-147=123 -->
+      <!-- Jun 734,873  y=270-(84873*0.0016)=270-136=134 -->
+      <!-- Jul 728,694  y=270-(78694*0.0016)=270-126=144 -->
+      <!-- Aug 722,285  y=270-(72285*0.0016)=270-116=154 -->
+      <!-- Sep 705,125  y=270-(55125*0.0016)=270-88=182 -->
+      <!-- Oct 704,565  y=270-(54565*0.0016)=270-87=183 -->
+      <!-- Nov 717,429  y=270-(67429*0.0016)=270-108=162 -->
+      <!-- Dec 738,993  y=270-(88993*0.0016)=270-142=128 -->
+
+      <polyline points="80,82 104,100 128,106 152,111 176,123 200,134 224,144 248,154 272,182 296,183 320,162 345,128"
+        class="data-line" stroke="var(--primetime)" opacity="0.4"/>
+
+      <!-- 2024 Monthly (from weekly EoM): Jan-Dec, x from 365 to 630 -->
+      <!-- Jan 763,606 y=82+3=85 (approx from scale) -->
+      <!-- Feb 787,388 y=270-(137388*0.0016)=270-220=50 (actually let me calc properly) -->
+      <!-- recalc: y = 270 - (subs - 650000) * 240/150000 -->
+      <!-- Jan 763606: 270-(113606*0.0016)= 270-181.8= 88 -->
+      <!-- Feb 787388: 270-(137388*0.0016)= 270-219.8= 50 -->
+      <!-- Mar 775269: 270-(125269*0.0016)= 270-200.4= 70 -->
+      <!-- Apr 778995: 270-(128995*0.0016)= 270-206.4= 64 -->
+      <!-- May 783574: 270-(133574*0.0016)= 270-213.7= 56 -->
+      <!-- Jun 777435: 270-(127435*0.0016)= 270-203.9= 66 -->
+      <!-- Jul 751242: 270-(101242*0.0016)= 270-161.99= 108 -->
+      <!-- Aug 748078: 270-(98078*0.0016)= 270-156.9= 113 -->
+      <!-- Sep 733121: 270-(83121*0.0016)= 270-133= 137 -->
+      <!-- Oct 722845: 270-(72845*0.0016)= 270-116.6= 153 -->
+      <!-- Nov 719146: 270-(69146*0.0016)= 270-110.6= 159 -->
+      <!-- Dec 709431: 270-(59431*0.0016)= 270-95.1= 175 -->
+
+      <polyline points="365,88 389,50 413,70 437,64 461,56 485,66 509,108 533,113 557,137 581,153 605,159 630,175"
+        class="data-line" stroke="var(--primetime)" opacity="0.7"/>
+      <circle cx="389" cy="50" r="4" fill="var(--turf)" stroke="white" stroke-width="1.5"/>
+      <text x="389" y="43" text-anchor="middle" class="annotation-bold" fill="var(--turf)">787K peak</text>
+
+      <!-- 2025 Monthly: Jan-Dec, x from 650 to 820 (14px spacing) -->
+      <!-- Jan 709361: y=270-(59361*0.0016)=270-95=175 -->
+      <!-- Feb 714344: y=270-(64344*0.0016)=270-103=167 -->
+      <!-- Mar 718548: y=270-(68548*0.0016)=270-110=160 -->
+      <!-- Apr 727990: y=270-(77990*0.0016)=270-125=145 -->
+      <!-- May 736888: y=270-(86888*0.0016)=270-139=131 -->
+      <!-- Jun 745397: y=270-(95397*0.0016)=270-153=117 -->
+      <!-- Jul 742788: y=270-(92788*0.0016)=270-148=122 -->
+      <!-- Aug 744207: y=270-(94207*0.0016)=270-151=119 -->
+      <!-- Sep 746237: y=270-(96237*0.0016)=270-154=116 -->
+      <!-- Oct 756649: y=270-(106649*0.0016)=270-171=99 -->
+      <!-- Nov 757142: y=270-(107142*0.0016)=270-171=99 -->
+      <!-- Dec 756830: y=270-(106830*0.0016)=270-171=99 -->
+
+      <polyline points="650,175 664,167 678,160 692,145 706,131 720,117 734,122 748,119 762,116 776,99 790,99 804,99"
+        class="data-line" stroke="var(--primetime)" opacity="0.85"/>
+
+      <!-- 2026 Q1: Jan, Feb, Mar (weekly EoM approximations) -->
+      <!-- Jan EoM (~Week 5) 724,611: y=270-(74611*0.0016)=270-119=151 -->
+      <!-- Feb EoM (~Week 9) 697,542: y=270-(47542*0.0016)=270-76=194 -->
+      <!-- Mar EoM (~Week 13) 663,358: y=270-(13358*0.0016)=270-21=249 -->
+
+      <polyline points="838,151 855,194 872,249"
+        class="data-line" stroke="var(--red-card)" stroke-width="3"/>
+      <circle cx="872" cy="249" r="5" fill="var(--red-card)" stroke="white" stroke-width="2"/>
+      <text x="872" y="264" text-anchor="middle" class="annotation-bold" fill="var(--red-card)">663K</text>
+    </svg>
+  </div>
+
+  <!-- 2026 WEEKLY DETAIL -->
+  <div class="section-header"><div class="section-title">2026 Weekly Detail — The Memo Active Subscribers</div><div class="section-subtitle">From Growth Scorecard & Tracker</div></div>
+
+  <div class="table-wrap">
+    <table class="timeline-table">
+      <thead>
+        <tr><th>Week</th><th>Dates</th><th class="num">Active Subs</th><th class="num">WoW Change</th><th class="num">Net Gained/Lost</th><th class="num">Opens/Edition</th><th class="num">Open Rate</th><th class="num">Unsub Rate</th><th>Trend</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Week 1</td><td>Dec 29 – Jan 4</td>
+          <td class="num">750,991</td><td class="num" style="color:var(--red-card);">−0.4%</td><td class="num" style="color:var(--red-card);">−5,839</td>
+          <td class="num">590,179</td><td class="num">81.8%</td><td class="num">—</td>
+          <td><span class="perf red">&#9660;</span></td>
+        </tr>
+        <tr>
+          <td>Week 2</td><td>Jan 5 – Jan 11</td>
+          <td class="num">741,155</td><td class="num" style="color:var(--red-card);">−1.3%</td><td class="num" style="color:var(--red-card);">−9,836</td>
+          <td class="num">590,149</td><td class="num">91.5%</td><td class="num">0.73%</td>
+          <td><span class="perf red">&#9660;</span></td>
+        </tr>
+        <tr>
+          <td>Week 3</td><td>Jan 12 – Jan 18</td>
+          <td class="num">736,232</td><td class="num" style="color:var(--red-card);">−0.7%</td><td class="num" style="color:var(--red-card);">−4,923</td>
+          <td class="num">597,553</td><td class="num">90.2%</td><td class="num">0.14%</td>
+          <td><span class="perf red">&#9660;</span></td>
+        </tr>
+        <tr>
+          <td>Week 4</td><td>Jan 19 – Jan 25</td>
+          <td class="num">729,055</td><td class="num" style="color:var(--red-card);">−1.0%</td><td class="num" style="color:var(--red-card);">−7,177</td>
+          <td class="num">599,685</td><td class="num">88.1%</td><td class="num">0.15%</td>
+          <td><span class="perf red">&#9660;</span></td>
+        </tr>
+        <tr>
+          <td>Week 5</td><td>Jan 26 – Feb 1</td>
+          <td class="num">724,611</td><td class="num" style="color:var(--red-card);">−0.6%</td><td class="num" style="color:var(--red-card);">−4,444</td>
+          <td class="num">592,626</td><td class="num">84.5%</td><td class="num">1.39%</td>
+          <td><span class="perf red">&#9660;</span></td>
+        </tr>
+        <tr>
+          <td>Week 6</td><td>Feb 2 – Feb 8</td>
+          <td class="num">718,983</td><td class="num" style="color:var(--red-card);">−0.8%</td><td class="num" style="color:var(--red-card);">−5,628</td>
+          <td class="num">586,041</td><td class="num">86.5%</td><td class="num">0.51%</td>
+          <td><span class="perf red">&#9660;</span></td>
+        </tr>
+        <tr>
+          <td>Week 7</td><td>Feb 9 – Feb 15</td>
+          <td class="num">712,207</td><td class="num" style="color:var(--red-card);">−0.9%</td><td class="num" style="color:var(--red-card);">−6,776</td>
+          <td class="num">578,793</td><td class="num">83.4%</td><td class="num">1.89%</td>
+          <td><span class="perf red">&#9660;</span></td>
+        </tr>
+        <tr>
+          <td>Week 8</td><td>Feb 16 – Feb 22</td>
+          <td class="num">707,418</td><td class="num" style="color:var(--red-card);">−0.7%</td><td class="num" style="color:var(--red-card);">−4,789</td>
+          <td class="num">552,328</td><td class="num">83.9%</td><td class="num">0.42%</td>
+          <td><span class="perf yellow">&#9660;</span></td>
+        </tr>
+        <tr style="background:#FFF8E6;">
+          <td><strong>Week 9</strong></td><td>Feb 23 – Mar 1</td>
+          <td class="num"><strong>697,542</strong></td><td class="num" style="color:var(--red-card);"><strong>−1.4%</strong></td><td class="num" style="color:var(--red-card);"><strong>−9,876</strong></td>
+          <td class="num"><strong>566,788</strong></td><td class="num"><strong>84.1%</strong></td><td class="num"><strong>2.10%</strong></td>
+          <td><span class="perf red">&#9660; Large drop</span></td>
+        </tr>
+        <tr>
+          <td>Week 10</td><td>Mar 2 – Mar 8</td>
+          <td class="num">690,660</td><td class="num" style="color:var(--red-card);">−1.0%</td><td class="num" style="color:var(--red-card);">−6,882</td>
+          <td class="num">546,122</td><td class="num">82.2%</td><td class="num">0.44%</td>
+          <td><span class="perf red">&#9660;</span></td>
+        </tr>
+        <tr>
+          <td>Week 11</td><td>Mar 9 – Mar 15</td>
+          <td class="num">685,016</td><td class="num" style="color:var(--red-card);">−0.8%</td><td class="num" style="color:var(--red-card);">−5,644</td>
+          <td class="num">538,271</td><td class="num">81.3%</td><td class="num">1.13%</td>
+          <td><span class="perf red">&#9660;</span></td>
+        </tr>
+        <tr style="background:#FDE8EA;">
+          <td><strong>Week 12</strong></td><td>Mar 16 – Mar 22</td>
+          <td class="num"><strong>675,100</strong></td><td class="num" style="color:var(--red-card);"><strong>−1.4%</strong></td><td class="num" style="color:var(--red-card);"><strong>−9,916</strong></td>
+          <td class="num"><strong>531,605</strong></td><td class="num"><strong>80.8%</strong></td><td class="num"><strong>0.41%</strong></td>
+          <td><span class="perf red">&#9660; Below 550K opens</span></td>
+        </tr>
+        <tr style="background:#FDE8EA;">
+          <td><strong>Week 13</strong></td><td>Mar 23 – Mar 29</td>
+          <td class="num"><strong>663,358</strong></td><td class="num" style="color:var(--red-card);"><strong>−1.7%</strong></td><td class="num" style="color:var(--red-card);"><strong>−11,742</strong></td>
+          <td class="num"><strong>526,557</strong></td><td class="num"><strong>76.1%</strong></td><td class="num"><strong>1.81%</strong></td>
+          <td><span class="perf red">&#9660;&#9660; Worst week</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight-box">
+    <p><strong>Opens per edition have already fallen below 550K.</strong> Week 12 (531,605) and Week 13 (526,557) are both below the advertiser guarantee threshold. The open rate has also been declining — from 91.5% in Week 2 to 76.1% in Week 13 — which compounds the subscriber loss. Weeks with the heaviest losses (Weeks 2, 9, 12, 13) correlate with unsub rate spikes above 1%, suggesting periodic list hygiene purges or content-triggered churn events.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- MONTHLY HISTORICAL TABLE -->
+  <div class="section-header"><div class="section-title">Monthly Subscriber History (2023–2025)</div><div class="section-subtitle">End-of-month active subscriber counts from KPI Dashboard</div></div>
+
+  <div class="table-wrap">
+    <table class="timeline-table">
+      <thead>
+        <tr><th>Month</th><th class="num">Active Subs</th><th class="num">MoM Change</th><th class="num">Monthly Spend</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr class="year-header"><td colspan="5">2023</td></tr>
+        <tr><td>January</td><td class="num">767,560</td><td class="num">—</td><td class="num">$16,000</td><td>Year open — highest point of 2023</td></tr>
+        <tr><td>February</td><td class="num">756,522</td><td class="num" style="color:var(--red-card);">−1.4%</td><td class="num">$7,000</td><td></td></tr>
+        <tr><td>March</td><td class="num">752,788</td><td class="num" style="color:var(--red-card);">−0.5%</td><td class="num">$7,500</td><td></td></tr>
+        <tr><td>April</td><td class="num">749,541</td><td class="num" style="color:var(--red-card);">−0.4%</td><td class="num">$7,500</td><td></td></tr>
+        <tr><td>May</td><td class="num">741,743</td><td class="num" style="color:var(--red-card);">−1.0%</td><td class="num">$7,000</td><td></td></tr>
+        <tr><td>June</td><td class="num">734,873</td><td class="num" style="color:var(--red-card);">−0.9%</td><td class="num">$7,001</td><td></td></tr>
+        <tr><td>July</td><td class="num">728,694</td><td class="num" style="color:var(--red-card);">−0.8%</td><td class="num">$6,978</td><td></td></tr>
+        <tr><td>August</td><td class="num">722,285</td><td class="num" style="color:var(--red-card);">−0.9%</td><td class="num">$7,000</td><td></td></tr>
+        <tr><td>September</td><td class="num">705,125</td><td class="num" style="color:var(--red-card);">−2.4%</td><td class="num">$7,000</td><td>Large list purge</td></tr>
+        <tr><td>October</td><td class="num">704,565</td><td class="num" style="color:var(--red-card);">−0.1%</td><td class="num">$7,000</td><td>2023 low point</td></tr>
+        <tr><td>November</td><td class="num">717,429</td><td class="num" style="color:var(--turf);">+1.8%</td><td class="num">$14,000</td><td style="color:var(--turf);">Budget doubled → growth returned</td></tr>
+        <tr><td>December</td><td class="num">738,993</td><td class="num" style="color:var(--turf);">+3.0%</td><td class="num">$14,000</td><td style="color:var(--turf);">Strong recovery with higher spend</td></tr>
+
+        <tr class="year-header"><td colspan="5">2024 (from weekly data)</td></tr>
+        <tr><td>January</td><td class="num">763,606</td><td class="num" style="color:var(--turf);">+3.3%</td><td class="num">$14,000</td><td style="color:var(--turf);">Growth continues</td></tr>
+        <tr><td>February</td><td class="num">787,388</td><td class="num" style="color:var(--turf);">+3.1%</td><td class="num">—</td><td style="color:var(--turf); font-weight:700;">ALL-TIME PEAK</td></tr>
+        <tr><td>March</td><td class="num">775,269</td><td class="num" style="color:var(--red-card);">−1.5%</td><td class="num">—</td><td>Decline begins</td></tr>
+        <tr><td>April</td><td class="num">778,995</td><td class="num" style="color:var(--turf);">+0.5%</td><td class="num">—</td><td></td></tr>
+        <tr><td>May</td><td class="num">783,574</td><td class="num" style="color:var(--turf);">+0.6%</td><td class="num">—</td><td></td></tr>
+        <tr><td>June</td><td class="num">777,435</td><td class="num" style="color:var(--red-card);">−0.8%</td><td class="num">—</td><td></td></tr>
+        <tr><td>July</td><td class="num">751,242</td><td class="num" style="color:var(--red-card);">−3.4%</td><td class="num">—</td><td>Summer drop</td></tr>
+        <tr><td>August</td><td class="num">748,078</td><td class="num" style="color:var(--red-card);">−0.4%</td><td class="num">—</td><td></td></tr>
+        <tr><td>September</td><td class="num">733,121</td><td class="num" style="color:var(--red-card);">−2.0%</td><td class="num">—</td><td></td></tr>
+        <tr><td>October</td><td class="num">722,845</td><td class="num" style="color:var(--red-card);">−1.4%</td><td class="num">—</td><td></td></tr>
+        <tr><td>November</td><td class="num">719,146</td><td class="num" style="color:var(--red-card);">−0.5%</td><td class="num">—</td><td></td></tr>
+        <tr><td>December</td><td class="num">709,431</td><td class="num" style="color:var(--red-card);">−1.4%</td><td class="num">—</td><td>Year closes down 78K from peak</td></tr>
+
+        <tr class="year-header"><td colspan="5">2025 (from weekly data)</td></tr>
+        <tr><td>January</td><td class="num">709,361</td><td class="num" style="color:var(--red-card);">−0.0%</td><td class="num">—</td><td>Stabilizing</td></tr>
+        <tr><td>February</td><td class="num">714,344</td><td class="num" style="color:var(--turf);">+0.7%</td><td class="num">—</td><td></td></tr>
+        <tr><td>March</td><td class="num">718,548</td><td class="num" style="color:var(--turf);">+0.6%</td><td class="num">—</td><td></td></tr>
+        <tr><td>April</td><td class="num">727,990</td><td class="num" style="color:var(--turf);">+1.3%</td><td class="num">—</td><td></td></tr>
+        <tr><td>May</td><td class="num">736,888</td><td class="num" style="color:var(--turf);">+1.2%</td><td class="num">—</td><td></td></tr>
+        <tr><td>June</td><td class="num">745,397</td><td class="num" style="color:var(--turf);">+1.2%</td><td class="num">—</td><td style="color:var(--turf);">Strong H1 recovery</td></tr>
+        <tr><td>July</td><td class="num">742,788</td><td class="num" style="color:var(--red-card);">−0.4%</td><td class="num">—</td><td></td></tr>
+        <tr><td>August</td><td class="num">744,207</td><td class="num" style="color:var(--turf);">+0.2%</td><td class="num">—</td><td></td></tr>
+        <tr><td>September</td><td class="num">746,237</td><td class="num" style="color:var(--turf);">+0.3%</td><td class="num">—</td><td></td></tr>
+        <tr><td>October</td><td class="num">756,649</td><td class="num" style="color:var(--turf);">+1.4%</td><td class="num">—</td><td style="color:var(--turf);">2025 peak</td></tr>
+        <tr><td>November</td><td class="num">757,142</td><td class="num" style="color:var(--turf);">+0.1%</td><td class="num">—</td><td></td></tr>
+        <tr><td>December</td><td class="num">756,830</td><td class="num" style="color:var(--red-card);">−0.0%</td><td class="num">—</td><td>Plateau → decline begins</td></tr>
+
+        <tr class="year-header"><td colspan="5">2026 (from Growth Scorecard)</td></tr>
+        <tr><td>January (EoM)</td><td class="num">724,611</td><td class="num" style="color:var(--red-card);">−4.3%</td><td class="num">—</td><td style="color:var(--red-card);">Steep decline starts</td></tr>
+        <tr><td>February (EoM)</td><td class="num">697,542</td><td class="num" style="color:var(--red-card);">−3.7%</td><td class="num">—</td><td style="color:var(--red-card);">Below 700K for first time since Oct 2023</td></tr>
+        <tr style="background:#FDE8EA;"><td><strong>March (latest)</strong></td><td class="num"><strong>663,358</strong></td><td class="num" style="color:var(--red-card);"><strong>−4.9%</strong></td><td class="num">—</td><td style="color:var(--red-card); font-weight:700;">Opens per edition below 550K</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-header"><div class="section-title">Key Historical Patterns</div></div>
+
+  <div class="two-col">
+    <div class="reco-card" style="border-left: 4px solid var(--turf);">
+      <h3>When Growth Happened</h3>
+      <p>The only sustained growth periods were <strong>Nov 2023 – Feb 2024</strong> (when paid spend doubled to $14K/mo, driving 83K net new subs in 4 months) and <strong>Jan – Oct 2025</strong> (slow but steady +47K recovery over 10 months). Both periods suggest The Memo can grow when there's consistent investment in acquisition.</p>
+    </div>
+    <div class="reco-card" style="border-left: 4px solid var(--red-card);">
+      <h3>When Decline Happened</h3>
+      <p>The most aggressive declines correlate with <strong>summer months</strong> (Jul-Aug in both 2023 and 2024), <strong>list purges</strong> (Sep 2023: −17.8K in one month), and <strong>Q1 2026</strong> (−88K in 13 weeks — the worst quarter on record). The 2024 decline from peak (787K → 709K) happened over 10 months despite no change in editorial cadence, suggesting organic churn was outpacing acquisition.</p>
+    </div>
+  </div>
+
+  <div class="reco-card" style="border-left: 4px solid var(--scoreboard-blue);">
+    <h3>The Math: What Does April Need to Look Like?</h3>
+    <p>At <span class="mc">663,358 active subs</span> and a recent open rate of <span class="mc">76-81%</span>, you're currently delivering <span class="mc">~527-537K opens per edition</span> — below the 550K guarantee.</p>
+    <p>To get back to 550K opens, you need either: (a) <strong>~680K active subscribers</strong> at the current ~81% open rate, meaning a net gain of ~17K subs, or (b) <strong>a higher open rate</strong> on the current base, which means better content targeting and deliverability, or (c) <strong>a combination of both</strong> — which is the right answer.</p>
+    <p>At the April plan's projected 1,250-2,250 new leads from paid + referral channels, the key question is <strong>what does the churn side look like?</strong> If the current ~6,700/week churn rate continues, that's ~27K outgoing in April alone. The acquisition plan covers the new subscriber pipeline; the Campaign Monitor data will tell us if we can slow the outflow enough to close the gap.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- BOUNCE & REGISTRATION GATE DIAGNOSTICS -->
+  <div class="section-header"><div class="section-title">Retention Diagnostics: Bounces & Registration Gate</div><div class="section-subtitle">Data from Campaign Monitor exports</div></div>
+
+  <div class="kpi-row">
+    <div class="kpi-card" style="border-top: 3px solid var(--red-card);">
+      <div class="kpi-label">Total Bounced Users</div>
+      <div class="kpi-val" style="color:var(--red-card);">221,916</div>
+      <div class="kpi-sub">All-time bounced emails on FOS Daily list</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--red-card);">
+      <div class="kpi-label">2025 Bounces</div>
+      <div class="kpi-val" style="color:var(--red-card);">68,326</div>
+      <div class="kpi-sub">+31% vs. 2024 (52,296)</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--eats-yellow);">
+      <div class="kpi-label">Reg Gate Unsub Rate</div>
+      <div class="kpi-val" style="color:var(--eats-yellow);">54.1%</div>
+      <div class="kpi-sub">34,783 of 64,272 registrants unsubbed</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid var(--primetime);">
+      <div class="kpi-label">Median Time to Unsub</div>
+      <div class="kpi-val">67 days</div>
+      <div class="kpi-sub">From registration gate signup</div>
+    </div>
+  </div>
+
+  <div class="section-header"><div class="section-title">Bounce Analysis: Where Bad Emails Come From</div></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Acquisition Source</th><th class="num">Bounced Users</th><th class="num">% of Total</th><th>Assessment</th></tr>
+      </thead>
+      <tbody>
+        <tr style="background:#FDE8EA;">
+          <td><strong>Paid — Fluent</strong></td><td class="num">80,077</td><td class="num">36.1%</td>
+          <td><span class="perf red">Largest bounce source</span></td>
+        </tr>
+        <tr style="background:#FDE8EA;">
+          <td><strong>Paid — OptIn</strong></td><td class="num">65,579</td><td class="num">29.6%</td>
+          <td><span class="perf red">Second largest</span></td>
+        </tr>
+        <tr>
+          <td>Paid — Viking</td><td class="num">17,339</td><td class="num">7.8%</td>
+          <td><span class="perf yellow">High volume</span></td>
+        </tr>
+        <tr>
+          <td>Paid — Leadpulse</td><td class="num">13,016</td><td class="num">5.9%</td>
+          <td><span class="perf yellow">Moderate</span></td>
+        </tr>
+        <tr>
+          <td>Organic — On Site Signup</td><td class="num">11,004</td><td class="num">5.0%</td>
+          <td><span class="perf yellow">Expected range</span></td>
+        </tr>
+        <tr>
+          <td>Organic — Registration Gate</td><td class="num">3,102</td><td class="num">1.4%</td>
+          <td><span class="perf green">Lower bounce rate</span></td>
+        </tr>
+        <tr>
+          <td>All other sources</td><td class="num">31,799</td><td class="num">14.3%</td>
+          <td></td>
+        </tr>
+        <tr class="bold-row">
+          <td>Total</td><td class="num">221,916</td><td class="num">100%</td><td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight-box" style="border-color: var(--red-card); background: #FDE8EA;">
+    <p><strong>65.7% of all bounces come from just two paid sources: Fluent and OptIn.</strong> These legacy paid acquisition vendors (from 2022 era) contributed 145,656 bounced emails to the list. Bounces accelerated in 2025 (68,326 — up 31% vs. 2024), which means these bad addresses are still degrading deliverability today. A list cleanup focused on legacy paid sources would improve sender reputation, inbox placement, and open rates across the board.</p>
+  </div>
+
+  <div class="section-header" style="margin-top:24px;"><div class="section-title">Registration Gate: The Leaky Bucket</div></div>
+
+  <div class="two-col">
+    <div class="reco-card" style="border-left: 4px solid var(--eats-yellow);">
+      <h3>54% of Registration Gate Signups Unsubscribe</h3>
+      <p>Of <span class="mc">64,272 total registrants</span> who were auto-subscribed to The Memo via the website registration gate, <span class="mc">34,783 (54.1%)</span> have since unsubscribed. Only <span class="mc">29,489 (45.9%)</span> remain. This is a significant forced-subscription problem — people who signed up for site access, not for a newsletter.</p>
+    </div>
+    <div class="reco-card" style="border-left: 4px solid var(--primetime);">
+      <h3>When They Leave</h3>
+      <p>The unsub timing tells the story: <span class="mc">6.5% leave same day</span>, <span class="mc">15.4% within the first week</span>, and the largest cohort (<span class="mc">35.2%</span>) unsubscribes within <span class="mc">31-90 days</span>. The median time to unsub is <span class="mc">67 days</span> — meaning most forced registrants stick around for about 2 months before leaving. This creates a constant churn headwind.</p>
+    </div>
+  </div>
+
+  <div class="section-header" style="margin-top:24px;"><div class="section-title">Retention Recommendations</div></div>
+
+  <div class="reco-card" style="border-left: 4px solid var(--red-card);">
+    <h3><span class="reco-tag pause">Action</span> Clean Legacy Paid Acquisition Bounces from List</h3>
+    <p>Fluent and OptIn alone account for 145K bounced emails. If any of these addresses are still on the active list (soft bounces that haven't been fully purged), they're hurting deliverability for everyone. Run a full bounce suppression pass focused on legacy paid sources. This is the single highest-impact deliverability action available.</p>
+  </div>
+
+  <div class="reco-card" style="border-left: 4px solid var(--eats-yellow);">
+    <h3><span class="reco-tag test">Rethink</span> Registration Gate Auto-Subscribe Strategy</h3>
+    <p>The gate is creating subscribers who never asked for the newsletter — and 54% of them leave. Consider: (a) making newsletter opt-in a <strong>checkbox</strong> at registration rather than an automatic subscribe, (b) adding a clear "You're now getting The Memo" welcome email that sets expectations and lets people opt out cleanly on Day 1 rather than unsubscribing weeks later, or (c) segmenting gate registrants into a lighter-touch onboarding sequence before adding to the main list.</p>
+  </div>
+
+  <div class="reco-card" style="border-left: 4px solid var(--turf);">
+    <h3><span class="reco-tag scale">Invest</span> Welcome Sequence for All New Subscribers</h3>
+    <p>The 31-90 day unsub window for registration gate users suggests they're getting the newsletter, finding it irrelevant, and leaving. A strong 7-day welcome sequence that showcases The Memo's best content, explains the value prop, and creates an early open habit could meaningfully reduce churn in that critical first-90-days window. This applies to all acquisition channels, not just the gate.</p>
+  </div>
+
+</div>
+
+</div><!-- end .main -->
+
+<script>
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+
+  document.getElementById('tab-' + tabId).classList.add('active');
+
+  const tabMap = { overview: 0, memo: 1, asset: 2, tuned: 3, history: 4 };
+  const tabs = document.querySelectorAll('.tab');
+  if (tabMap[tabId] !== undefined) {
+    tabs[tabMap[tabId]].classList.add('active');
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
