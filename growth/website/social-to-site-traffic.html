@@ -191,58 +191,82 @@ body {
   <!-- TAB: OVERVIEW -->
   <div class="tab-content active" id="tab-overview">
 
-    <!-- Section header -->
-    <h2 class="section-title">KPI Overview — March 2026</h2>
+    <!-- HERO NUMBER -->
+    <div style="background: linear-gradient(135deg, var(--primetime) 0%, var(--scoreboard) 100%); border-radius: var(--radius); padding: 28px 32px; margin-bottom: 20px; color: white;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+        <div>
+          <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.85; margin-bottom: 4px;">Total Social Referral Views — March 2026</div>
+          <div style="font-size: 42px; font-weight: 800; line-height: 1.1;">101,887</div>
+          <div style="font-size: 13px; opacity: 0.85; margin-top: 6px;">All social traffic to frontofficesports.com &middot; <strong>+165% vs February</strong></div>
+        </div>
+        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+          <div style="background: rgba(255,255,255,0.15); border-radius: 8px; padding: 14px 20px; min-width: 160px;">
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.75;">What We Control</div>
+            <div style="font-size: 26px; font-weight: 800; margin-top: 2px;">66,183</div>
+            <div style="font-size: 11px; opacity: 0.8;">FOS posts (UTM-tracked) &middot; 65%</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.15); border-radius: 8px; padding: 14px 20px; min-width: 160px;">
+            <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.75;">What We Can Influence</div>
+            <div style="font-size: 26px; font-weight: 800; margin-top: 2px;">35,704</div>
+            <div style="font-size: 11px; opacity: 0.8;">Non-FOS referrals &middot; 35%</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <!-- All 5 KPIs on one row -->
+    <!-- Section header -->
+    <h2 class="section-title">What We Control: FOS-Posted Traffic</h2>
+    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; margin-top: -10px;">Metrics below reflect traffic from FOS's own social posts only (UTM-tracked). Non-FOS referral traffic has its own tab.</div>
+
+    <!-- 5 KPI cards -->
     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px;">
       <div class="kpi-card">
         <div class="accent" style="background: var(--scoreboard)"></div>
         <div class="label"><span style="display: inline-block; background: #eff6ff; color: var(--scoreboard); padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 700; margin-right: 4px;">PARSE.LY</span> Landing Views</div>
         <div class="value" style="font-size: 22px;">66,183</div>
-        <div class="meta">Established metric — direct social click-throughs</div>
+        <div class="meta">FOS posts only &middot; direct social click-throughs</div>
       </div>
       <div class="kpi-card">
         <div class="accent" style="background: var(--primetime)"></div>
         <div class="label"><span style="display: inline-block; background: #eef0f8; color: var(--primetime); padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 700; margin-right: 4px;">GA4</span> Session Views <span style="display: inline-block; background: #ecfdf5; color: var(--turf); padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 700; margin-left: 4px;">NEW</span></div>
         <div class="value" style="font-size: 22px;">76,481</div>
-        <div class="meta">Full session picture (+16% vs Parse.ly)</div>
+        <div class="meta">FOS posts only &middot; full session picture (+16%)</div>
       </div>
       <div class="kpi-card">
         <div class="accent" style="background: var(--turf)"></div>
         <div class="label">New Visitors</div>
         <div class="value" style="font-size: 22px;">44,280</div>
-        <div class="meta">75% of users — discovery engine</div>
+        <div class="meta">FOS posts only &middot; 75% are new to site</div>
       </div>
       <div class="kpi-card">
         <div class="accent" style="background: var(--center-court)"></div>
         <div class="label">Avg Session Duration</div>
         <div class="value" style="font-size: 22px;">1.6 min</div>
-        <div class="meta">vs newsletter's 3.3 min (GA4)</div>
+        <div class="meta">FOS posts only &middot; vs newsletter's 3.3 min</div>
       </div>
       <div class="kpi-card">
         <div class="accent" style="background: var(--scoreboard)"></div>
         <div class="label">Sessions/User</div>
         <div class="value" style="font-size: 22px;">1.24</div>
-        <div class="meta">vs newsletter's 1.37 (GA4)</div>
+        <div class="meta">FOS posts only &middot; vs newsletter's 1.37</div>
       </div>
     </div>
 
-    <!-- GA4 Explainer Card (matching newsletter style) — directly under KPI cards -->
+    <!-- GA4 Explainer Card -->
     <div style="background: #f0f7ff; border: 1px solid #c6deff; border-radius: var(--radius); padding: 16px 20px; margin-bottom: 24px;">
       <div style="font-size: 13px; font-weight: 600; color: var(--primetime); margin-bottom: 6px;">What GA4 Total Session Views tells us</div>
-      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-bottom: 0;">Parse.ly counts the page a reader lands on when they click a social link — that's 66,183 views. GA4 goes further: it tracks everything that happens <em>after</em> that click, including additional articles browsed and homepage visits within the same session. That's how we get to 76,481 — an additional <strong>10,298 pageviews</strong> (16% more) that were invisible before. The gap is smaller than newsletter's 42% uplift, which makes sense: social visitors tend to read one article and leave, while newsletter readers browse deeper. Still, 1 in 6 social visitors explored a second page — valuable secondary reach that Parse.ly alone doesn't capture.</p>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-bottom: 0;">Parse.ly counts the page a reader lands on when they click a social link — that's 66,183 views from FOS posts. GA4 goes further: it tracks everything that happens <em>after</em> that click, including additional articles browsed and homepage visits within the same session. That's how we get to 76,481 — an additional <strong>10,298 pageviews</strong> (16% more) that were invisible before. The gap is smaller than newsletter's 42% uplift, which makes sense: social visitors tend to read one article and leave, while newsletter readers browse deeper. Still, 1 in 6 social visitors explored a second page — valuable secondary reach that Parse.ly alone doesn't capture.</p>
     </div>
 
     <!-- Traffic Share doughnut + Channel Performance table SIDE BY SIDE -->
     <div class="chart-row">
       <div class="chart-box">
-        <h3>Traffic Share</h3>
-        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">FOS on X drives 94% of all social post-driven traffic</div>
+        <h3>Traffic Share <span style="font-size: 10px; font-weight: 600; color: var(--scoreboard); background: #eff6ff; padding: 2px 6px; border-radius: 3px; margin-left: 6px;">FOS POSTS ONLY</span></h3>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">FOS on X drives 94% of FOS-posted social traffic</div>
         <canvas id="chartPie"></canvas>
       </div>
       <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm);">
-        <h3 style="font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px;">Channel Performance</h3>
+        <h3 style="font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px;">Channel Performance <span style="font-size: 10px; font-weight: 600; color: var(--scoreboard); background: #eff6ff; padding: 2px 6px; border-radius: 3px; margin-left: 6px;">FOS POSTS ONLY</span></h3>
         <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">LinkedIn visitors spend 2x longer per article than X visitors</div>
         <table class="data-table" style="margin-bottom: 0;">
           <thead>
@@ -289,7 +313,7 @@ body {
     </div>
 
     <!-- Historical Trend: Jan → Feb → Mar -->
-    <h2 class="section-title" style="margin-top: 28px;">Historical Context: Social-to-Site Traffic (Jan–Mar 2026)</h2>
+    <h2 class="section-title" style="margin-top: 28px;">Historical Context: Total Social-to-Site Traffic (Jan–Mar 2026) <span style="font-size: 10px; font-weight: 600; color: white; background: var(--primetime); padding: 2px 6px; border-radius: 3px; margin-left: 6px; vertical-align: middle;">FOS + NON-FOS</span></h2>
     <div class="chart-box" style="margin-bottom: 20px;">
       <h3>Total Social Referral Views by Month</h3>
       <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Jan &amp; Feb include all social referrals (FOS + non-FOS). March is broken out: @FOS posts (UTM-segmented) vs. non-FOS referrals. Even @FOS-only March exceeds every previous month.</div>
@@ -340,8 +364,8 @@ body {
 
     <!-- Top 10 articles table with per-platform breakdown -->
     <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm); margin-bottom: 20px;">
-      <h3 style="font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px;">Top 10 Articles Driving Social Traffic</h3>
-      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Ranked by total Parse.ly page views · Platform columns show per-channel page views</div>
+      <h3 style="font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px;">Top 10 Articles Driving Social Traffic <span style="font-size: 10px; font-weight: 600; color: var(--scoreboard); background: #eff6ff; padding: 2px 6px; border-radius: 3px; margin-left: 6px;">FOS POSTS ONLY</span></h3>
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Ranked by FOS-posted Parse.ly page views &middot; Platform columns show per-channel page views &middot; See Non-FOS Referral Traffic tab for organic reach</div>
       <div style="overflow-x: auto;">
         <table class="data-table" style="min-width: 900px;">
           <thead><tr>
@@ -381,6 +405,10 @@ body {
 
   <!-- TAB: DEEP DIVES -->
   <div class="tab-content" id="tab-deep">
+
+    <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px; margin-bottom: 20px;">
+      <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;"><span style="font-size: 10px; font-weight: 600; color: var(--scoreboard); background: #eff6ff; padding: 2px 6px; border-radius: 3px; margin-right: 6px;">FOS POSTS ONLY</span> All metrics in this tab reflect traffic from FOS's own social posts (UTM-tracked). For organic/non-FOS traffic by platform, see the <strong>Non-FOS Referral Traffic</strong> tab.</div>
+    </div>
 
     <!-- ==================== FOS ON X ==================== -->
     <div class="status-card" style="border-left: 4px solid var(--scoreboard); margin-bottom: 20px;">
@@ -845,6 +873,10 @@ body {
 
   <!-- TAB: NON-FOS REFERRAL TRAFFIC -->
   <div class="tab-content" id="tab-nonfos">
+
+    <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px; margin-bottom: 20px;">
+      <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;"><span style="font-size: 10px; font-weight: 600; color: white; background: var(--primetime); padding: 2px 6px; border-radius: 3px; margin-right: 6px;">WHAT WE CAN INFLUENCE</span> Traffic from sources outside FOS's own accounts — reporter shares, fan posts, Reddit threads, Bluesky, organic discovery. These views represent the earned reach of FOS content. For FOS-posted metrics, see <strong>Executive Summary</strong> and <strong>Channel Deep Dives</strong>.</div>
+    </div>
 
     <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm); margin-bottom: 20px;">
       <h3 style="font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px;">Where Non-FOS Social Traffic Comes From (35,704 Views)</h3>
