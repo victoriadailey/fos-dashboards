@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Front Office Sports / Newsletter-to-Site Traffic Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  --scoreboard: #196CFC;
+  --primetime: #0D1D64;
+  --turf: #007640;
+  --eats-yellow: #D4A800;
+  --red-card: #E00922;
+  --center-court: #CFA677;
+  --deep-rough: #044928;
+  --infield: #B47E41;
+  --seams: #800B14;
+  --bg: #f0f2f5;
+  --bg-card: #ffffff;
+  --border: #e5e7eb;
+  --border-light: #f0f1f3;
+  --text: #1a1a2e;
+  --text-muted: #6b7280;
+  --text-dim: #9ca3af;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+  --radius: 10px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* HEADER */
+.header {
+  background: var(--bg-card);
+  padding: 24px 40px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+.header-inner { max-width: 1440px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+.header h1 span { color: var(--scoreboard); font-weight: 400; font-size: 18px; }
+.header-meta { font-size: 13px; color: var(--text-muted); }
+.header-meta strong { color: var(--text); font-weight: 600; }
+
+/* NAV */
+.nav-tabs {
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  position: sticky; top: 73px; z-index: 99;
+}
+.nav-tabs-inner {
+  max-width: 1440px; margin: 0 auto;
+  display: flex; gap: 0; overflow-x: auto;
+}
+.nav-tab {
+  padding: 12px 20px; font-size: 13px; font-weight: 500;
+  color: var(--text-muted); cursor: pointer;
+  border: none; border-bottom: 2px solid transparent;
+  background: none; font-family: inherit; white-space: nowrap;
+  transition: all 0.15s;
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--scoreboard); border-bottom-color: var(--scoreboard); font-weight: 600; }
+
+/* MAIN */
+.main { max-width: 1440px; margin: 0 auto; padding: 28px 40px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* SECTION */
+.section-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 16px; }
+.section-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* KPI CARDS */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.kpi-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px;
+  box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+}
+.kpi-card .accent { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.kpi-card .label { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+.kpi-card .value { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1.1; letter-spacing: -0.5px; }
+.kpi-card .meta { margin-top: 10px; font-size: 12px; color: var(--text-dim); }
+
+/* TABLES */
+.data-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+  background: var(--bg-card); border-radius: var(--radius);
+  overflow: hidden; border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm); margin-bottom: 20px;
+}
+.data-table th {
+  background: #f9fafb; padding: 12px 16px; text-align: left;
+  font-weight: 600; color: var(--text); border-bottom: 1px solid var(--border);
+  cursor: pointer; user-select: none; font-size: 13px;
+}
+.data-table th:hover { background: #f3f4f6; }
+.data-table th.num { text-align: right; }
+.data-table td { padding: 12px 16px; border-bottom: 1px solid var(--border-light); }
+.data-table td.num { text-align: right; font-weight: 500; font-variant-numeric: tabular-nums; }
+.data-table tr:last-child td { border-bottom: none; }
+
+/* CHARTS */
+.chart-box {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px;
+  box-shadow: var(--shadow-sm); margin-bottom: 28px;
+}
+.chart-box h3 { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--text); }
+
+/* CHART ROW */
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+/* CALLOUTS */
+.callout {
+  border-left: 3px solid var(--text-muted);
+  background: #f9fafb; padding: 14px 16px;
+  border-radius: 6px; margin-bottom: 14px;
+}
+.callout.positive { border-left-color: var(--turf); background: rgba(0, 118, 64, 0.04); }
+.callout.warning { border-left-color: var(--eats-yellow); background: rgba(212, 168, 0, 0.04); }
+.callout.info { border-left-color: var(--scoreboard); background: rgba(25, 108, 252, 0.04); }
+.callout.negative { border-left-color: var(--red-card); background: rgba(224, 9, 34, 0.04); }
+.callout-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.callout p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+/* FOOTER */
+.footer {
+  text-align: center; padding: 20px 40px;
+  font-size: 12px; color: var(--text-dim);
+  border-top: 1px solid var(--border); margin-top: 40px;
+}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-inner">
+            <div>
+                <h1>Front Office Sports <span>/ Newsletter-to-Site Traffic Dashboard</span></h1>
+                <div class="header-meta">Source: <strong>GA4 · Parse.ly</strong> &nbsp;|&nbsp; March 2026 · 14-Month Historical View &nbsp;|&nbsp; Last Updated: <strong>April 6, 2026</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-tabs">
+      <div class="nav-tabs-inner">
+        <button class="nav-tab active" onclick="switchTab('executive')">Executive Summary</button>
+        <button class="nav-tab" onclick="switchTab('destinations')">Where Readers Go</button>
+        <button class="nav-tab" onclick="switchTab('content')">Top Content</button>
+        <button class="nav-tab" onclick="switchTab('quality')">Session Quality</button>
+        <button class="nav-tab" onclick="switchTab('historical')">Historical Trends</button>
+        <button class="nav-tab" onclick="switchTab('actions')">Action Items</button>
+        <button class="nav-tab" onclick="switchTab('methodology')">Methodology</button>
+      </div>
+    </div>
+
+    <div class="main">
+        <!-- TAB 1: EXECUTIVE SUMMARY -->
+        <div id="executive" class="tab-content active">
+            <h2 class="section-title">KPI Overview — March 2026</h2>
+
+            <!-- All 6 KPIs on one row -->
+            <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 20px;">
+              <div class="kpi-card">
+                <div class="accent" style="background: var(--primetime)"></div>
+                <div class="label"><span style="display: inline-block; background: #eef0f8; color: var(--primetime); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700;">PARSE.LY</span> Landing Views</div>
+                <div class="value" style="font-size: 22px;">106,689</div>
+                <div class="meta">Established metric <span style="color: var(--turf); font-weight: 600;">+2.3% MoM</span></div>
+              </div>
+              <div class="kpi-card">
+                <div class="accent" style="background: var(--scoreboard)"></div>
+                <div class="label"><span style="display: inline-block; background: #eff6ff; color: var(--scoreboard); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700;">GA4</span> Session Views <span style="display: inline-block; background: #ecfdf5; color: var(--turf); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700;">NEW</span></div>
+                <div class="value" style="font-size: 22px;">151,408</div>
+                <div class="meta">Full session picture <span style="color: var(--turf); font-weight: 600;">+37.1% MoM</span></div>
+              </div>
+              <div class="kpi-card">
+                <div class="accent" style="background: var(--turf)"></div>
+                <div class="label">Returning Visitors</div>
+                <div class="value" style="font-size: 22px;">45,701</div>
+                <div class="meta">52.8% — now majority <span style="color: var(--turf); font-weight: 600;">+23.0%</span></div>
+              </div>
+              <div class="kpi-card">
+                <div class="accent" style="background: var(--center-court)"></div>
+                <div class="label">New Visitors</div>
+                <div class="value" style="font-size: 22px;">40,781</div>
+                <div class="meta">47.2% of users <span style="color: var(--text-muted); font-weight: 600;">-21.0%</span></div>
+              </div>
+              <div class="kpi-card">
+                <div class="accent" style="background: var(--eats-yellow)"></div>
+                <div class="label">Avg Session Duration</div>
+                <div class="value" style="font-size: 22px;">3.3 min</div>
+                <div class="meta">vs 2.3 min Feb <span style="color: var(--turf); font-weight: 600;">+43.5%</span></div>
+              </div>
+              <div class="kpi-card">
+                <div class="accent" style="background: var(--eats-yellow)"></div>
+                <div class="label">Sessions/User</div>
+                <div class="value" style="font-size: 22px;">1.37</div>
+                <div class="meta">Browsing depth <span style="color: var(--turf); font-weight: 600;">+6.2%</span></div>
+              </div>
+            </div>
+
+            <!-- GA4 Explainer Card -->
+            <div style="background: #f0f7ff; border: 1px solid #c6deff; border-radius: var(--radius); padding: 16px 20px; margin-bottom: 24px;">
+              <div style="font-size: 13px; font-weight: 600; color: var(--primetime); margin-bottom: 6px;">What GA4 Total Session Views tells us</div>
+              <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-bottom: 0;">Parse.ly counts the page a reader lands on when they click a newsletter link — that's 106,689 views. GA4 goes further: it tracks everything that happens <em>after</em> that click, including additional articles browsed, homepage visits, and game pages within the same session. That's how we get to 151,408 — an additional <strong>44,719 pageviews</strong> (42% more) that were invisible before. This metric reveals the true value of a newsletter click: readers don't just view one page, they stay and explore.</p>
+            </div>
+
+            <!-- Monthly Trend Chart (moved up) -->
+            <h2 class="section-title">Monthly Trend</h2>
+            <div class="chart-box" style="height: auto; padding: 22px;">
+                <h3>Newsletter-to-Site Pageviews: 14-Month Trend (Feb 2025 – Mar 2026)</h3>
+                <canvas id="trendChart" style="max-height: 280px;"></canvas>
+            </div>
+
+            <!-- Key Findings -->
+            <h2 class="section-title">Key Findings</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px;">
+              <div style="background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--turf); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm);">
+                <div style="font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 10px;">QOTD Restored — Biggest Win This Month</div>
+                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">QOTD traffic surged from 338 GA4 views in Feb to <strong>9,518 in March</strong>. Visitors who land on QOTD average 2.2 sessions/user and stay 67-81 seconds — it's a session starter, not a dead end. The Mar 24 page optimization pushed retention to its highest level in 14 months.</p>
+              </div>
+              <div style="background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--turf); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm);">
+                <div style="font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 10px;">Factle Is Thriving (Parse.ly Broke)</div>
+                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">Parse.ly showed a 77% Factle drop, but GA4 reveals <strong>7,487 Factle views</strong> — up 27% from Feb's 5,874. Factle users average 3.1-5.2 sessions/user with 3+ minute sessions. Parse.ly tracking broke mid-March; <strong>tracking is back up and running for April.</strong></p>
+              </div>
+              <div style="background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--turf); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm);">
+                <div style="font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 10px;">Returning Visitors Now the Majority</div>
+                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">Returning visitors flipped from 41.9% in Feb to <strong>52.8% in March</strong>, generating 60,861 views (57% of total). The newsletter is building a habitual readership base — more than half of newsletter-driven users are coming back.</p>
+              </div>
+              <div style="background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--turf); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm);">
+                <div style="font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 10px;">March Broke the Volume + Engagement Trade-Off</div>
+                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">In 2025, high-traffic months (Mar-Apr) had shorter sessions (2.1 min), while low-traffic months (Sep) had longer ones (3.6 min). March 2026 is the first month to achieve <strong>both high volume (151K views) and deep engagement (3.3 min)</strong> — the ideal combination.</p>
+              </div>
+              <div style="background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--turf); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm);">
+                <div style="font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 10px;">Session Duration Surged 43%</div>
+                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">Average session duration jumped from 2.3 min in February to <strong>3.3 min in March</strong>. Sessions/user has climbed from 1.16 (Mar 2025) to 1.37 (Mar 2026) — an 18% improvement in browsing depth over 12 months.</p>
+              </div>
+              <div style="background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--turf); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm);">
+                <div style="font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 10px;">Parse.ly vs GA4: The Gap Tells a Story</div>
+                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">In 2025, GA4 and Parse.ly tracked within 0-10% of each other. In Feb-Mar 2026, GA4 pulled ahead (+6% Feb, <strong>+42% Mar</strong>) as QOTD restoration and Factle growth drove secondary pageviews that GA4 captures but Parse.ly can't.</p>
+              </div>
+            </div>
+
+            <!-- Goal Tracking -->
+            <h2 class="section-title">Goal Tracking by Month</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th class="num">2025 Baseline</th>
+                        <th class="num">Jan 2026</th>
+                        <th class="num">Feb 2026</th>
+                        <th class="num">Mar 2026</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Parse.ly Monthly Views</td>
+                        <td class="num">93,648</td>
+                        <td class="num">84,060</td>
+                        <td class="num">104,293</td>
+                        <td class="num">106,689</td>
+                    </tr>
+                    <tr>
+                        <td>GA4 Total Session Views</td>
+                        <td class="num">91,231</td>
+                        <td class="num">82,843</td>
+                        <td class="num">110,404</td>
+                        <td class="num">151,408</td>
+                    </tr>
+                    <tr>
+                        <td>GA4 Returning Visitors</td>
+                        <td class="num">—</td>
+                        <td class="num">—</td>
+                        <td class="num">37,156</td>
+                        <td class="num">45,701</td>
+                    </tr>
+                    <tr>
+                        <td>GA4 New Visitors</td>
+                        <td class="num">—</td>
+                        <td class="num">—</td>
+                        <td class="num">51,613</td>
+                        <td class="num">40,781</td>
+                    </tr>
+                    <tr>
+                        <td>GA4 Avg Session Duration</td>
+                        <td class="num">2.5 min</td>
+                        <td class="num">2.4 min</td>
+                        <td class="num">2.3 min</td>
+                        <td class="num">3.3 min</td>
+                    </tr>
+                    <tr>
+                        <td>GA4 Sessions/User</td>
+                        <td class="num">1.21</td>
+                        <td class="num">1.34</td>
+                        <td class="num">1.29</td>
+                        <td class="num">1.37</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TAB 2: WHERE READERS GO -->
+        <div id="destinations" class="tab-content">
+            <h2 class="section-title">Destination Breakdown</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px;">
+              <!-- Doughnut chart on left -->
+              <div class="chart-box" style="margin-bottom: 0; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 100%; height: 320px;">
+                  <canvas id="destinationDoughnut"></canvas>
+                </div>
+              </div>
+              <!-- 6 KPI cards on right in 2x3 grid -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; gap: 10px;">
+                <div class="kpi-card" style="padding: 14px 16px;">
+                    <div class="accent" style="background: var(--scoreboard)"></div>
+                    <div class="label">Articles</div>
+                    <div class="value" style="font-size: 20px;">114,074</div>
+                    <div class="meta">+38% vs Parse.ly — GA4 captures secondary browsing</div>
+                </div>
+                <div class="kpi-card" style="padding: 14px 16px;">
+                    <div class="accent" style="background: var(--primetime)"></div>
+                    <div class="label">Homepage</div>
+                    <div class="value" style="font-size: 20px;">11,031</div>
+                    <div class="meta">3.8 min avg session — deepest engagement</div>
+                </div>
+                <div class="kpi-card" style="padding: 14px 16px;">
+                    <div class="accent" style="background: var(--turf)"></div>
+                    <div class="label">QOTD</div>
+                    <div class="value" style="font-size: 20px;">9,518</div>
+                    <div class="meta">2.2 sessions/user — up from 338 in Feb <span style="color: var(--turf); font-weight: 600;">+2,716%</span></div>
+                </div>
+                <div class="kpi-card" style="padding: 14px 16px;">
+                    <div class="accent" style="background: var(--turf)"></div>
+                    <div class="label">Factle</div>
+                    <div class="value" style="font-size: 20px;">7,487</div>
+                    <div class="meta">3.1-5.2 sessions/user · GA4 up 27% vs Feb <span style="color: var(--turf); font-weight: 600;">+27%</span></div>
+                </div>
+                <div class="kpi-card" style="padding: 14px 16px;">
+                    <div class="accent" style="background: var(--center-court)"></div>
+                    <div class="label">Author Pages</div>
+                    <div class="value" style="font-size: 20px;">4,749</div>
+                    <div class="meta">10 tracked authors · low engagement opportunity</div>
+                </div>
+                <div class="kpi-card" style="padding: 14px 16px;">
+                    <div class="accent" style="background: var(--infield)"></div>
+                    <div class="label">Other</div>
+                    <div class="value" style="font-size: 20px;">3,549</div>
+                    <div class="meta">Videos, Games, Events pages</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Key findings moved up -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px;">
+              <div style="background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--turf); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-sm);">
+                <div style="font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px;">QOTD Reintroduction: Immediate Traffic Recovery</div>
+                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65;">TFV views surged from 338 (Feb) to <strong>9,518 in March</strong> — despite only being active for 27 days. That's 353 views/day, projecting to ~10,900 for a full month — nearly <strong>double</strong> the 2025 monthly average of ~5,400.</p>
+              </div>
+              <div style="background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--turf); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-sm);">
+                <div style="font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px;">TFV Page Optimization: Highest Retention Ever</div>
+                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65;">Sessions/user on TFV pages hit <strong>2.20 in March</strong> — the highest in 14 months, up from a 2025 average of ~1.87. Readers are clicking through to more articles after voting. A full month of the optimization should push this even higher in April.</p>
+              </div>
+            </div>
+
+            <h2 class="section-title">QOTD Impact: 14-Month Trend</h2>
+            <div class="chart-row">
+                <div class="chart-box" style="height: auto;">
+                    <h3>Thanks-for-Voting Views by Month</h3>
+                    <canvas id="qotdTrendChart" style="max-height: 240px;"></canvas>
+                </div>
+                <div class="chart-box" style="height: auto;">
+                    <h3>Sessions/User on TFV Pages (Retention)</h3>
+                    <canvas id="qotdRetentionChart" style="max-height: 240px;"></canvas>
+                </div>
+            </div>
+
+            <h2 class="section-title">GA4 vs Parse.ly Comparison</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Destination</th>
+                        <th class="num">Parse.ly Views</th>
+                        <th class="num">GA4 Views</th>
+                        <th class="num">Gap</th>
+                        <th>What It Means</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Articles</td>
+                        <td class="num">82,860</td>
+                        <td class="num">114,074</td>
+                        <td class="num">+38%</td>
+                        <td>GA4 captures articles browsed after the landing page</td>
+                    </tr>
+                    <tr>
+                        <td>Homepage</td>
+                        <td class="num">3,271</td>
+                        <td class="num">11,031</td>
+                        <td class="num">+237%</td>
+                        <td>Many readers browse the homepage during their session</td>
+                    </tr>
+                    <tr>
+                        <td>QOTD</td>
+                        <td class="num">8,414</td>
+                        <td class="num">9,518</td>
+                        <td class="num">+13%</td>
+                        <td>Close — QOTD is mostly a direct landing, less secondary browsing</td>
+                    </tr>
+                    <tr>
+                        <td>Factle</td>
+                        <td class="num">926</td>
+                        <td class="num">7,487</td>
+                        <td class="num">+708%</td>
+                        <td>Parse.ly tracking broke mid-March</td>
+                    </tr>
+                    <tr>
+                        <td>Author Pages</td>
+                        <td class="num">3,506</td>
+                        <td class="num">4,749</td>
+                        <td class="num">+35%</td>
+                        <td>Some author page visits happen mid-session</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td class="num">106,689</td>
+                        <td class="num">151,408</td>
+                        <td class="num">+42%</td>
+                        <td>44,719 additional pageviews from in-session browsing</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 class="section-title">Non-Article Engagement</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Page</th>
+                        <th class="num">Views</th>
+                        <th class="num">Users</th>
+                        <th>Avg Session</th>
+                        <th class="num">Sessions/User</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Factle Sports (/trivia/factle-sports/)</td>
+                        <td class="num">5,644</td>
+                        <td class="num">1,707</td>
+                        <td>3.5 min</td>
+                        <td class="num">3.1</td>
+                    </tr>
+                    <tr>
+                        <td>QOTD 1 (/thanks-for-voting-1/)</td>
+                        <td class="num">5,349</td>
+                        <td class="num">2,382</td>
+                        <td>1.1 min</td>
+                        <td class="num">2.2</td>
+                    </tr>
+                    <tr>
+                        <td>QOTD 2 (/thanks-for-voting-2/)</td>
+                        <td class="num">4,165</td>
+                        <td class="num">1,892</td>
+                        <td>1.3 min</td>
+                        <td class="num">2.2</td>
+                    </tr>
+                    <tr>
+                        <td>Factle Classic (/trivia/factle/)</td>
+                        <td class="num">1,842</td>
+                        <td class="num">342</td>
+                        <td>3.0 min</td>
+                        <td class="num">5.2</td>
+                    </tr>
+                    <tr>
+                        <td>Games Hub (/games/)</td>
+                        <td class="num">883</td>
+                        <td class="num">505</td>
+                        <td>0.6 min</td>
+                        <td class="num">1.6</td>
+                    </tr>
+                    <tr>
+                        <td>Events (/events/)</td>
+                        <td class="num">654</td>
+                        <td class="num">392</td>
+                        <td>0.7 min</td>
+                        <td class="num">1.1</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 class="section-title">Top Authors</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Author</th>
+                        <th class="num">Views</th>
+                        <th class="num">Users</th>
+                        <th>Avg Session</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Ben Horney</td>
+                        <td class="num">584</td>
+                        <td class="num">505</td>
+                        <td>1.1 min</td>
+                    </tr>
+                    <tr>
+                        <td>Eric Fisher</td>
+                        <td class="num">567</td>
+                        <td class="num">498</td>
+                        <td>0.7 min</td>
+                    </tr>
+                    <tr>
+                        <td>Amanda Christovich</td>
+                        <td class="num">427</td>
+                        <td class="num">384</td>
+                        <td>0.8 min</td>
+                    </tr>
+                    <tr>
+                        <td>David Rumsey</td>
+                        <td class="num">411</td>
+                        <td class="num">388</td>
+                        <td>0.5 min</td>
+                    </tr>
+                    <tr>
+                        <td>Annie Costabile</td>
+                        <td class="num">385</td>
+                        <td class="num">340</td>
+                        <td>1.1 min</td>
+                    </tr>
+                    <tr>
+                        <td>Michael McCarthy</td>
+                        <td class="num">351</td>
+                        <td class="num">322</td>
+                        <td>2.2 min</td>
+                    </tr>
+                    <tr>
+                        <td>Margaret Fleming</td>
+                        <td class="num">341</td>
+                        <td class="num">315</td>
+                        <td>1.1 min</td>
+                    </tr>
+                    <tr>
+                        <td>Catherine</td>
+                        <td class="num">300</td>
+                        <td class="num">305</td>
+                        <td>0.4 min</td>
+                    </tr>
+                    <tr>
+                        <td>Colin Salao</td>
+                        <td class="num">275</td>
+                        <td class="num">261</td>
+                        <td>0.7 min</td>
+                    </tr>
+                    <tr>
+                        <td>Alex Schiffer</td>
+                        <td class="num">247</td>
+                        <td class="num">223</td>
+                        <td>0.9 min</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout warning">
+                <div class="callout-title">Author Pages Are Low-Engagement Exits</div>
+                <p>Author pages average 0.5-1.1 min sessions — below the 3.3 min site-wide average from newsletter traffic. These pages need article archives, follow CTAs, and better bios to convert curiosity clicks into deeper engagement.</p>
+            </div>
+        </div>
+
+        <!-- TAB 3: TOP CONTENT -->
+        <div id="content" class="tab-content">
+            <h2 class="section-title">Top 10 Articles by Pageviews</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="num">#</th>
+                        <th>Article</th>
+                        <th class="num">Views</th>
+                        <th>Avg Session</th>
+                        <th class="num">Sessions/User</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="num">1</td><td>Players Say Big 12 Tournament's LED Court Is Slick and Slippery</td><td class="num">1,251</td><td>3.5 min</td><td class="num">1.26</td></tr>
+                    <tr><td class="num">2</td><td>College Sports Commission Says NIL Go System Under Strain</td><td class="num">1,205</td><td>5.7 min</td><td class="num">1.39</td></tr>
+                    <tr><td class="num">3</td><td>Mark Cuban Regrets Selling Mavs to Adelson Family</td><td class="num">1,172</td><td>1.4 min</td><td class="num">1.43</td></tr>
+                    <tr><td class="num">4</td><td>College Athletic Departments Are Becoming Media Companies</td><td class="num">1,116</td><td>5.8 min</td><td class="num">1.63</td></tr>
+                    <tr><td class="num">5</td><td>ICE Using Same Planes as College Basketball Teams</td><td class="num">1,092</td><td>2.8 min</td><td class="num">1.27</td></tr>
+                    <tr><td class="num">6</td><td>Hawks Stand By 'Magic City Monday' Promotion</td><td class="num">1,058</td><td>3.0 min</td><td class="num">1.22</td></tr>
+                    <tr><td class="num">7</td><td>Alabama Leads College Football in Private Jet Spending</td><td class="num">944</td><td>2.1 min</td><td class="num">1.38</td></tr>
+                    <tr><td class="num">8</td><td>College Basketball Game Organizer Feuding With Photo Services</td><td class="num">937</td><td>2.8 min</td><td class="num">1.25</td></tr>
+                    <tr><td class="num">9</td><td>Wasserman Agency Drops Name Amid Epstein Fallout</td><td class="num">886</td><td>3.2 min</td><td class="num">1.22</td></tr>
+                    <tr><td class="num">10</td><td>Young Athletes Have Entered Their LinkedIn Era</td><td class="num">886</td><td>5.8 min</td><td class="num">1.44</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="section-title">Top 10 Articles by Session Depth</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="num">#</th>
+                        <th>Article</th>
+                        <th>Avg Session</th>
+                        <th class="num">Views</th>
+                        <th class="num">Sessions/User</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="num">1</td><td>Young Pirates Phenom: Another High-Stakes Decision</td><td>16.5 min</td><td class="num">289</td><td class="num">1.34</td></tr>
+                    <tr><td class="num">2</td><td>Chad Ochocinco Reveals Why He Stood by Shannon Sharpe</td><td>14.3 min</td><td class="num">218</td><td class="num">1.26</td></tr>
+                    <tr><td class="num">3</td><td>Top NFL TV Free Agents 2026</td><td>14.1 min</td><td class="num">201</td><td class="num">1.33</td></tr>
+                    <tr><td class="num">4</td><td>Alex Lasry: NBA Europe Soccer-Like Impact on Basketball</td><td>13.3 min</td><td class="num">409</td><td class="num">1.44</td></tr>
+                    <tr><td class="num">5</td><td>American Sports Owners Feuding Over French Soccer Team</td><td>11.5 min</td><td class="num">229</td><td class="num">1.59</td></tr>
+                    <tr><td class="num">6</td><td>Pat McAfee Media Guest Game</td><td>10.4 min</td><td class="num">469</td><td class="num">1.31</td></tr>
+                    <tr><td class="num">7</td><td>Golf Channel Open to Re-Doing PGA Tour Deals</td><td>10.2 min</td><td class="num">267</td><td class="num">1.45</td></tr>
+                    <tr><td class="num">8</td><td>Miami-Ohio Debate Intensifies After First Loss</td><td>10.0 min</td><td class="num">155</td><td class="num">1.25</td></tr>
+                    <tr><td class="num">9</td><td>PGA Tour / LIV Golf Showing No Signs of 2027 Synergy</td><td>9.4 min</td><td class="num">218</td><td class="num">1.20</td></tr>
+                    <tr><td class="num">10</td><td>Adam Silver / Magic City Monday</td><td>8.5 min</td><td class="num">504</td><td class="num">1.38</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout positive">
+                <div class="callout-title">Feature Content Drives the Deepest Sessions</div>
+                <p>The top 10 articles by session duration average 12+ minutes per session. These are consistently investigative, narrative-driven pieces — not breaking news. When a newsletter reader clicks a feature story, they don't just read it — they browse the entire site.</p>
+            </div>
+
+            <div class="callout info">
+                <div class="callout-title">College Sports Dominated March</div>
+                <p>5 of the top 10 articles by views were College Sports pieces, driven by March Madness. The NIL system article (1,205 views, 5.7 min session) and college media companies piece (1,116 views, 5.8 min) both drove deep sessions.</p>
+            </div>
+        </div>
+
+        <!-- TAB 4: SESSION QUALITY -->
+        <div id="quality" class="tab-content">
+            <h2 class="section-title">Session Duration Across 14 Months</h2>
+            <div class="chart-box" style="height: 350px;">
+                <canvas id="sessionDurationChart"></canvas>
+            </div>
+
+            <h2 class="section-title">Audience & Device Breakdown (Mar 2026)</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 28px;">
+              <div class="chart-box" style="margin-bottom: 0;">
+                <h3 style="font-size: 13px;">Visitors: New vs Returning</h3>
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Returning +23% MoM · New -21% MoM</div>
+                <div style="height: 200px;"><canvas id="visitorTypeDoughnut"></canvas></div>
+              </div>
+              <div class="chart-box" style="margin-bottom: 0;">
+                <h3 style="font-size: 13px;">Views by Visitor Type</h3>
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Returning +26% MoM · New -18% MoM</div>
+                <div style="height: 200px;"><canvas id="visitorViewsDoughnut"></canvas></div>
+              </div>
+              <div class="chart-box" style="margin-bottom: 0;">
+                <h3 style="font-size: 13px;">Reader Device</h3>
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Desktop-dominant audience</div>
+                <div style="height: 200px;"><canvas id="deviceDoughnut"></canvas></div>
+              </div>
+            </div>
+
+            <h2 class="section-title">Section Performance by Views</h2>
+            <div class="chart-row">
+              <div class="chart-box" style="height: auto;">
+                <h3 style="font-size: 13px;">Views by Section</h3>
+                <div style="height: 280px;"><canvas id="sectionDoughnut"></canvas></div>
+              </div>
+              <div class="chart-box" style="height: auto;">
+                <h3 style="font-size: 13px;">Section Detail</h3>
+                <table class="data-table" style="margin-bottom: 0;">
+                  <thead>
+                    <tr><th>Section</th><th class="num">Articles</th><th class="num">Views</th><th class="num">Views/Article</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Leagues</td><td class="num">231</td><td class="num">16,665</td><td class="num">72</td></tr>
+                    <tr><td>College Sports</td><td class="num">118</td><td class="num">16,358</td><td class="num">139</td></tr>
+                    <tr><td>Media</td><td class="num">180</td><td class="num">15,445</td><td class="num">86</td></tr>
+                    <tr><td>Athletes</td><td class="num">72</td><td class="num">9,299</td><td class="num">129</td></tr>
+                    <tr><td>Teams</td><td class="num">80</td><td class="num">7,364</td><td class="num">92</td></tr>
+                    <tr><td>Sports Betting</td><td class="num">40</td><td class="num">4,269</td><td class="num">107</td></tr>
+                    <tr><td>Law</td><td class="num">29</td><td class="num">3,503</td><td class="num">121</td></tr>
+                    <tr><td>World Cup</td><td class="num">13</td><td class="num">2,280</td><td class="num">175</td></tr>
+                    <tr><td>Politics</td><td class="num">21</td><td class="num">1,929</td><td class="num">92</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="callout info">
+                <div class="callout-title">Parse.ly vs GA4: Understanding the Metrics</div>
+                <p>Parse.ly avg min/view measures engaged time on the individual page. GA4 session duration measures total time on the site. Both are useful — Parse.ly for content quality, GA4 for site stickiness.</p>
+            </div>
+        </div>
+
+        <!-- TAB 4: HISTORICAL TRENDS -->
+        <div id="historical" class="tab-content">
+            <h2 class="section-title">14-Month Performance Summary</h2>
+
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="accent" style="background: var(--scoreboard)"></div>
+                    <div class="label">14-Month High</div>
+                    <div class="value">151,408</div>
+                    <div class="meta">28% above previous peak (Mar 2026)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="accent" style="background: var(--red-card)"></div>
+                    <div class="label">14-Month Low</div>
+                    <div class="value">70,262</div>
+                    <div class="meta">November 2025</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="accent" style="background: var(--turf)"></div>
+                    <div class="label">2025 Monthly Avg</div>
+                    <div class="value">91,231</div>
+                    <div class="meta">GA4 views (Feb-Dec)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="accent" style="background: var(--eats-yellow)"></div>
+                    <div class="label">Mar 2026 vs 2025 Avg</div>
+                    <div class="value">+66%</div>
+                    <div class="meta">Growth from baseline</div>
+                </div>
+            </div>
+
+            <h2 class="section-title">Complete 14-Month Data</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th class="num">GA4 Views</th>
+                        <th class="num">Parse.ly Views</th>
+                        <th class="num">GA4 vs P.ly</th>
+                        <th class="num">GA4 Users</th>
+                        <th>Avg Duration</th>
+                        <th class="num">Sess/User</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Feb 2025</td>
+                        <td class="num">94,647</td>
+                        <td class="num">—</td>
+                        <td class="num">—</td>
+                        <td class="num">78,724</td>
+                        <td>2.7 min</td>
+                        <td class="num">1.20</td>
+                    </tr>
+                    <tr>
+                        <td>Mar 2025</td>
+                        <td class="num">118,142</td>
+                        <td class="num">118,176</td>
+                        <td class="num">0%</td>
+                        <td class="num">101,158</td>
+                        <td>2.1 min</td>
+                        <td class="num">1.16</td>
+                    </tr>
+                    <tr>
+                        <td>Apr 2025</td>
+                        <td class="num">119,935</td>
+                        <td class="num">122,391</td>
+                        <td class="num">-2%</td>
+                        <td class="num">102,097</td>
+                        <td>2.1 min</td>
+                        <td class="num">1.17</td>
+                    </tr>
+                    <tr>
+                        <td>May 2025</td>
+                        <td class="num">99,863</td>
+                        <td class="num">104,121</td>
+                        <td class="num">-4%</td>
+                        <td class="num">83,795</td>
+                        <td>2.3 min</td>
+                        <td class="num">1.20</td>
+                    </tr>
+                    <tr>
+                        <td>Jun 2025</td>
+                        <td class="num">98,767</td>
+                        <td class="num">100,713</td>
+                        <td class="num">-2%</td>
+                        <td class="num">84,077</td>
+                        <td>2.3 min</td>
+                        <td class="num">1.16</td>
+                    </tr>
+                    <tr>
+                        <td>Jul 2025</td>
+                        <td class="num">75,196</td>
+                        <td class="num">80,925</td>
+                        <td class="num">-7%</td>
+                        <td class="num">61,054</td>
+                        <td>2.9 min</td>
+                        <td class="num">1.22</td>
+                    </tr>
+                    <tr>
+                        <td>Aug 2025</td>
+                        <td class="num">83,831</td>
+                        <td class="num">92,656</td>
+                        <td class="num">-10%</td>
+                        <td class="num">68,859</td>
+                        <td>2.8 min</td>
+                        <td class="num">1.21</td>
+                    </tr>
+                    <tr>
+                        <td>Sep 2025</td>
+                        <td class="num">73,677</td>
+                        <td class="num">77,715</td>
+                        <td class="num">-5%</td>
+                        <td class="num">54,651</td>
+                        <td>3.6 min</td>
+                        <td class="num">1.29</td>
+                    </tr>
+                    <tr>
+                        <td>Oct 2025</td>
+                        <td class="num">91,960</td>
+                        <td class="num">91,640</td>
+                        <td class="num">0%</td>
+                        <td class="num">74,101</td>
+                        <td>2.8 min</td>
+                        <td class="num">1.22</td>
+                    </tr>
+                    <tr>
+                        <td>Nov 2025</td>
+                        <td class="num">70,262</td>
+                        <td class="num">70,151</td>
+                        <td class="num">0%</td>
+                        <td class="num">55,144</td>
+                        <td>2.7 min</td>
+                        <td class="num">1.26</td>
+                    </tr>
+                    <tr>
+                        <td>Dec 2025</td>
+                        <td class="num">77,267</td>
+                        <td class="num">77,990</td>
+                        <td class="num">-1%</td>
+                        <td class="num">58,154</td>
+                        <td>2.7 min</td>
+                        <td class="num">1.24</td>
+                    </tr>
+                    <tr>
+                        <td>Jan 2026</td>
+                        <td class="num">82,843</td>
+                        <td class="num">84,060</td>
+                        <td class="num">-1%</td>
+                        <td class="num">60,752</td>
+                        <td>2.4 min</td>
+                        <td class="num">1.34</td>
+                    </tr>
+                    <tr>
+                        <td>Feb 2026</td>
+                        <td class="num">110,404</td>
+                        <td class="num">104,293</td>
+                        <td class="num">+6%</td>
+                        <td class="num">84,064</td>
+                        <td>2.3 min</td>
+                        <td class="num">1.29</td>
+                    </tr>
+                    <tr style="background: #f0f9ff;">
+                        <td style="font-weight: 700;">Mar 2026</td>
+                        <td class="num" style="font-weight: 700;">151,408</td>
+                        <td class="num" style="font-weight: 700;">106,689</td>
+                        <td class="num" style="font-weight: 700; color: var(--scoreboard);">+42%</td>
+                        <td class="num" style="font-weight: 700;">107,761</td>
+                        <td style="font-weight: 700;">3.3 min</td>
+                        <td class="num" style="font-weight: 700;">1.37</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 class="section-title">Session Duration vs Views: The Engagement Relationship</h2>
+            <div class="chart-box" style="height: 350px;">
+                <canvas id="dualAxisChart"></canvas>
+            </div>
+
+            <h2 class="section-title">Session Duration Trend (14 Months)</h2>
+            <div class="chart-box" style="height: 350px;">
+                <canvas id="durationTrendChart"></canvas>
+            </div>
+
+        </div>
+
+        <!-- TAB 5: ACTION ITEMS -->
+        <div id="actions" class="tab-content">
+            <h2 class="section-title">February Recommendations — March Status Check</h2>
+
+            <div class="callout positive">
+                <div class="callout-title">1. Restore QOTD <span style="background-color: var(--turf); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">✅ IMPLEMENTED</span></div>
+                <p>QOTD was restored in March. GA4 shows 9,518 views (up from 338 in Feb). Visitors average 2.2 sessions/user — QOTD is a session starter that drives further browsing.</p>
+            </div>
+
+            <div class="callout warning">
+                <div class="callout-title">2. UTM Standardization for Tuned In & Asset Class <span style="background-color: var(--eats-yellow); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">⚠️ NOT STARTED</span></div>
+                <p>Tuned In and Asset Class still lack unique utm_source values. Without these, their site traffic is invisible in Parse.ly. This was a Day 1 recommendation — every month without UTMs is a month of blind optimization.</p>
+            </div>
+
+            <div class="callout positive">
+                <div class="callout-title">3. Persistent Factle CTA <span style="background-color: var(--turf); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">✅ ON TRACK</span></div>
+                <p>GA4 confirms Factle is thriving: 7,487 views in March, up 27% from Feb. Parse.ly tracking broke mid-month, creating a false alarm. Factle users average 3.1-5.2 sessions/user — the most engaged newsletter-to-site visitors.</p>
+            </div>
+
+            <div class="callout positive">
+                <div class="callout-title">4. Continue New Format Rollout <span style="background-color: var(--turf); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">✅ ON TRACK</span></div>
+                <p>Month 2 of the Memo Makeover: GA4 session views grew from 110,404 to 151,408 (+37%). Session duration jumped from 2.3 to 3.3 min. The format lift is durable and accelerating.</p>
+            </div>
+
+            <div class="callout info">
+                <div class="callout-title">5. Author Page Optimization <span style="background-color: var(--scoreboard); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">⏳ IN PROGRESS</span></div>
+                <p>Author pages got 4,749 GA4 views from newsletter traffic (3.1%), but sessions average only 0.5-1.1 min — well below the 3.3 min site average. Revamped pages with article archives would convert these clicks into deeper engagement.</p>
+            </div>
+
+            <div class="callout info">
+                <div class="callout-title">6. Standardize GA4 Reporting <span style="background-color: var(--scoreboard); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">🆕 RECOMMENDED</span></div>
+                <p>This month's GA4 export revealed session-level data that Parse.ly can't capture: 44,700 secondary pageviews, 3.3 min sessions, 1.37 pages per user. Recommend adding GA4 newsletter traffic to the monthly reporting cadence alongside Parse.ly.</p>
+            </div>
+        </div>
+
+        <!-- TAB 6: METHODOLOGY -->
+        <div id="methodology" class="tab-content">
+            <h2 class="section-title">Data Sources</h2>
+
+            <div class="callout info">
+                <div class="callout-title">GA4 (Google Analytics 4)</div>
+                <p>Session-level data filtered to newsletter traffic (campaign source = FOS Daily Newsletter). GA4 captures ALL pageviews within a session that began from a newsletter click, revealing secondary browsing, session duration, and pages per session. Exports available for February 2025 through March 2026 with consistent "Average session duration" metric.</p>
+            </div>
+
+            <div class="callout info">
+                <div class="callout-title">Parse.ly</div>
+                <p>Campaign source "FOS Daily Newsletter" — tracks confirmed landing pageviews on frontofficesports.com. Parse.ly is the established source of truth for the 200K monthly goal. It also provides article-level metadata (section, author, publish date) and engagement time per page.</p>
+            </div>
+
+            <div class="callout negative">
+                <div class="callout-title">Campaign Monitor is NOT used for traffic measurement</div>
+                <p>CM click data includes 83-88% phantom clicks from automated systems and cannot be used to measure actual site visits. CM data may be referenced for edition-level comparisons only.</p>
+            </div>
+
+            <h2 class="section-title">What Each Source Measures</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>GA4</th>
+                        <th>Parse.ly</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Total session pageviews</td>
+                        <td>✅</td>
+                        <td>❌ (landing page only)</td>
+                    </tr>
+                    <tr>
+                        <td>Session duration</td>
+                        <td>✅</td>
+                        <td>❌</td>
+                    </tr>
+                    <tr>
+                        <td>Pages per session</td>
+                        <td>✅</td>
+                        <td>❌</td>
+                    </tr>
+                    <tr>
+                        <td>Landing page attribution</td>
+                        <td>✅</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>Article section/author metadata</td>
+                        <td>❌</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>Per-page engaged time</td>
+                        <td>❌</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>New vs returning visitors</td>
+                        <td>❌</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>Device breakdown</td>
+                        <td>❌</td>
+                        <td>✅</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 class="section-title">Key Definitions</h2>
+
+            <div class="callout info">
+                <div class="callout-title">GA4 Total Views</div>
+                <p>All pageviews in sessions where the user arrived via a newsletter click. Includes the landing page plus any other pages browsed during that session.</p>
+            </div>
+
+            <div class="callout info">
+                <div class="callout-title">Parse.ly Landing Views</div>
+                <p>Pageviews directly attributed to the FOS Daily Newsletter campaign source — the page the reader landed on.</p>
+            </div>
+
+            <div class="callout info">
+                <div class="callout-title">Secondary Pageviews</div>
+                <p>The difference between GA4 total views and Parse.ly landing views, representing pages browsed after the initial click-through.</p>
+            </div>
+
+            <div class="callout info">
+                <div class="callout-title">Session Duration</div>
+                <p>GA4's average elapsed time from session start to last recorded event.</p>
+            </div>
+
+            <div class="callout info">
+                <div class="callout-title">Sessions/User</div>
+                <p>Average number of sessions per active user, indicating browsing depth.</p>
+            </div>
+
+            <div class="callout info">
+                <div class="callout-title">Returning Visitors</div>
+                <p>Users Parse.ly has seen before from any source — a loyalty indicator.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Front Office Sports · Growth & Audience Development · Data as of April 3, 2026
+    </div>
+
+    <script>
+        // Tab switching
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.nav-tab');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Table sorting
+        document.querySelectorAll('th').forEach(th => {
+            th.addEventListener('click', () => {
+                const table = th.closest('table');
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                const index = Array.from(th.parentNode.children).indexOf(th);
+                const isNumeric = !isNaN(rows[0].children[index].textContent.replace(/[,$%]/g, ''));
+
+                rows.sort((a, b) => {
+                    const aVal = a.children[index].textContent.trim().replace(/[,$%]/g, '');
+                    const bVal = b.children[index].textContent.trim().replace(/[,$%]/g, '');
+
+                    if (isNumeric) {
+                        return parseFloat(aVal) - parseFloat(bVal);
+                    } else {
+                        return aVal.localeCompare(bVal);
+                    }
+                });
+
+                tbody.innerHTML = '';
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        });
+
+        // Format numbers with commas
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // Update KPI values with formatted numbers (only pure integers, skip decimals and suffixed values)
+        document.querySelectorAll('.kpi-card .value').forEach(el => {
+            const text = el.textContent.trim();
+            if (/^\d[\d,]+$/.test(text)) {
+                const num = parseInt(text.replace(/,/g, ''));
+                if (!isNaN(num)) el.textContent = formatNumber(num);
+            }
+        });
+
+        // Chart.js initialization
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        font: { family: "'Inter', sans-serif", size: 12 },
+                        color: '#6b7280',
+                        padding: 15
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    grid: { color: '#f0f1f3' },
+                    ticks: { color: '#9ca3af', font: { family: "'Inter', sans-serif", size: 11 } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#9ca3af', font: { family: "'Inter', sans-serif", size: 11 } }
+                }
+            }
+        };
+
+        // Trend Chart - Updated with 14 months of data
+        const trendCtx = document.getElementById('trendChart');
+        if (trendCtx) {
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Feb 25', 'Mar 25', 'Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25', 'Oct 25', 'Nov 25', 'Dec 25', 'Jan 26', 'Feb 26', 'Mar 26'],
+                    datasets: [
+                        {
+                            label: 'GA4 Monthly Views',
+                            data: [94647, 118142, 119935, 99863, 98767, 75196, 83831, 73677, 91960, 70262, 77267, 82843, 110404, 151408],
+                            borderColor: '#196CFC',
+                            backgroundColor: 'rgba(25, 108, 252, 0.05)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Parse.ly Monthly Views',
+                            data: [null, 118176, 122391, 104121, 100713, 80925, 92656, 77715, 91640, 70151, 77990, 84060, 104293, 106689],
+                            borderColor: '#0D1D64',
+                            backgroundColor: 'rgba(13, 29, 100, 0.05)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: '200K Goal',
+                            data: [200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000],
+                            borderColor: '#E00922',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0
+                        }
+                    ]
+                },
+                options: {
+                    ...chartOptions,
+                    plugins: {
+                        ...chartOptions.plugins,
+                        filler: { propagate: true }
+                    }
+                }
+            });
+        }
+
+        // Destination Doughnut
+        const destCtx = document.getElementById('destinationDoughnut');
+        if (destCtx) {
+            new Chart(destCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Articles', 'Homepage', 'QOTD', 'Factle', 'Author Pages', 'Other'],
+                    datasets: [{
+                        data: [114074, 11031, 9518, 7487, 4749, 3549],
+                        backgroundColor: ['#196CFC', '#0D1D64', '#007640', '#D4A800', '#CFA677', '#B47E41'],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                font: { family: "'Inter', sans-serif", size: 12 },
+                                color: '#6b7280',
+                                padding: 15
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Session Duration Chart - Updated with 14 months
+        const sessionCtx = document.getElementById('sessionDurationChart');
+        if (sessionCtx) {
+            new Chart(sessionCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Feb 25', 'Mar 25', 'Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25', 'Oct 25', 'Nov 25', 'Dec 25', 'Jan 26', 'Feb 26', 'Mar 26'],
+                    datasets: [{
+                        label: 'Avg Session Duration (minutes)',
+                        data: [2.7, 2.1, 2.1, 2.3, 2.3, 2.9, 2.8, 3.6, 2.8, 2.7, 2.7, 2.4, 2.3, 3.3],
+                        backgroundColor: ['#196CFC', '#196CFC', '#196CFC', '#196CFC', '#196CFC', '#196CFC', '#196CFC', '#196CFC', '#196CFC', '#196CFC', '#196CFC', '#196CFC', '#196CFC', '#196CFC'],
+                        borderRadius: 4
+                    }]
+                },
+                options: chartOptions
+            });
+        }
+
+        // Visitor Type Doughnut (New vs Returning)
+        const vtCtx = document.getElementById('visitorTypeDoughnut');
+        if (vtCtx) {
+            new Chart(vtCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Returning — 52.8%', 'New — 47.2%'],
+                    datasets: [{
+                        data: [45701, 40781],
+                        backgroundColor: ['#196CFC', '#CFA677'],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '55%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#6b7280', padding: 10, usePointStyle: true, pointStyle: 'circle' } },
+                        tooltip: { callbacks: { label: ctx => ctx.label + ' (' + ctx.parsed.toLocaleString() + ' visitors)' } }
+                    }
+                }
+            });
+        }
+
+        // Visitor Views Doughnut
+        const vvCtx = document.getElementById('visitorViewsDoughnut');
+        if (vvCtx) {
+            new Chart(vvCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Returning — 57%', 'New — 43%'],
+                    datasets: [{
+                        data: [60861, 45828],
+                        backgroundColor: ['#196CFC', '#CFA677'],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '55%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#6b7280', padding: 10, usePointStyle: true, pointStyle: 'circle' } },
+                        tooltip: { callbacks: { label: ctx => ctx.label + ' (' + ctx.parsed.toLocaleString() + ' views)' } }
+                    }
+                }
+            });
+        }
+
+        // Device Doughnut
+        const devCtx = document.getElementById('deviceDoughnut');
+        if (devCtx) {
+            new Chart(devCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Desktop — 56.8%', 'Mobile — 42.8%', 'Tablet — 0.5%'],
+                    datasets: [{
+                        data: [60560, 45629, 500],
+                        backgroundColor: ['#0D1D64', '#196CFC', '#CFA677'],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '55%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#6b7280', padding: 10, usePointStyle: true, pointStyle: 'circle' } },
+                        tooltip: { callbacks: { label: ctx => ctx.label + ' (' + ctx.parsed.toLocaleString() + ' views)' } }
+                    }
+                }
+            });
+        }
+
+        // Section Performance Doughnut
+        const secCtx = document.getElementById('sectionDoughnut');
+        if (secCtx) {
+            new Chart(secCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Leagues', 'College Sports', 'Media', 'Athletes', 'Teams', 'Sports Betting', 'Law', 'World Cup', 'Politics'],
+                    datasets: [{
+                        data: [16665, 16358, 15445, 9299, 7364, 4269, 3503, 2280, 1929],
+                        backgroundColor: ['#196CFC', '#007640', '#0D1D64', '#CFA677', '#D4A800', '#E00922', '#B47E41', '#044928', '#800B14'],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '45%',
+                    plugins: {
+                        legend: { position: 'right', labels: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#6b7280', padding: 8, usePointStyle: true, pointStyle: 'circle' } },
+                        tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed.toLocaleString() + ' views' } }
+                    }
+                }
+            });
+        }
+
+        // Dual Axis Chart - Session Duration vs Views
+        const dualCtx = document.getElementById('dualAxisChart');
+        if (dualCtx) {
+            new Chart(dualCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Feb 25', 'Mar 25', 'Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25', 'Oct 25', 'Nov 25', 'Dec 25', 'Jan 26', 'Feb 26', 'Mar 26'],
+                    datasets: [
+                        {
+                            label: 'GA4 Views',
+                            data: [94647, 118142, 119935, 99863, 98767, 75196, 83831, 73677, 91960, 70262, 77267, 82843, 110404, 151408],
+                            backgroundColor: 'rgba(25, 108, 252, 0.6)',
+                            borderColor: '#196CFC',
+                            borderWidth: 1,
+                            yAxisID: 'y',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Avg Session Duration (min)',
+                            data: [2.7, 2.1, 2.1, 2.3, 2.3, 2.9, 2.8, 3.6, 2.8, 2.7, 2.7, 2.4, 2.3, 3.3],
+                            borderColor: '#E00922',
+                            backgroundColor: 'transparent',
+                            borderWidth: 3,
+                            type: 'line',
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: { family: "'Inter', sans-serif", size: 12 },
+                                color: '#6b7280',
+                                padding: 15
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'GA4 Views', color: '#6b7280' },
+                            grid: { color: '#f0f1f3' },
+                            ticks: { color: '#9ca3af', font: { family: "'Inter', sans-serif", size: 11 } }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: 'Avg Session Duration (min)', color: '#6b7280' },
+                            grid: { drawOnChartArea: false },
+                            ticks: { color: '#9ca3af', font: { family: "'Inter', sans-serif", size: 11 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af', font: { family: "'Inter', sans-serif", size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Duration Trend Chart
+        const durationCtx = document.getElementById('durationTrendChart');
+        if (durationCtx) {
+            new Chart(durationCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Feb 25', 'Mar 25', 'Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25', 'Oct 25', 'Nov 25', 'Dec 25', 'Jan 26', 'Feb 26', 'Mar 26'],
+                    datasets: [{
+                        label: 'Avg Session Duration (minutes)',
+                        data: [2.7, 2.1, 2.1, 2.3, 2.3, 2.9, 2.8, 3.6, 2.8, 2.7, 2.7, 2.4, 2.3, 3.3],
+                        borderColor: '#E00922',
+                        backgroundColor: 'rgba(224, 9, 34, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#E00922',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        ...chartOptions.plugins,
+                        legend: {
+                            labels: {
+                                font: { family: "'Inter', sans-serif", size: 12 },
+                                color: '#6b7280',
+                                padding: 15
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 4,
+                            grid: { color: '#f0f1f3' },
+                            ticks: { color: '#9ca3af', font: { family: "'Inter', sans-serif", size: 11 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af', font: { family: "'Inter', sans-serif", size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+        // QOTD Trend Chart - TFV Views by Month
+        const qotdCtx = document.getElementById('qotdTrendChart');
+        if (qotdCtx) {
+            const qotdLabels = ['Feb 25', 'Mar 25', 'Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25', 'Oct 25', 'Nov 25', 'Dec 25', 'Jan 26', 'Feb 26', 'Mar 26'];
+            const qotdData = [6141, 6118, 5870, 5434, 4867, 4778, 4785, 4938, 5537, 4651, 5473, 4693, 338, 9518];
+
+            new Chart(qotdCtx, {
+                type: 'bar',
+                data: {
+                    labels: qotdLabels,
+                    datasets: [{
+                        label: 'TFV Pageviews',
+                        data: qotdData,
+                        backgroundColor: qotdData.map((v, i) =>
+                            i === 12 ? '#E00922' :
+                            i === 13 ? '#007640' :
+                            '#196CFC'
+                        ),
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    plugins: {
+                        ...chartOptions.plugins,
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // QOTD Retention Chart - Sessions/User trend
+        const retCtx = document.getElementById('qotdRetentionChart');
+        if (retCtx) {
+            new Chart(retCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Feb 25', 'Mar 25', 'Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25', 'Oct 25', 'Nov 25', 'Dec 25', 'Jan 26', 'Feb 26', 'Mar 26'],
+                    datasets: [{
+                        label: 'Sessions/User on TFV Pages',
+                        data: [1.61, 1.72, 1.77, 1.80, 1.79, 1.96, 1.90, 2.03, 2.07, 1.99, 1.91, 2.04, 1.31, 2.20],
+                        borderColor: '#007640',
+                        backgroundColor: 'rgba(0, 118, 64, 0.08)',
+                        borderWidth: 2.5,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: [
+                            '#196CFC','#196CFC','#196CFC','#196CFC','#196CFC','#196CFC','#196CFC','#196CFC','#196CFC','#196CFC','#196CFC','#196CFC','#E00922','#007640'
+                        ],
+                        pointRadius: [3,3,3,3,3,3,3,3,3,3,3,3,6,6],
+                        pointBorderWidth: [1,1,1,1,1,1,1,1,1,1,1,1,2,2],
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    plugins: {
+                        ...chartOptions.plugins,
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(ctx) {
+                                    if (ctx.dataIndex === 12) return '⚠️ QOTD removed — low sample';
+                                    if (ctx.dataIndex === 13) return '✅ Highest retention ever';
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ...chartOptions.scales.y,
+                            min: 1.0,
+                            max: 2.5,
+                            ticks: {
+                                ...chartOptions.scales.y.ticks,
+                                callback: v => v.toFixed(1) + 'x'
+                            }
+                        },
+                        x: chartOptions.scales.x
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

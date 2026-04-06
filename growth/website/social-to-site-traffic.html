@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOS Social → Site Traffic Dashboard | March 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  --scoreboard: #196CFC;
+  --primetime: #0D1D64;
+  --turf: #007640;
+  --eats-yellow: #D4A800;
+  --red-card: #E00922;
+  --center-court: #CFA677;
+  --deep-rough: #044928;
+  --infield: #B47E41;
+  --seams: #800B14;
+  --bg: #f0f2f5;
+  --bg-card: #ffffff;
+  --border: #e5e7eb;
+  --border-light: #f0f1f3;
+  --text: #1a1a2e;
+  --text-muted: #6b7280;
+  --text-dim: #9ca3af;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+  --radius: 10px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* HEADER */
+.header {
+  background: var(--bg-card);
+  padding: 24px 40px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+.header-inner { max-width: 1440px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+.header h1 span { color: var(--scoreboard); font-weight: 400; font-size: 18px; }
+.header-meta { font-size: 13px; color: var(--text-muted); }
+.header-meta strong { color: var(--text); font-weight: 600; }
+
+/* NAV */
+.nav-tabs {
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  position: sticky; top: 73px; z-index: 99;
+}
+.nav-tabs-inner { max-width: 1440px; margin: 0 auto; display: flex; gap: 0; overflow-x: auto; }
+.nav-tab {
+  padding: 12px 20px; font-size: 13px; font-weight: 500;
+  color: var(--text-muted); cursor: pointer;
+  border: none; border-bottom: 2px solid transparent;
+  background: none; font-family: inherit; white-space: nowrap;
+  transition: all 0.15s;
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--scoreboard); border-bottom-color: var(--scoreboard); font-weight: 600; }
+
+/* MAIN */
+.main { max-width: 1440px; margin: 0 auto; padding: 28px 40px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* SECTION */
+.section-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 16px; }
+.section-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* KPI CARDS */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.kpi-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px;
+  box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+}
+.kpi-card .accent { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.kpi-card .label { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+.kpi-card .value { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1.1; letter-spacing: -0.5px; }
+.kpi-card .meta { margin-top: 10px; font-size: 12px; color: var(--text-dim); }
+
+/* TABLES */
+.data-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+  background: var(--bg-card); border-radius: var(--radius);
+  overflow: hidden; border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm); margin-bottom: 20px;
+}
+.data-table th {
+  text-align: left; padding: 10px 14px; font-size: 12px;
+  font-weight: 600; color: var(--text-muted); background: #f9fafb;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border-light); color: var(--text); }
+.data-table tr:hover td { background: #f9fafb; }
+.data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.data-table .total-row { font-weight: 700; border-top: 2px solid var(--border); }
+
+/* CHART BOXES */
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-row.full { grid-template-columns: 1fr; }
+.chart-box {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm);
+}
+.chart-box h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 14px; }
+.chart-box canvas { max-height: 280px; }
+
+/* CALLOUTS */
+.callouts { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.callout {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px;
+  border-left: 3px solid; box-shadow: var(--shadow-sm);
+}
+.callout.positive { border-left-color: var(--turf); }
+.callout.warning { border-left-color: var(--eats-yellow); }
+.callout.negative { border-left-color: var(--red-card); }
+.callout.info { border-left-color: var(--scoreboard); }
+.callout-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.callout p { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+
+/* STATUS CARDS */
+.status-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+  box-shadow: var(--shadow-sm); margin-bottom: 14px;
+}
+.status-card .card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.status-card .card-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.status-pill { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.status-pill.green { background: #ecfdf5; color: #047857; }
+.status-pill.yellow { background: #fefce8; color: #a16207; }
+.status-pill.red { background: #fef2f2; color: #b91c1c; }
+.status-pill.blue { background: #dbeafe; color: var(--scoreboard); }
+.status-card p { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+
+/* METHODOLOGY */
+.method-section { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+.method-section h3 { font-size: 14px; font-weight: 600; color: var(--text); margin: 20px 0 10px; }
+.method-section h3:first-child { margin-top: 0; }
+
+/* FOOTER */
+.footer { text-align: center; padding: 20px 40px; font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: 20px; }
+
+@media (max-width: 900px) {
+  .chart-row { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .callouts { grid-template-columns: 1fr; }
+  .header { padding: 20px 20px; }
+  .nav-tabs { padding: 0 20px; }
+  .main { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <h1>Front Office Sports <span>/ Social-to-Site Traffic Dashboard</span></h1>
+      <div class="header-meta">Source: <strong>GA4 · Parse.ly · Sprout Social</strong> &nbsp;|&nbsp; Jan–Mar 2026 · Baseline Quarter &nbsp;|&nbsp; Last Updated: <strong>April 6, 2026</strong></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tabs-inner">
+    <button class="nav-tab active" onclick="switchTab('overview')">Executive Summary</button>
+    <button class="nav-tab" onclick="switchTab('deep')">Channel Deep Dives</button>
+    <button class="nav-tab" onclick="switchTab('compare')">vs Newsletter</button>
+    <button class="nav-tab" onclick="switchTab('nonfos')">Non-FOS Referral Traffic</button>
+    <button class="nav-tab" onclick="switchTab('recs')">Optimizations</button>
+    <button class="nav-tab" onclick="switchTab('method')">Methodology</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- TAB: OVERVIEW -->
+  <div class="tab-content active" id="tab-overview">
+
+    <!-- Section header -->
+    <h2 class="section-title">KPI Overview — March 2026</h2>
+
+    <!-- All 5 KPIs on one row -->
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px;">
+      <div class="kpi-card">
+        <div class="accent" style="background: var(--scoreboard)"></div>
+        <div class="label"><span style="display: inline-block; background: #eff6ff; color: var(--scoreboard); padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 700; margin-right: 4px;">PARSE.LY</span> Landing Views</div>
+        <div class="value" style="font-size: 22px;">66,183</div>
+        <div class="meta">Established metric — direct social click-throughs</div>
+      </div>
+      <div class="kpi-card">
+        <div class="accent" style="background: var(--primetime)"></div>
+        <div class="label"><span style="display: inline-block; background: #eef0f8; color: var(--primetime); padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 700; margin-right: 4px;">GA4</span> Session Views <span style="display: inline-block; background: #ecfdf5; color: var(--turf); padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 700; margin-left: 4px;">NEW</span></div>
+        <div class="value" style="font-size: 22px;">76,481</div>
+        <div class="meta">Full session picture (+16% vs Parse.ly)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="accent" style="background: var(--turf)"></div>
+        <div class="label">New Visitors</div>
+        <div class="value" style="font-size: 22px;">44,280</div>
+        <div class="meta">75% of users — discovery engine</div>
+      </div>
+      <div class="kpi-card">
+        <div class="accent" style="background: var(--center-court)"></div>
+        <div class="label">Avg Session Duration</div>
+        <div class="value" style="font-size: 22px;">1.6 min</div>
+        <div class="meta">vs newsletter's 3.3 min (GA4)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="accent" style="background: var(--scoreboard)"></div>
+        <div class="label">Sessions/User</div>
+        <div class="value" style="font-size: 22px;">1.24</div>
+        <div class="meta">vs newsletter's 1.37 (GA4)</div>
+      </div>
+    </div>
+
+    <!-- GA4 Explainer Card (matching newsletter style) — directly under KPI cards -->
+    <div style="background: #f0f7ff; border: 1px solid #c6deff; border-radius: var(--radius); padding: 16px 20px; margin-bottom: 24px;">
+      <div style="font-size: 13px; font-weight: 600; color: var(--primetime); margin-bottom: 6px;">What GA4 Total Session Views tells us</div>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-bottom: 0;">Parse.ly counts the page a reader lands on when they click a social link — that's 66,183 views. GA4 goes further: it tracks everything that happens <em>after</em> that click, including additional articles browsed and homepage visits within the same session. That's how we get to 76,481 — an additional <strong>10,298 pageviews</strong> (16% more) that were invisible before. The gap is smaller than newsletter's 42% uplift, which makes sense: social visitors tend to read one article and leave, while newsletter readers browse deeper. Still, 1 in 6 social visitors explored a second page — valuable secondary reach that Parse.ly alone doesn't capture.</p>
+    </div>
+
+    <!-- Traffic Share doughnut + Channel Performance table SIDE BY SIDE -->
+    <div class="chart-row">
+      <div class="chart-box">
+        <h3>Traffic Share</h3>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">FOS on X drives 94% of all social post-driven traffic</div>
+        <canvas id="chartPie"></canvas>
+      </div>
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm);">
+        <h3 style="font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px;">Channel Performance</h3>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">LinkedIn visitors spend 2x longer per article than X visitors</div>
+        <table class="data-table" style="margin-bottom: 0;">
+          <thead>
+            <tr>
+              <th>Channel</th>
+              <th class="num">Page Views</th>
+              <th class="num">Avg Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background: #f0f7ff;">
+              <td><span style="color: var(--scoreboard); font-weight: 600;">FOS on X</span></td>
+              <td class="num"><strong>62,472</strong></td>
+              <td class="num">0:25</td>
+            </tr>
+            <tr>
+              <td><span style="color: var(--turf); font-weight: 600;">FOS on LinkedIn</span></td>
+              <td class="num">2,140</td>
+              <td class="num"><strong>0:49</strong></td>
+            </tr>
+            <tr>
+              <td><span style="color: var(--text-muted); font-weight: 600;">FOS on Facebook</span></td>
+              <td class="num">874</td>
+              <td class="num">0:27</td>
+            </tr>
+            <tr>
+              <td><span style="color: var(--center-court); font-weight: 600;">FOS on Instagram</span></td>
+              <td class="num">689</td>
+              <td class="num">0:44</td>
+            </tr>
+            <tr>
+              <td><span style="color: var(--red-card); font-weight: 600;">FOS on Threads</span></td>
+              <td class="num">8</td>
+              <td class="num">0:26</td>
+            </tr>
+            <tr class="total-row">
+              <td><strong>TOTAL</strong></td>
+              <td class="num">66,183</td>
+              <td class="num">0:25</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Historical Trend: Jan → Feb → Mar -->
+    <h2 class="section-title" style="margin-top: 28px;">Historical Context: Social-to-Site Traffic (Jan–Mar 2026)</h2>
+    <div class="chart-box" style="margin-bottom: 20px;">
+      <h3>Total Social Referral Views by Month</h3>
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Jan &amp; Feb include all social referrals (FOS + non-FOS). March is broken out: @FOS posts (UTM-segmented) vs. non-FOS referrals. Even @FOS-only March exceeds every previous month.</div>
+      <canvas id="chartHistoricalSocial" style="max-height: 300px;"></canvas>
+    </div>
+
+    <div class="callouts" style="margin-bottom: 20px;">
+      <div class="callout positive">
+        <div class="callout-title">March FOS-Only Traffic Exceeds Previous Months' Total Social</div>
+        <p>March's 66,183 views came exclusively from FOS's own social posts (UTM-segmented). January and February's totals (55,320 and 38,430) included <em>all</em> social referral traffic — FOS posts, reporter shares, Reddit, Bluesky, everything. Even with this narrower definition, March is up 20% vs. January and 72% vs. February. The combination of proper UTM tracking and strong content drove the best social-to-site month on record.</p>
+      </div>
+      <div class="callout info">
+        <div class="callout-title">What's Not in March's 66K: Non-FOS Social Referrals</div>
+        <p>In addition to FOS's own 66,183 views, Parse.ly captured 35,704 social referral views from non-FOS sources — organic shares, reporter posts, Reddit threads, Bluesky, and other social mentions. Combined, that's 101,887 total social referral views in March. Twitter/X accounts for two-thirds of this bucket (23,766 views across 500 articles), with WNBA CBA coverage and layoff/media stories driving most of it. Full platform and article breakdown below.</p>
+      </div>
+    </div>
+
+    <table class="data-table" style="margin-bottom: 20px;">
+      <thead><tr><th>Month</th><th class="num">Total Social Views</th><th class="num">MoM</th><th>Data Scope</th></tr></thead>
+      <tbody>
+        <tr><td>January 2026</td><td class="num">55,320</td><td class="num">—</td><td>All social referrals (Parse.ly)</td></tr>
+        <tr><td>February 2026</td><td class="num">38,430</td><td class="num" style="color: var(--red-card);">-30.5%</td><td>All social referrals (Parse.ly)</td></tr>
+        <tr style="background: #f0f7ff;"><td><strong>March 2026 (FOS only)</strong></td><td class="num"><strong>66,183</strong></td><td class="num" style="color: var(--turf); font-weight: 700;">+72.2%</td><td>FOS posts only (UTM-segmented)</td></tr>
+        <tr style="color: var(--text-dim);"><td>March 2026 (non-FOS)</td><td class="num">35,704</td><td class="num">—</td><td>Organic social referrals, Reddit, Bluesky, etc.</td></tr>
+        <tr class="total-row"><td>March 2026 (combined)</td><td class="num">101,887</td><td class="num" style="color: var(--turf);">+165.1% vs Feb</td><td>All social traffic to frontofficesports.com</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Platform-level Jan → Feb trend -->
+    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm); margin-bottom: 20px;">
+      <h3 style="font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px;">Platform Trend: Jan → Feb → Mar (All Social Referrals)</h3>
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">All months include all social referral traffic (FOS + non-FOS combined). March = FOS UTM-segmented + non-FOS organic referrals.</div>
+      <table class="data-table" style="margin-bottom: 0;">
+        <thead><tr><th>Platform</th><th class="num">Jan 2026</th><th class="num">Feb 2026</th><th class="num">Jan→Feb</th><th class="num" style="color: var(--scoreboard);">Mar 2026</th><th class="num">Feb→Mar</th></tr></thead>
+        <tbody>
+          <tr style="background: #f0f7ff;"><td><strong>Twitter/X</strong></td><td class="num">35,325</td><td class="num">24,654</td><td class="num" style="color: var(--red-card);">-30%</td><td class="num"><strong>86,238</strong></td><td class="num" style="color: var(--turf); font-weight: 700;">+250%</td></tr>
+          <tr><td>LinkedIn</td><td class="num">5,171</td><td class="num">2,557</td><td class="num" style="color: var(--red-card);">-51%</td><td class="num"><strong>4,939</strong></td><td class="num" style="color: var(--turf);">+93%</td></tr>
+          <tr><td>Facebook</td><td class="num">6,556</td><td class="num">4,744</td><td class="num" style="color: var(--red-card);">-28%</td><td class="num">3,958</td><td class="num" style="color: var(--red-card);">-17%</td></tr>
+          <tr><td>Reddit</td><td class="num">3,714</td><td class="num">2,786</td><td class="num" style="color: var(--red-card);">-25%</td><td class="num">3,482</td><td class="num" style="color: var(--turf);">+25%</td></tr>
+          <tr><td>Instagram</td><td class="num">2,186</td><td class="num">1,367</td><td class="num" style="color: var(--red-card);">-37%</td><td class="num">1,851</td><td class="num" style="color: var(--turf);">+35%</td></tr>
+          <tr><td>Bluesky</td><td class="num">776</td><td class="num">727</td><td class="num" style="color: var(--red-card);">-6%</td><td class="num">938</td><td class="num" style="color: var(--turf);">+29%</td></tr>
+          <tr><td>Threads</td><td class="num">564</td><td class="num">1,131</td><td class="num" style="color: var(--turf);">+101%</td><td class="num">222</td><td class="num" style="color: var(--red-card);">-80%</td></tr>
+          <tr class="total-row"><td><strong>Total</strong></td><td class="num">55,320</td><td class="num">38,430</td><td class="num" style="color: var(--red-card);">-30.5%</td><td class="num"><strong>101,887</strong></td><td class="num" style="color: var(--turf); font-weight: 700;">+165%</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size: 11px; color: var(--text-dim); margin-top: 10px;">March Twitter/X = 62,472 (FOS UTM) + 23,766 (non-FOS) combined. LinkedIn nearly doubles Jan→Mar thanks to FOS UTM posting (2,140) + strong organic reach (2,799). Threads decline is a data artifact — Jan/Feb included all Threads referrals; March non-FOS Threads is only 214 + 8 FOS UTM views.</div>
+    </div>
+
+    <!-- Top 10 articles table with per-platform breakdown -->
+    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm); margin-bottom: 20px;">
+      <h3 style="font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px;">Top 10 Articles Driving Social Traffic</h3>
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Ranked by total Parse.ly page views · Platform columns show per-channel page views</div>
+      <div style="overflow-x: auto;">
+        <table class="data-table" style="min-width: 900px;">
+          <thead><tr>
+            <th>Article</th>
+            <th class="num">Total Views</th>
+            <th class="num">Engaged Min</th>
+            <th class="num">New Visitors</th>
+            <th class="num" style="color: var(--scoreboard);">X</th>
+            <th class="num" style="color: var(--turf);">LinkedIn</th>
+            <th class="num" style="color: var(--center-court);">IG</th>
+            <th class="num" style="color: var(--text-muted);">FB</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>Jack Nicklaus Re-Acquires Nicklaus Companies After $50M Lawsuit</td><td class="num"><strong>6,831</strong></td><td class="num">3,588</td><td class="num">5,412</td><td class="num">6,831</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>Jeff Passan Explains Why He Decided Against Replacing Wojnarowski</td><td class="num"><strong>1,967</strong></td><td class="num">271</td><td class="num">1,643</td><td class="num">1,967</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>Hawks Stand By 'Magic City Monday' Promotion</td><td class="num"><strong>1,944</strong></td><td class="num">325</td><td class="num">1,562</td><td class="num">1,944</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>College Athletic Depts Are Becoming Full-Blown Media Companies</td><td class="num"><strong>1,813</strong></td><td class="num">591</td><td class="num">1,483</td><td class="num">1,521</td><td class="num">—</td><td class="num">292</td><td class="num">—</td></tr>
+            <tr><td>Bucs Previously Duped by Fake Emeka Egbuka Account</td><td class="num"><strong>1,832</strong></td><td class="num">68</td><td class="num">1,487</td><td class="num">1,832</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>Sources: NBC Taps Jason Benetti As Top MLB Announcer</td><td class="num"><strong>1,452</strong></td><td class="num">297</td><td class="num">1,269</td><td class="num">1,452</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>PFF Lays Off Several Employees Amid Company Sale</td><td class="num"><strong>1,436</strong></td><td class="num">244</td><td class="num">1,263</td><td class="num">1,436</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>PGA Tour Not Holding a Creator Classic at The Players</td><td class="num"><strong>1,323</strong></td><td class="num">72</td><td class="num">1,118</td><td class="num">1,323</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>Why the NFL's 2026 Schedule Could Look Very Different</td><td class="num"><strong>1,160</strong></td><td class="num">676</td><td class="num">928</td><td class="num">1,160</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>Darryn Peterson Says 'Mind Stuff' Derailed Bizarre Season</td><td class="num"><strong>1,153</strong></td><td class="num">147</td><td class="num">988</td><td class="num">1,153</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="font-size: 11px; color: var(--text-dim); margin-top: 10px;">Platform columns reflect Parse.ly UTM-segmented attribution. "—" means no tracked traffic from that channel. LinkedIn's top articles (Mike Repole, Trump Roundtable) rank outside the overall top 10 but lead in engaged time — see Channel Deep Dives.</div>
+    </div>
+
+    <!-- Newsletter Drives 2x Longer Sessions callout -->
+    <div class="callout positive">
+      <div class="callout-title">Newsletter Drives 2x Longer Sessions</div>
+      <p>This month's social sessions averaged 1.6 minutes vs. newsletter's 3.3 minutes — a 50% difference. Social is the top-of-funnel discovery channel; newsletter is the engagement lever. See the "vs Newsletter" tab for the full comparison.</p>
+    </div>
+
+  </div>
+
+  <!-- TAB: DEEP DIVES -->
+  <div class="tab-content" id="tab-deep">
+
+    <!-- ==================== FOS ON X ==================== -->
+    <div class="status-card" style="border-left: 4px solid var(--scoreboard); margin-bottom: 20px;">
+      <div class="card-head">
+        <div class="card-title">FOS on X — The Traffic Engine</div>
+      </div>
+
+      <!-- X KPI Cards -->
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0;">
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">Parse.ly Landing Views</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px;">62,472</div>
+          <div style="font-size: 11px; color: var(--text-dim);">94.4% of all social traffic</div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">GA4 Session Views <span style="display: inline-block; background: #ecfdf5; color: var(--turf); padding: 0 4px; border-radius: 3px; font-size: 9px; font-weight: 700;">EST</span></div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px;">~72,192</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Proportional est. from 76K total</div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">Avg Engaged Time</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px;">0:25</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Parse.ly &middot; lowest of all channels</div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">Posts &middot; Articles &middot; Impressions</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px;">1,012</div>
+          <div style="font-size: 11px; color: var(--text-dim);">posts &middot; 375 articles &middot; 41.2M imp</div>
+        </div>
+      </div>
+
+      <!-- X Analysis -->
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;">X is FOS&rsquo;s volume play. The top performers share a clear pattern: <strong>headline-driven stories with immediate click appeal</strong>. The biggest articles fall into distinct buckets &mdash; business deals with dollar figures (Nicklaus/$50M at 6,831 views), personnel moves in sports media (Jeff Passan at 1,967), quirky or controversial team stories (Hawks &ldquo;Magic City Monday&rdquo; at 1,944), and industry shake-ups (PFF layoffs at 1,436). What ties them together: they all read like &ldquo;you need to know this right now&rdquo; headlines. X rewards speed and specificity &mdash; the more concrete the hook (a name, a dollar figure, a surprising detail), the better it converts to clicks.</p>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 8px;">@FOS posts breaking news headlines with article image cards &mdash; X generates a visual card preview from the FOS URL, which viewers click to read the full story. @FOS_News_ complements this as a link-sharing account, often posting direct article URLs in follow-up threads. Together they drove traffic to 375 unique FOS articles.</p>
+
+      <!-- X Top Articles Table -->
+      <table class="data-table" style="margin-top: 16px;">
+        <thead><tr><th>Top Articles from X</th><th class="num">Views</th><th class="num">Avg Time</th><th class="num">% New</th><th class="num">Views/Session</th></tr></thead>
+        <tbody>
+          <tr><td>Jack Nicklaus Re-Acquires Nicklaus Companies After $50M Lawsuit</td><td class="num">6,831</td><td class="num">0:31</td><td class="num">79%</td><td class="num">1.05</td></tr>
+          <tr><td>Jeff Passan Explains Why He Decided Against Replacing Wojnarowski</td><td class="num">1,967</td><td class="num">0:08</td><td class="num">84%</td><td class="num">1.26</td></tr>
+          <tr><td>Hawks Stand By 'Magic City Monday' Promotion</td><td class="num">1,944</td><td class="num">0:10</td><td class="num">80%</td><td class="num">1.05</td></tr>
+          <tr><td>Bucs Previously Duped by Fake Emeka Egbuka Account</td><td class="num">1,832</td><td class="num">0:02</td><td class="num">81%</td><td class="num">1.40</td></tr>
+          <tr><td>College Athletic Depts Are Becoming Full-Blown Media Companies</td><td class="num">1,813</td><td class="num">0:19</td><td class="num">82%</td><td class="num">1.38</td></tr>
+          <tr><td>Sources: NBC Taps Jason Benetti As Top MLB Announcer</td><td class="num">1,452</td><td class="num">0:12</td><td class="num">87%</td><td class="num">1.15</td></tr>
+          <tr><td>PFF Lays Off Several Employees Amid Company Sale</td><td class="num">1,436</td><td class="num">0:10</td><td class="num">88%</td><td class="num">1.36</td></tr>
+          <tr><td>PGA Tour Not Holding a Creator Classic at The Players</td><td class="num">1,323</td><td class="num">0:03</td><td class="num">84%</td><td class="num">1.10</td></tr>
+          <tr><td>Why the NFL&rsquo;s 2026 Schedule Could Look Very Different</td><td class="num">1,160</td><td class="num">0:34</td><td class="num">80%</td><td class="num">1.21</td></tr>
+          <tr><td>Darryn Peterson Says 'Mind Stuff' Derailed Bizarre Season</td><td class="num">1,153</td><td class="num">0:07</td><td class="num">86%</td><td class="num">1.08</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">Avg Time = Parse.ly (engaged min &divide; page views). % New and Views/Session from GA4. Top 10 = ~31% of all X traffic.</p>
+
+      <!-- X Data Note — RED -->
+      <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius); padding: 14px 18px; margin-top: 14px;">
+        <div style="font-size: 12px; font-weight: 600; color: var(--red-card); margin-bottom: 4px;">Data note &mdash; action needed</div>
+        <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6; margin: 0;">Both @FOS and @FOS_News_ use the same &ldquo;Twitter&rdquo; UTM source tag. The casing difference in Parse.ly (&ldquo;TWITTER&rdquo; vs. &ldquo;Twitter&rdquo;) reflects a mid-month formatting change, not an account split. <strong>We cannot currently attribute traffic to one account vs. the other.</strong> Given different strategies (headline + image card vs. direct link) and volumes (835 vs. 177 posts), this is critical visibility to unlock. See Optimizations tab.</p>
+      </div>
+    </div>
+
+    <!-- ==================== FOS ON LINKEDIN ==================== -->
+    <div class="status-card" style="border-left: 4px solid var(--turf); margin-bottom: 20px;">
+      <div class="card-head">
+        <div class="card-title">FOS on LinkedIn — The Quality Play</div>
+      </div>
+
+      <!-- LinkedIn KPI Cards -->
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0;">
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">Parse.ly Landing Views</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px;">2,140</div>
+          <div style="font-size: 11px; color: var(--text-dim);">3.2% of social traffic</div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">GA4 Session Views <span style="display: inline-block; background: #ecfdf5; color: var(--turf); padding: 0 4px; border-radius: 3px; font-size: 9px; font-weight: 700;">EST</span></div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px;">~2,472</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Proportional est. from 76K total</div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">Avg Engaged Time</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--turf); margin-top: 4px;">0:49</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Parse.ly &middot; <strong>2x X&rsquo;s 0:25</strong></div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">Posts &middot; Articles &middot; Impressions</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px;">111</div>
+          <div style="font-size: 11px; color: var(--text-dim);">posts &middot; 19 articles &middot; 8.5M imp</div>
+        </div>
+      </div>
+
+      <!-- LinkedIn Analysis -->
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;">Completely different content profile from X. LinkedIn&rsquo;s top articles are <strong>long-form features and business-of-sports analysis</strong>: the Mike Repole/St. John&rsquo;s NIL story averaged 1:23 engaged time per view, Trump&rsquo;s college sports roundtable hit 1:00, and the McNeese student manager piece drew 0:35. The themes are money, power, and institutional decision-making &mdash; LinkedIn&rsquo;s audience wants to understand <em>why</em> something matters for the industry, not just <em>what</em> happened. The athlete-as-brand angle also works naturally here (&ldquo;Young Athletes Have Entered Their LinkedIn Era&rdquo;).</p>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 8px;"><strong>The opportunity is volume, not quality.</strong> Only 19 articles received LinkedIn traffic vs. 375 from X. The engagement signal is proven &mdash; 0:49 avg engaged time, nearly 2x X. Expanding article link posts (aim for 4&ndash;5 per week) and prioritizing features, NIL stories, and media rights analysis could meaningfully grow this channel without sacrificing its engagement advantage.</p>
+
+      <!-- LinkedIn Top Articles Table -->
+      <table class="data-table" style="margin-top: 16px;">
+        <thead><tr><th>Top LinkedIn Articles</th><th class="num">Views</th><th class="num">Avg Time</th><th class="num">% New</th><th class="num">Views/Session</th></tr></thead>
+        <tbody>
+          <tr><td>How Mike Repole&rsquo;s Millions Pulled St. John&rsquo;s Into the NIL Era</td><td class="num">378</td><td class="num">1:23</td><td class="num">80%</td><td class="num">1.13</td></tr>
+          <tr><td>Trump&rsquo;s College Sports Roundtable Includes No College Athletes</td><td class="num">253</td><td class="num">1:00</td><td class="num">84%</td><td class="num">1.25</td></tr>
+          <tr><td>Alabama Leads College Football in Private Jet Spending</td><td class="num">202</td><td class="num">0:22</td><td class="num">66%</td><td class="num">1.18</td></tr>
+          <tr><td>How a &lsquo;Life Skills University&rsquo; Is Upending March Madness</td><td class="num">195</td><td class="num">0:14</td><td class="num">86%</td><td class="num">1.09</td></tr>
+          <tr><td>WWE &amp; Front Office Sports Announce Content Partnership</td><td class="num">167</td><td class="num">0:16</td><td class="num">80%</td><td class="num">1.27</td></tr>
+          <tr><td>Viral McNeese Student Manager Makes March Madness Return</td><td class="num">154</td><td class="num">0:35</td><td class="num">84%</td><td class="num">1.28</td></tr>
+          <tr><td>Young Athletes Have Entered Their LinkedIn Era</td><td class="num">151</td><td class="num">0:29</td><td class="num">83%</td><td class="num">1.20</td></tr>
+        </tbody>
+      </table>
+
+      <!-- LinkedIn Data Note -->
+      <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; margin-top: 14px;">
+        <div style="font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px;">Data note</div>
+        <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6; margin: 0;">% New and Views/Session are from GA4 aggregate social sessions for these articles (not LinkedIn-specific). LinkedIn-specific GA4 breakdowns require platform-level session segmentation in GA4.</p>
+      </div>
+    </div>
+
+    <!-- ==================== FOS ON INSTAGRAM ==================== -->
+    <div class="status-card" style="border-left: 4px solid var(--center-court); margin-bottom: 20px;">
+      <div class="card-head">
+        <div class="card-title">@FrontOfficeSports on Instagram — Untapped Link-in-Bio Potential</div>
+      </div>
+
+      <!-- IG KPI Cards -->
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0;">
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">Parse.ly Landing Views</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px;">689</div>
+          <div style="font-size: 11px; color: var(--text-dim);">1.0% of social traffic</div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">GA4 Session Views <span style="display: inline-block; background: #ecfdf5; color: var(--turf); padding: 0 4px; border-radius: 3px; font-size: 9px; font-weight: 700;">EST</span></div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px;">~796</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Proportional est. from 76K total</div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">Avg Engaged Time</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px;">0:44</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Parse.ly &middot; 2nd highest channel</div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">Link-in-Bio vs. Stories</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px;">662 / 27</div>
+          <div style="font-size: 11px; color: var(--text-dim);">96% link-in-bio &middot; 56 articles</div>
+        </div>
+      </div>
+
+      <!-- IG Analysis -->
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;">Instagram is fundamentally a <strong>link-in-bio game right now</strong> &mdash; 96% of traffic came through link-in-bio vs. just 27 views from Stories. One article drove 42% of all IG traffic: &ldquo;College Athletic Depts Are Becoming Full-Blown Media Companies&rdquo; at 292 views, an industry trend piece that also had legs on X (1,521 views). The pattern: content that connects sports business to a broader cultural narrative travels across platforms.</p>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 8px;">The opportunity is less about which articles to post and more about <strong>caption strategy</strong>: strong CTAs that explicitly drive people to the link-in-bio convert. Stories are underutilized for traffic &mdash; only 9 articles got Story links all month. Increasing link sticker usage on Stories, especially for breaking news and exclusives, is a low-effort way to grow this channel.</p>
+
+      <!-- IG Data Table -->
+      <table class="data-table" style="margin-top: 16px;">
+        <thead><tr><th>Breakdown</th><th class="num">Views</th><th class="num">Articles</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>Link-in-Bio</td><td class="num">662</td><td class="num">47</td><td>Primary traffic driver</td></tr>
+          <tr><td>Stories (Link Sticker)</td><td class="num">27</td><td class="num">9</td><td>Underutilized &mdash; room to grow</td></tr>
+          <tr style="font-weight: 600; border-top: 2px solid var(--border);"><td>Top Article: &ldquo;College Media Companies&rdquo;</td><td class="num">292</td><td class="num">&mdash;</td><td>42% of all IG traffic from one post</td></tr>
+        </tbody>
+      </table>
+
+      <!-- IG Data Note -->
+      <div style="background: #f9fafb; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; margin-top: 14px;">
+        <div style="font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px;">Data note</div>
+        <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6; margin: 0;">Traffic is heavily concentrated in one article. With 56 articles receiving any traffic, expanding consistent link-in-bio CTAs across more posts should help distribute traffic more evenly. The 0:44 avg engaged time (2nd only to LinkedIn) suggests quality visitors once they arrive.</p>
+      </div>
+
+      <!-- IG Stories Investigation Note -->
+      <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius); padding: 14px 18px; margin-top: 12px;">
+        <div style="font-size: 12px; font-weight: 600; color: var(--red-card); margin-bottom: 4px;">Action needed — IG Stories traffic check</div>
+        <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6; margin: 0;">Only 9 articles registered Story link clicks for the entire month, totaling just 27 views. Given the volume of Stories we post with links, this doesn&rsquo;t feel right. We need to verify whether UTM parameters are being applied consistently to Story link stickers — if they&rsquo;re not, this traffic is either going untracked or being misattributed. See the <strong>Optimizations</strong> tab for more detail and recommended next steps.</p>
+      </div>
+    </div>
+
+    <!-- ==================== FOS ON THREADS ==================== -->
+    <div class="status-card" style="border-left: 4px solid var(--red-card); margin-bottom: 20px;">
+      <div class="card-head">
+        <div class="card-title">@frontofficesports on Threads — Too Early to Call</div>
+      </div>
+
+      <!-- Threads KPI Cards -->
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0; max-width: 400px;">
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">Parse.ly Landing Views</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--eats-yellow); margin-top: 4px;">8</div>
+          <div style="font-size: 11px; color: var(--text-dim);">From 1 UTM-tagged post</div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">Avg Engaged Time</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px;">0:26</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Parse.ly &middot; single post sample</div>
+        </div>
+      </div>
+
+      <!-- Threads Analysis -->
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;"><strong>This is one data point, not a platform assessment.</strong> One single post with a properly applied UTM link generated 8 page views and 0:26 of engaged time. The other 81 posts published in March were non-article content without tracked links, so they don&rsquo;t appear here.</p>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 8px;"><strong>Next steps:</strong> Test link-forward post formats (article teasers with links vs. text-only) and measure whether Threads can convert engagement into site traffic. This requires consistent UTM-tagged links across posts &mdash; without that, there&rsquo;s no data to optimize against.</p>
+    </div>
+
+    <!-- ==================== FACEBOOK (brief) ==================== -->
+    <div class="status-card" style="border-left: 4px solid var(--text-muted);">
+      <div class="card-head">
+        <div class="card-title">FOS on Facebook</div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0;">
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">Parse.ly Landing Views</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px;">874</div>
+          <div style="font-size: 11px; color: var(--text-dim);">1.3% of social traffic</div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">Avg Engaged Time</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px;">0:27</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Parse.ly &middot; comparable to X</div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 500; color: var(--text-muted);">GA4 Session Views <span style="display: inline-block; background: #ecfdf5; color: var(--turf); padding: 0 4px; border-radius: 3px; font-size: 9px; font-weight: 700;">EST</span></div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-top: 4px;">~1,009</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Proportional est.</div>
+        </div>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;">Facebook drives minimal traffic at 874 views (1.3% of total). The 0:27 avg engaged time is comparable to X, suggesting visitors who arrive are engaged &mdash; there just aren&rsquo;t many of them. Not a priority channel for traffic optimization at this stage, but worth monitoring as a distribution channel.</p>
+    </div>
+
+  </div>
+
+  <!-- TAB: VS NEWSLETTER -->
+  <div class="tab-content" id="tab-compare">
+
+    <div class="callout info">
+      <div class="callout-title">Why This Comparison Matters</div>
+      <p>March 2026 is the first month with proper UTM tracking for social, making this the baseline. The newsletter has 14 months of GA4 history, giving us a benchmark for what "good" looks like. These are complementary channels — social drives discovery, newsletter drives depth — and together they should compound.</p>
+    </div>
+
+    <h2 class="section-title">March 2026: Social vs Newsletter Side-by-Side</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th class="num">Social</th>
+          <th class="num">Newsletter</th>
+          <th>Takeaway</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: 600;">Parse.ly Landing Views</td>
+          <td class="num">66,183</td>
+          <td class="num">106,689</td>
+          <td>Newsletter drives 61% more confirmed traffic</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600;">GA4 Total Session Views</td>
+          <td class="num">76,481</td>
+          <td class="num">151,408</td>
+          <td>Newsletter drives 2x total pageviews in session</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600;">GA4 Active Users</td>
+          <td class="num">58,881</td>
+          <td class="num">107,761</td>
+          <td>Newsletter reaches 83% more unique users</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600;">Avg Session Duration</td>
+          <td class="num">1.6 min</td>
+          <td class="num" style="color: var(--turf); font-weight: 700;">3.3 min</td>
+          <td>Newsletter sessions are 2x longer</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600;">Sessions/User</td>
+          <td class="num">1.24</td>
+          <td class="num" style="color: var(--turf); font-weight: 700;">1.37</td>
+          <td>Newsletter readers browse more pages</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600;">New Visitor %</td>
+          <td class="num" style="color: var(--turf); font-weight: 700;">75%</td>
+          <td class="num">47%</td>
+          <td>Social is the top-of-funnel discovery engine</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600;">Parse.ly Avg Engaged Time</td>
+          <td class="num">0:25</td>
+          <td class="num">0:35</td>
+          <td>Newsletter readers spend 40% more time per page</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="chart-row">
+      <div class="chart-box">
+        <h3>Traffic Volume: Social vs Newsletter (March 2026)</h3>
+        <canvas id="chartCompareVolume"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Engagement Quality: Social vs Newsletter</h3>
+        <canvas id="chartCompareQuality"></canvas>
+      </div>
+    </div>
+
+    <h2 class="section-title">Where Social Wins</h2>
+    <div class="callouts">
+      <div class="callout positive">
+        <div class="callout-title">Discovery Engine: 75% New Visitors</div>
+        <p>Social sends 75% new visitors to the site vs newsletter's 47%. This is the awareness channel — bringing people to FOS for the first time. The funnel question: how many of these 44,280 new visitors can we convert to newsletter subscribers?</p>
+      </div>
+      <div class="callout positive">
+        <div class="callout-title">Breadth of Coverage: 378 Articles</div>
+        <p>Social drove traffic to 378 unique articles — more diverse distribution than newsletter, which concentrates traffic on the editorially curated top stories. Social acts as a long-tail amplifier for FOS content.</p>
+      </div>
+    </div>
+
+    <h2 class="section-title">Where Newsletter Wins</h2>
+    <div class="callouts">
+      <div class="callout info">
+        <div class="callout-title">Session Depth: 2x Longer, 10% More Pages</div>
+        <p>Newsletter readers average 3.3-minute sessions and browse 1.37 pages per visit — both significantly higher than social. Newsletter traffic is the deeper engagement play, driving more total ad impressions per user.</p>
+      </div>
+      <div class="callout info">
+        <div class="callout-title">Loyalty: 52.8% Returning Visitors</div>
+        <p>Newsletter has flipped to majority returning visitors (52.8%), building habitual readership. Social is still overwhelmingly new visitors — expected, but worth tracking as social UTMs mature.</p>
+      </div>
+    </div>
+
+    <h2 class="section-title">Historical Context: Newsletter's 14-Month Trend as Benchmark</h2>
+    <div class="chart-box" style="margin-bottom: 24px;">
+      <h3>Newsletter GA4 Views (Feb 2025 – Mar 2026) with March Social Baseline</h3>
+      <canvas id="chartHistoricalBenchmark" style="max-height: 300px;"></canvas>
+    </div>
+
+    <div class="callouts">
+      <div class="callout info">
+        <div class="callout-title">Social's March = Newsletter's Summer Months</div>
+        <p>Social's 76,481 GA4 views in March are comparable to the newsletter's Jul-Sep 2025 range (73K-84K) — the newsletter's quietest months. This is a promising starting point: if social can grow at the same trajectory newsletter did from its summer baseline to spring peak (+60-80%), that's a potential 120K-140K social views within 12 months.</p>
+      </div>
+      <div class="callout warning">
+        <div class="callout-title">Baseline Caveat: No Historical Social Comparison Available</div>
+        <p>UTMs for social were only set up in March 2026 — there's no pre-March social data to compare against. This dashboard establishes the baseline. Monthly tracking from here forward will reveal seasonal patterns, growth trajectory, and the impact of the optimizations recommended in this dashboard.</p>
+      </div>
+    </div>
+
+    <h2 class="section-title">The Combined Channel Picture</h2>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="accent" style="background: var(--scoreboard)"></div>
+        <div class="label">Combined GA4 Views</div>
+        <div class="value">227,889</div>
+        <div class="meta">Social (76K) + Newsletter (152K)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="accent" style="background: var(--primetime)"></div>
+        <div class="label">Combined Parse.ly Views</div>
+        <div class="value">172,872</div>
+        <div class="meta">Social (66K) + Newsletter (107K)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="accent" style="background: var(--turf)"></div>
+        <div class="label">Combined Active Users</div>
+        <div class="value">166,642</div>
+        <div class="meta">Some overlap expected between channels</div>
+      </div>
+      <div class="kpi-card">
+        <div class="accent" style="background: var(--center-court)"></div>
+        <div class="label">Social Share of Traffic</div>
+        <div class="value">34%</div>
+        <div class="meta">GA4 views — room to grow</div>
+      </div>
+    </div>
+
+    <div class="callout positive">
+      <div class="callout-title">The Flywheel Opportunity</div>
+      <p>Social brings 44,280 new visitors. Newsletter converts them into returning, deeply engaged readers. The cross-functional play: add newsletter signup CTAs to the highest-traffic social landing pages, and use the newsletter's editorial curation to re-promote articles that overperformed on social. Each channel compounds the other.</p>
+    </div>
+
+  </div>
+
+  <!-- TAB: OPTIMIZATIONS -->
+  <div class="tab-content" id="tab-recs">
+
+    <!-- UTM Tracking Card -->
+    <div class="status-card" style="border-left: 4px solid var(--red-card);">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Implement separate UTM parameters for @FOS vs. @FOS_News_ on X</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">All Channels — UTM Tracking</div>
+        </div>
+        <span class="status-pill red">Do This First</span>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;">Right now, both @FOS and @FOS_News_ use the same Twitter UTM source tag in article links. That means Parse.ly lumps all X traffic together — we can see that X drove 62,472 page views, but we <strong>can't tell how much came from @FOS vs. @FOS_News_</strong>. Given that these accounts have very different strategies (headline + image card vs. direct link sharing) and very different post volumes (835 vs. 177), this is critical visibility to unlock.</p>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;"><strong>Action items:</strong> (1) Assign distinct UTM campaign or source values — e.g., <code>utm_source=twitter_fos</code> for @FOS and <code>utm_source=twitter_fosnews</code> for @FOS_News_. (2) Update link templates in Sprout (or wherever links are generated) for each account. (3) Coordinate with whoever manages the Parse.ly UTM filters to ensure the new values create separate segments. (4) Once live, this unlocks account-level optimization: we'll finally know which account is the real traffic driver, where to invest more, and how the two accounts work together (or don't).</p>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;"><strong>Cross-functional note:</strong> This same UTM hygiene improvement should extend to LinkedIn, Instagram, and any other channel where FOS controls the links. Clean attribution makes every future traffic analysis more actionable — and strengthens any data story.</p>
+    </div>
+
+    <!-- Improper UTM Campaigns Card -->
+    <div class="status-card" style="border-left: 4px solid var(--eats-yellow);">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Fix improper UTM campaign strings leaking social traffic</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">All Channels — UTM Cleanup</div>
+        </div>
+        <span class="status-pill yellow">Quick Fix</span>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;">We found <strong>442 page views</strong> in March using non-standard UTM campaign strings that fall outside the main FOS social tracking segments. These views are real social traffic that's invisible in the dashboard because it doesn't match the expected UTM format. The biggest offender is the LinkedIn bio link (394 views) — that's nearly 20% more LinkedIn traffic that should be counted.</p>
+
+      <table class="data-table" style="margin-top: 14px;">
+        <thead><tr><th>Campaign String</th><th class="num">Views</th><th>Source(s)</th><th>Likely Origin</th></tr></thead>
+        <tbody>
+          <tr style="background: #fefce8;"><td><code>bio</code></td><td class="num"><strong>394</strong></td><td>linkedin</td><td>LinkedIn profile bio link — no FOS UTM applied</td></tr>
+          <tr><td><code>article-sharing</code></td><td class="num">25</td><td>twitter (23), linkedin (2)</td><td>Generic campaign — likely manual or CMS default</td></tr>
+          <tr><td><code>later-linkinbio-frontofficesports</code></td><td class="num">9</td><td>linkin.bio</td><td>Later scheduling tool auto-generated UTM</td></tr>
+          <tr><td><code>threaded-comments</code></td><td class="num">7</td><td>twitter (6), linkedin (1)</td><td>Auto-generated from threaded reply links</td></tr>
+          <tr><td><code>buffer</code></td><td class="num">5</td><td>twitter.com</td><td>Buffer scheduling tool auto-generated UTM</td></tr>
+          <tr><td><code>overnight-slate</code></td><td class="num">2</td><td>twitter</td><td>Overnight content slate — non-standard tag</td></tr>
+          <tr class="total-row"><td><strong>TOTAL</strong></td><td class="num"><strong>442</strong></td><td colspan="2">Not captured in main FOS social dashboard</td></tr>
+        </tbody>
+      </table>
+
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;"><strong>Action items:</strong> (1) Update the LinkedIn profile bio link to use the standard FOS UTM format — this alone would add 394 views to LinkedIn's total, bringing it from 2,140 to 2,534 (+18%). (2) Replace any Later or Buffer auto-generated UTMs with FOS-standard parameters in the scheduling tool settings. (3) Audit any other link sources using <code>article-sharing</code>, <code>threaded-comments</code>, or <code>overnight-slate</code> as campaign values and migrate them to the standard format. (4) Document the correct UTM format for all team members who share FOS links.</p>
+    </div>
+
+    <!-- Reporter Post Tracking Card -->
+    <div class="status-card" style="border-left: 4px solid var(--scoreboard);">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Consider tracking traffic from FOS reporter social posts</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">All Channels — Attribution Visibility</div>
+        </div>
+        <span class="status-pill blue">Explore</span>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;">March's non-FOS social referral data (35,704 views from Parse.ly) includes organic shares, Reddit threads, Bluesky posts, and — likely — posts from FOS reporters sharing their own stories from personal accounts. We currently have no way to separate reporter-driven traffic from organic social referrals.</p>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;"><strong>Why this matters:</strong> If reporters are driving meaningful traffic from their personal accounts, that's valuable signal for understanding which bylines have social pull, which stories get amplified by their authors, and how much of our "organic" social traffic is actually reporter-driven. It could also inform how we support reporters in promoting their work.</p>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;"><strong>If we decide to implement:</strong> Assign reporter-specific UTM parameters (e.g., <code>utm_source=twitter&amp;utm_campaign=reporter-[name]</code>) for links reporters share from their personal accounts. This would let us segment reporter traffic in Parse.ly without mixing it into the FOS account data. Worth discussing whether the lift is worth it vs. the coordination required.</p>
+    </div>
+
+    <!-- IG Stories UTM Card -->
+    <div class="status-card" style="border-left: 4px solid var(--center-court);">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Investigate IG Stories link tracking — traffic likely underreported</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">Instagram — UTM Verification</div>
+        </div>
+        <span class="status-pill yellow">Quick Fix</span>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;">Only <strong>9 articles</strong> registered Story link sticker clicks in all of March, totaling just 27 views. Given the volume of Stories we post with links, this number doesn&rsquo;t add up. The most likely explanation: UTM parameters aren&rsquo;t being applied consistently (or at all) to Story link stickers, meaning that traffic is either going untracked or being attributed to generic &ldquo;instagram.com&rdquo; referrals outside of our social segments.</p>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;"><strong>Action items:</strong> (1) Audit the current Story link workflow — check whether link stickers are getting FOS-standard UTM parameters when posted via Sprout or manually. (2) If UTMs aren&rsquo;t being applied, update the posting workflow so every Story link sticker includes <code>utm_source=instagram&amp;utm_medium=social&amp;utm_campaign=stories</code> (or equivalent). (3) After fixing, monitor April Story traffic to establish a real baseline. (4) Compare April Story clicks to March&rsquo;s 27 to quantify how much traffic was previously invisible.</p>
+    </div>
+
+    <!-- LinkedIn Card - Updated -->
+    <div class="status-card" style="border-left: 4px solid var(--turf);">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Expand article post count on LinkedIn</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">LinkedIn — Scale Quality Traffic</div>
+        </div>
+        <span class="status-pill green">Highest Impact</span>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;">LinkedIn visitors average <strong>0:49 engaged time</strong> — the highest of any channel and nearly 2x the X average. But only 19 articles received LinkedIn traffic this month vs. 375 from X. The quality is proven; the volume opportunity is wide open.</p>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;"><strong>Action items:</strong> (1) Post FOS article links more frequently — aim for 4–5 link posts per week alongside the existing video/carousel/photo content. (2) Ensure every FOS exclusive and feature gets a LinkedIn link post with UTM parameters. (3) For carousel and photo posts that cover an FOS article's topic, add the article link in the first comment. (4) Prioritize features and long-form pieces — the Mike Repole story generated 1.6 min avg engaged time, and the Trump roundtable piece drew 253 page views with deep engagement. This is exactly the kind of content LinkedIn's audience wants to read in full.</p>
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-top: 12px;"><strong>Cross-functional note:</strong> LinkedIn drives highly engaged visitors — exactly the profile that matters for growing FOS's overall audience reach as another channel to amplify content and reach new readers.</p>
+    </div>
+
+  </div>
+
+  <!-- TAB: NON-FOS REFERRAL TRAFFIC -->
+  <div class="tab-content" id="tab-nonfos">
+
+    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm); margin-bottom: 20px;">
+      <h3 style="font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px;">Where Non-FOS Social Traffic Comes From (35,704 Views)</h3>
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Traffic to FOS articles from shares we don't control — fan posts, reporter accounts, Reddit threads, Bluesky, organic discovery. Excludes TickPick giveaway pages.</div>
+
+      <table class="data-table" style="margin-bottom: 16px;">
+        <thead><tr><th>Platform</th><th class="num">Views</th><th class="num">% of Non-FOS</th><th class="num">Articles</th><th class="num">Views/Article</th><th>What's Driving It</th></tr></thead>
+        <tbody>
+          <tr style="background: #f0f7ff;"><td><strong>Twitter/X</strong></td><td class="num"><strong>23,766</strong></td><td class="num">66.6%</td><td class="num">500</td><td class="num">48.2</td><td>WNBA CBA + layoff/media stories dominate; likely reporter shares + fan retweets</td></tr>
+          <tr><td>Facebook</td><td class="num">4,044</td><td class="num">11.3%</td><td class="num">496</td><td class="num">6.8</td><td>Broad distribution; college sports + media stories lead</td></tr>
+          <tr><td>Reddit</td><td class="num">3,811</td><td class="num">10.7%</td><td class="num">100</td><td class="num">35.0</td><td>Viral one-offs (March Madness Dayton = 1,033 alone)</td></tr>
+          <tr><td>LinkedIn</td><td class="num">1,821</td><td class="num">5.1%</td><td class="num">15</td><td class="num"><strong>125.8</strong></td><td>Highest efficiency; sports-biz features travel organically</td></tr>
+          <tr><td>Instagram</td><td class="num">1,256</td><td class="num">3.5%</td><td class="num">129</td><td class="num">9.3</td><td>Team/athlete stories; Ryan Reynolds Wrexham piece = 366</td></tr>
+          <tr><td>Bluesky</td><td class="num">954</td><td class="num">2.7%</td><td class="num">55</td><td class="num">17.4</td><td>WNBA CBA coverage dominates (43% of Bluesky traffic)</td></tr>
+          <tr><td>Threads</td><td class="num">240</td><td class="num">0.7%</td><td class="num">14</td><td class="num">16.8</td><td>Small but present; WNBA + World Cup coverage</td></tr>
+          <tr class="total-row"><td><strong>TOTAL</strong></td><td class="num"><strong>35,704*</strong></td><td class="num">100%</td><td class="num">—</td><td class="num">—</td><td></td></tr>
+        </tbody>
+      </table>
+      <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 16px;">*Referrer-level total from Parse.ly. Non-article pages (TickPick giveaway, Newsletters Meta Ads, Factle, FOS homepage) excluded from views/article calculations.</div>
+
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-bottom: 12px;"><strong>The headline:</strong> Two-thirds of non-FOS social traffic (23,766 views across 500 articles) comes from Twitter/X — a mix of FOS reporter personal accounts, fan shares, and viral retweets. The content that travels here mirrors what works on @FOS: breaking WNBA CBA news (Annie Costabile), layoff/business stories, and media moves. The reporter tracking recommendation in Optimizations is even more relevant now — if we can separate reporter-driven shares from organic fan traffic, we'll know exactly how much of this 24K is earned reach from our own team.</p>
+
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-bottom: 12px;"><strong>Content that travels organically across platforms:</strong> The WNBA CBA tentative agreement (Annie Costabile) appeared on all 7 platforms — the only article with that kind of reach. Underdog layoffs, Spotify/Ringer layoffs, and the Caitlin Clark CBA push all crossed 4–5 platforms. LinkedIn remains the highest efficiency by far at 126 views per article — sports-business features travel there without FOS posting them. Reddit rewards niche, evergreen content (the March Madness Dayton explainer is from 2023 and still drives 1,000+ views).</p>
+    </div>
+
+    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm); margin-bottom: 20px;">
+      <h3 style="font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px;">Top Articles by Total Views (Non-FOS Referral Traffic)</h3>
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">These views are in addition to FOS-posted traffic. Ranked by combined non-FOS views across all platforms.</div>
+      <div style="overflow-x: auto;">
+        <table class="data-table" style="min-width: 900px; margin-bottom: 0;">
+          <thead><tr><th>Article</th><th class="num">Total</th><th class="num" style="color: var(--scoreboard);">X</th><th class="num">Reddit</th><th class="num">FB</th><th class="num">LinkedIn</th><th class="num">IG</th><th class="num">Bluesky</th><th class="num">Threads</th></tr></thead>
+          <tbody>
+            <tr><td>Underdog Makes Major Job Cuts in Pivot to Prediction Markets</td><td class="num"><strong>1,397</strong></td><td class="num">1,275</td><td class="num">110</td><td class="num">11</td><td class="num">—</td><td class="num">1</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>WNBA and Players Meet for Overnight CBA Talks, No Deal Yet</td><td class="num"><strong>1,231</strong></td><td class="num">1,145</td><td class="num">31</td><td class="num">6</td><td class="num">—</td><td class="num">6</td><td class="num">43</td><td class="num">—</td></tr>
+            <tr><td>Why Men's March Madness Always Begins in Dayton</td><td class="num"><strong>1,048</strong></td><td class="num">—</td><td class="num">1,033</td><td class="num">14</td><td class="num">—</td><td class="num">1</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr style="background: #f0f7ff;"><td>WNBA, WNBPA Reach Tentative Verbal Agreement for CBA <span style="display:inline-block;background:#ecfdf5;color:var(--turf);padding:0 4px;border-radius:3px;font-size:9px;font-weight:700;">ALL 7</span></td><td class="num"><strong>1,005</strong></td><td class="num">766</td><td class="num">8</td><td class="num">18</td><td class="num">92</td><td class="num">3</td><td class="num">113</td><td class="num">5</td></tr>
+            <tr><td>Spotify Lays Off 15, Including Multiple Ringer Staffers</td><td class="num"><strong>1,004</strong></td><td class="num">978</td><td class="num">—</td><td class="num">3</td><td class="num">—</td><td class="num">21</td><td class="num">2</td><td class="num">—</td></tr>
+            <tr><td>WNBA Tentative CBA Sets $7M Cap, Could Exceed $10M by 2031</td><td class="num"><strong>879</strong></td><td class="num">717</td><td class="num">56</td><td class="num">14</td><td class="num">—</td><td class="num">—</td><td class="num">71</td><td class="num">21</td></tr>
+            <tr><td>Star Marathoner Says Gel Company Dropped Her Over Pregnancy</td><td class="num"><strong>860</strong></td><td class="num">258</td><td class="num">364</td><td class="num">11</td><td class="num">—</td><td class="num">187</td><td class="num">40</td><td class="num">—</td></tr>
+            <tr><td>Caitlin Clark, Breanna Stewart Push for Marathon CBA Session</td><td class="num"><strong>782</strong></td><td class="num">571</td><td class="num">19</td><td class="num">140</td><td class="num">—</td><td class="num">4</td><td class="num">—</td><td class="num">48</td></tr>
+            <tr><td>How Fox's Jamie Little Became the MJ Whisperer</td><td class="num"><strong>637</strong></td><td class="num">624</td><td class="num">—</td><td class="num">6</td><td class="num">—</td><td class="num">7</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>MLB Makes Multiyear Prediction-Market Deal With Polymarket</td><td class="num"><strong>600</strong></td><td class="num">417</td><td class="num">26</td><td class="num">8</td><td class="num">—</td><td class="num">—</td><td class="num">149</td><td class="num">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="font-size: 11px; color: var(--text-dim); margin-top: 10px;">The WNBA CBA tentative agreement appeared on all 7 platforms — the only article with that kind of organic cross-platform reach. Annie Costabile authored 6 of the top 10 non-FOS articles.</div>
+    </div>
+
+    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm); margin-bottom: 20px;">
+      <h3 style="font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px;">Top Authors by Non-FOS Referral Views</h3>
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Which FOS bylines generate the most organic social traffic from sources outside FOS's own accounts.</div>
+      <table class="data-table" style="margin-bottom: 0;">
+        <thead><tr><th>Author</th><th class="num">Views</th><th class="num">Posts</th><th class="num">Views/Post</th><th>Strongest Platform(s)</th></tr></thead>
+        <tbody>
+          <tr style="background: #f0f7ff;"><td><strong>Annie Costabile</strong></td><td class="num"><strong>8,023</strong></td><td class="num">56</td><td class="num">143</td><td>WNBA beat dominates — X (6,480) drives most, but travels to all 7 platforms</td></tr>
+          <tr><td>Ben Horney</td><td class="num">4,546</td><td class="num">107</td><td class="num">42</td><td>Prediction markets + layoffs; X (3,247) + Instagram + Reddit</td></tr>
+          <tr><td>Michael McCarthy</td><td class="num">4,021</td><td class="num">85</td><td class="num">47</td><td>Media coverage; X (3,278) + Facebook + Reddit</td></tr>
+          <tr><td>Ryan Glasspiegel</td><td class="num">3,632</td><td class="num">58</td><td class="num">63</td><td>Layoff/media stories; X (3,265) + Facebook + Reddit</td></tr>
+          <tr><td>David Rumsey</td><td class="num">2,546</td><td class="num">105</td><td class="num">24</td><td>X (1,571) + Facebook + Reddit</td></tr>
+          <tr><td>Amanda Christovich</td><td class="num">2,259</td><td class="num">77</td><td class="num">29</td><td>College sports features; X (1,315) + LinkedIn (460)</td></tr>
+          <tr><td>Eric Fisher</td><td class="num">2,141</td><td class="num">118</td><td class="num">18</td><td>RSN / business; X (818) + Facebook (625) + Reddit (312)</td></tr>
+          <tr><td>Doug Greenberg</td><td class="num">1,071</td><td class="num">5</td><td class="num"><strong>214</strong></td><td>1 viral Reddit article (March Madness Dayton = 1,033)</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size: 11px; color: var(--text-dim); margin-top: 10px;">Author views include all non-FOS social platforms. Annie Costabile's WNBA coverage generated the most organic social traffic of any FOS byline in March — and her content is the only coverage that consistently travels across all 7 platforms.</div>
+    </div>
+
+  </div>
+
+  <!-- TAB: METHODOLOGY -->
+  <div class="tab-content" id="tab-method">
+    <div class="method-section" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm);">
+      <h3 style="margin-top: 0;">Data Sources & Methodology</h3>
+      <div style="margin-bottom: 12px;"><span style="display: inline-block; background: #e8f5e9; color: var(--turf); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-right: 8px;">Parse.ly</span> <strong>Site traffic (source of truth)</strong> — Page views, visitors, and engaged minutes to frontofficesports.com. Parse.ly data is segmented by UTM parameters specific to FOS's own social posts — this tracks traffic driven by FOS's posts only, not all social referral traffic to the site. Average engaged time is a <strong>pageview-weighted average</strong> as reported by Parse.ly — each article's time is weighted by its page views, so high-traffic articles have a larger impact on the average than low-traffic ones.</div>
+      <div style="margin-bottom: 12px;"><span style="display: inline-block; background: #e8f5e9; color: var(--turf); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-right: 8px;">Parse.ly</span> <strong>X / Twitter data note</strong> — Parse.ly contains two Twitter UTM segments ("TWITTER" and "Twitter") that reflect a mid-month formatting change in UTM tagging, <strong>not</strong> a split between @FOS and @FOS_News_. Cross-referencing article titles against Sprout post text confirmed that articles in both segments were posted by both accounts. All X traffic is therefore reported as a single combined channel. Implementing distinct UTMs per account is recommended to enable account-level analysis in future months.</div>
+      <div style="margin-bottom: 12px;"><span style="display: inline-block; background: #eff6ff; color: var(--scoreboard); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-right: 8px;">Sprout</span> <strong>Post engagement & content audit</strong> — Impressions, engagement rate, and content type for posts from @FOS (835 posts), @FOS_News_ (177 posts), FOS on LinkedIn (111 posts), and @frontofficesports on Threads (82 posts). Note: on X, most @FOS posts use article image cards (URL pasted → X generates card preview, strips URL from text). Sprout exports these as "Text" with no visible URL, but the card link is present and clickable. Similar behavior observed on LinkedIn.</div>
+      <div style="margin-bottom: 12px;"><span style="display: inline-block; background: #eff6ff; color: var(--scoreboard); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-right: 8px;">GA4</span> <strong>Session-level data</strong> — Session-level data filtered to social referral traffic for March 2026. GA4 captures all pageviews within a session that began from a social click. This reveals browsing depth and session quality beyond the Parse.ly landing-page view. Avg session duration, session distribution, and pages per visit derive from GA4 social traffic segments.</div>
+      <div style="margin-bottom: 0; font-size: 13px; color: var(--text-muted);"><strong>Scope:</strong> Traffic to frontofficesports.com pages only, driven by FOS's own social posts. Non-FOS destinations excluded.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+Front Office Sports · Growth & Audience Development · Data as of April 6, 2026
+</div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+  // Trigger chart redraw on tab switch
+  setTimeout(() => { Object.values(window.charts || {}).forEach(c => c.resize()); }, 100);
+}
+
+Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#6b7280';
+const C = { scoreboard:'#196CFC', primetime:'#0D1D64', turf:'#007640', eats:'#D4A800', red:'#E00922', center:'#CFA677', gray:'#9ca3af' };
+
+window.charts = {};
+
+window.charts.pie = new Chart(document.getElementById('chartPie'), {
+  type:'doughnut', data: { labels:['FOS on X — 94%','FOS on LinkedIn — 3%','FOS on Facebook — 1%','FOS on Instagram — 1%','FOS on Threads — <1%'],
+    datasets:[{ data:[62472,2140,874,689,8], backgroundColor:[C.scoreboard,C.turf,C.gray,C.center,C.red], borderWidth:2, borderColor:'#fff' }] },
+  options: { responsive:true, cutout:'55%', plugins:{ legend:{ position:'right', labels:{padding:12, usePointStyle:true, pointStyle:'circle'} }}}
+});
+
+
+// HISTORICAL SOCIAL TREND: Jan → Feb → Mar (stacked for March)
+const histSocialEl = document.getElementById('chartHistoricalSocial');
+if (histSocialEl) {
+  window.charts.histSocial = new Chart(histSocialEl, {
+    type:'bar', data: {
+      labels:['Jan 2026','Feb 2026','Mar 2026'],
+      datasets:[
+        {
+          label:'All Social Referrals (FOS + non-FOS)',
+          data:[55320,38430,0],
+          backgroundColor:'rgba(0,0,0,0.75)',
+          borderRadius:6,
+          borderSkipped:false
+        },
+        {
+          label:'@FOS Posts Only (UTM-Segmented)',
+          data:[0,0,66183],
+          backgroundColor:C.scoreboard,
+          borderRadius:{topLeft:0,topRight:0,bottomLeft:6,bottomRight:6},
+          borderSkipped:false
+        },
+        {
+          label:'Non-FOS Social Referrals',
+          data:[0,0,35704],
+          backgroundColor:'rgba(25,108,252,0.25)',
+          borderRadius:{topLeft:6,topRight:6,bottomLeft:0,bottomRight:0},
+          borderSkipped:false
+        }
+      ]
+    },
+    options: {
+      responsive:true,
+      plugins:{
+        legend:{display:true, position:'bottom', labels:{usePointStyle:true, pointStyle:'circle', padding:16, filter:item=>item.datasetIndex!==undefined}},
+        tooltip:{callbacks:{
+          label:ctx=>{
+            if(ctx.parsed.y===0) return null;
+            return ctx.dataset.label+': '+ctx.parsed.y.toLocaleString()+' views';
+          },
+          afterBody:ctx=>{
+            if(ctx[0].dataIndex===2){
+              const total = 66183+35704;
+              return ['Combined: '+total.toLocaleString()+' views'];
+            }
+            return [];
+          }
+        }}
+      },
+      scales:{
+        x:{stacked:true, grid:{display:false}},
+        y:{stacked:true, beginAtZero:true, ticks:{callback:v=>v>=1000?(v/1000)+'K':v}, grid:{color:'#f0f1f3'}}
+      }
+    }
+  });
+}
+
+// VS NEWSLETTER: Volume comparison
+const compVolEl = document.getElementById('chartCompareVolume');
+if (compVolEl) {
+  window.charts.compVol = new Chart(compVolEl, {
+    type:'bar', data: {
+      labels:['Parse.ly\nLanding Views','GA4\nSession Views','Active\nUsers'],
+      datasets:[
+        { label:'Social', data:[66183,76481,58881], backgroundColor:C.scoreboard, borderRadius:4 },
+        { label:'Newsletter', data:[106689,151408,107761], backgroundColor:C.primetime, borderRadius:4 }
+      ]
+    },
+    options: { responsive:true, plugins:{ legend:{position:'top',labels:{padding:12,usePointStyle:true,pointStyle:'circle'}},
+      tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toLocaleString()}}},
+      scales:{ y:{beginAtZero:true,ticks:{callback:v=>v>=1000?(v/1000)+'K':v},grid:{color:'#f0f1f3'}}, x:{grid:{display:false}} }}
+  });
+}
+
+// VS NEWSLETTER: Quality comparison
+const compQualEl = document.getElementById('chartCompareQuality');
+if (compQualEl) {
+  window.charts.compQual = new Chart(compQualEl, {
+    type:'bar', data: {
+      labels:['Avg Session\n(minutes)','Sessions\nper User','Returning\nVisitors (%)'],
+      datasets:[
+        { label:'Social', data:[1.6,1.24,25], backgroundColor:C.scoreboard, borderRadius:4 },
+        { label:'Newsletter', data:[3.3,1.37,52.8], backgroundColor:C.primetime, borderRadius:4 }
+      ]
+    },
+    options: { responsive:true, plugins:{ legend:{position:'top',labels:{padding:12,usePointStyle:true,pointStyle:'circle'}}},
+      scales:{ y:{beginAtZero:true,grid:{color:'#f0f1f3'}}, x:{grid:{display:false}} }}
+  });
+}
+
+// VS NEWSLETTER: Historical benchmark chart
+const benchEl = document.getElementById('chartHistoricalBenchmark');
+if (benchEl) {
+  window.charts.benchmark = new Chart(benchEl, {
+    type:'bar', data: {
+      labels:['Feb 25','Mar 25','Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26'],
+      datasets:[
+        {
+          label:'Newsletter GA4 Views',
+          data:[94647,118142,119935,99863,98767,75196,83831,73677,91960,70262,77267,82843,110404,151408],
+          backgroundColor:'rgba(13,29,100,0.7)',
+          borderRadius:4,
+          order:2
+        },
+        {
+          label:'Social GA4 Views (Mar 2026)',
+          data:[null,null,null,null,null,null,null,null,null,null,null,null,null,76481],
+          backgroundColor:C.scoreboard,
+          borderRadius:4,
+          order:1
+        }
+      ]
+    },
+    options: {
+      responsive:true,
+      plugins:{
+        legend:{position:'top',labels:{padding:12,usePointStyle:true,pointStyle:'circle'}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toLocaleString()}}
+      },
+      scales:{
+        y:{beginAtZero:true,stacked:false,ticks:{callback:v=>v>=1000?(v/1000)+'K':v},grid:{color:'#f0f1f3'}},
+        x:{grid:{display:false}}
+      }
+    }
+  });
+}
+</script>
+
+</body>
+</html>
