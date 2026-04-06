@@ -170,7 +170,7 @@ body {
   <div class="header-inner">
     <div>
       <h1>Front Office Sports <span>/ Social-to-Site Traffic Dashboard</span></h1>
-      <div class="header-meta">Source: <strong>GA4 · Parse.ly · Sprout Social</strong> &nbsp;|&nbsp; Jan–Mar 2026 · Baseline Quarter &nbsp;|&nbsp; Last Updated: <strong>April 6, 2026</strong></div>
+      <div class="header-meta">Source: <strong>GA4 · Parse.ly · Sprout Social</strong> &nbsp;|&nbsp; Mar 2025–Mar 2026 · Baseline Quarter &nbsp;|&nbsp; Last Updated: <strong>April 6, 2026</strong></div>
     </div>
   </div>
 </div>
@@ -312,34 +312,45 @@ body {
       </div>
     </div>
 
-    <!-- Historical Trend: Jan → Feb → Mar -->
-    <h2 class="section-title" style="margin-top: 28px;">Historical Context: Total Social-to-Site Traffic (Jan–Mar 2026) <span style="font-size: 10px; font-weight: 600; color: white; background: var(--primetime); padding: 2px 6px; border-radius: 3px; margin-left: 6px; vertical-align: middle;">FOS + NON-FOS</span></h2>
+    <!-- Historical Trend: Mar 2025 → Mar 2026 -->
+    <h2 class="section-title" style="margin-top: 28px;">14-Month Trend: Social-to-Site Traffic (Mar 2025–Mar 2026) <span style="font-size: 10px; font-weight: 600; color: white; background: var(--primetime); padding: 2px 6px; border-radius: 3px; margin-left: 6px; vertical-align: middle;">FOS + NON-FOS</span></h2>
     <div class="chart-box" style="margin-bottom: 20px;">
-      <h3>Total Social Referral Views by Month</h3>
-      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Jan &amp; Feb include all social referrals (FOS + non-FOS). March is broken out: @FOS posts (UTM-segmented) vs. non-FOS referrals. Even @FOS-only March exceeds every previous month.</div>
-      <canvas id="chartHistoricalSocial" style="max-height: 300px;"></canvas>
+      <h3>Monthly Social Referral Views vs. 175K Goal</h3>
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">All social referrals (Parse.ly) from Mar 2025 onward. March 2026 adds FOS-only (UTM-segmented) and GA4 session views as new tracking layers. The 175K monthly goal has never been reached — Aug 2025 (162K) was the closest.</div>
+      <canvas id="chartHistoricalSocial" style="max-height: 340px;"></canvas>
     </div>
 
     <div class="callouts" style="margin-bottom: 20px;">
       <div class="callout positive">
-        <div class="callout-title">March FOS-Only Traffic Exceeds Previous Months' Total Social</div>
-        <p>March's 66,183 views came exclusively from FOS's own social posts (UTM-segmented). January and February's totals (55,320 and 38,430) included <em>all</em> social referral traffic — FOS posts, reporter shares, Reddit, Bluesky, everything. Even with this narrower definition, March is up 20% vs. January and 72% vs. February. The combination of proper UTM tracking and strong content drove the best social-to-site month on record.</p>
+        <div class="callout-title">March 2026 in Context: 8th of 13 Months — With a Clearer Picture Than Any Before It</div>
+        <p>At 101,887 combined views, March 2026 ranks 8th out of the last 13 months. The peak was August 2025 at 162,245 — and no month has ever hit the 175K goal. But March is the first month where we can separate what we control (66,183 FOS-posted views) from what we can influence (35,704 non-FOS). That visibility is the real milestone: we now have a baseline to grow against with precision.</p>
       </div>
       <div class="callout info">
-        <div class="callout-title">What's Not in March's 66K: Non-FOS Social Referrals</div>
-        <p>In addition to FOS's own 66,183 views, Parse.ly captured 35,704 social referral views from non-FOS sources — organic shares, reporter posts, Reddit threads, Bluesky, and other social mentions. Combined, that's 101,887 total social referral views in March. Twitter/X accounts for two-thirds of this bucket (23,766 views across 500 articles), with WNBA CBA coverage and layoff/media stories driving most of it. Full platform and article breakdown below.</p>
+        <div class="callout-title">New Tracking Layers Starting in March 2026</div>
+        <p>Two new lines appear on the trend chart starting this month. <strong>FOS Posts Only</strong> (66,183) isolates traffic from @FOS social accounts via UTM tracking — the portion we directly control. <strong>GA4 Session Views</strong> (76,481) captures the full session picture for those same visitors, showing 16% more pageviews than the initial click. Both will track month-over-month going forward.</p>
       </div>
     </div>
 
     <table class="data-table" style="margin-bottom: 20px;">
-      <thead><tr><th>Month</th><th class="num">Total Social Views</th><th class="num">MoM</th><th>Data Scope</th></tr></thead>
+      <thead><tr><th>Month</th><th class="num">Total Social Views</th><th class="num">MoM</th><th class="num">vs. 175K Goal</th><th>Notes</th></tr></thead>
       <tbody>
-        <tr><td>January 2026</td><td class="num">55,320</td><td class="num">—</td><td>All social referrals (Parse.ly)</td></tr>
-        <tr><td>February 2026</td><td class="num">38,430</td><td class="num" style="color: var(--red-card);">-30.5%</td><td>All social referrals (Parse.ly)</td></tr>
-        <tr style="background: #f0f7ff;"><td><strong>March 2026 (FOS only)</strong></td><td class="num"><strong>66,183</strong></td><td class="num" style="color: var(--turf); font-weight: 700;">+72.2%</td><td>FOS posts only (UTM-segmented)</td></tr>
-        <tr style="color: var(--text-dim);"><td>March 2026 (non-FOS)</td><td class="num">35,704</td><td class="num">—</td><td>Organic social referrals, Reddit, Bluesky, etc.</td></tr>
-        <tr class="total-row"><td>March 2026 (combined)</td><td class="num">101,887</td><td class="num" style="color: var(--turf);">+165.1% vs Feb</td><td>All social traffic to frontofficesports.com</td></tr>
+        <tr><td>Mar 2025</td><td class="num">71,818</td><td class="num">—</td><td class="num" style="color: var(--red-card);">-59%</td><td></td></tr>
+        <tr><td>Apr 2025</td><td class="num">119,747</td><td class="num" style="color: var(--turf);">+66.7%</td><td class="num" style="color: var(--red-card);">-32%</td><td></td></tr>
+        <tr><td>May 2025</td><td class="num">103,218</td><td class="num" style="color: var(--red-card);">-13.8%</td><td class="num" style="color: var(--red-card);">-41%</td><td></td></tr>
+        <tr><td>Jun 2025</td><td class="num">136,083</td><td class="num" style="color: var(--turf);">+31.8%</td><td class="num" style="color: var(--red-card);">-22%</td><td></td></tr>
+        <tr><td>Jul 2025</td><td class="num">77,891</td><td class="num" style="color: var(--red-card);">-42.8%</td><td class="num" style="color: var(--red-card);">-55%</td><td></td></tr>
+        <tr style="background: #fef9e7;"><td><strong>Aug 2025</strong></td><td class="num"><strong>162,245</strong></td><td class="num" style="color: var(--turf); font-weight: 700;">+108.3%</td><td class="num" style="color: var(--red-card);">-7%</td><td style="font-size: 11px; color: var(--eats-yellow);">Peak month — closest to 175K goal</td></tr>
+        <tr><td>Sep 2025</td><td class="num">105,764</td><td class="num" style="color: var(--red-card);">-34.8%</td><td class="num" style="color: var(--red-card);">-40%</td><td></td></tr>
+        <tr><td>Oct 2025</td><td class="num">125,076</td><td class="num" style="color: var(--turf);">+18.3%</td><td class="num" style="color: var(--red-card);">-29%</td><td></td></tr>
+        <tr><td>Nov 2025</td><td class="num">130,771</td><td class="num" style="color: var(--turf);">+4.6%</td><td class="num" style="color: var(--red-card);">-25%</td><td></td></tr>
+        <tr><td>Dec 2025</td><td class="num">61,931</td><td class="num" style="color: var(--red-card);">-52.6%</td><td class="num" style="color: var(--red-card);">-65%</td><td style="font-size: 11px; color: var(--text-dim);">Holiday low</td></tr>
+        <tr><td>Jan 2026</td><td class="num">55,320</td><td class="num" style="color: var(--red-card);">-10.7%</td><td class="num" style="color: var(--red-card);">-68%</td><td></td></tr>
+        <tr><td>Feb 2026</td><td class="num">38,430</td><td class="num" style="color: var(--red-card);">-30.5%</td><td class="num" style="color: var(--red-card);">-78%</td><td style="font-size: 11px; color: var(--text-dim);">13-month low</td></tr>
+        <tr style="background: #f0f7ff;"><td><strong>Mar 2026</strong></td><td class="num"><strong>101,887</strong></td><td class="num" style="color: var(--turf); font-weight: 700;">+165.1%</td><td class="num" style="color: var(--red-card);">-42%</td><td style="font-size: 11px; color: var(--scoreboard);">First month with FOS vs non-FOS split</td></tr>
       </tbody>
+      <tfoot>
+        <tr style="background: #f9fafb; font-size: 12px;"><td><strong>13-Month Avg</strong></td><td class="num"><strong>99,244</strong></td><td class="num" colspan="3" style="text-align: left; color: var(--text-muted);">Mar 2026 is 3% above average · 175K goal never reached</td></tr>
+      </tfoot>
     </table>
 
     <!-- Platform-level Jan → Feb trend -->
@@ -988,57 +999,103 @@ window.charts.pie = new Chart(document.getElementById('chartPie'), {
 });
 
 
-// HISTORICAL SOCIAL TREND: Jan → Feb → Mar (stacked for March)
+// HISTORICAL SOCIAL TREND: 14-month line chart (Mar 2025 → Mar 2026) + 175K goal
 const histSocialEl = document.getElementById('chartHistoricalSocial');
 if (histSocialEl) {
+  const histLabels = ['Mar 25','Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26'];
+  const allSocialData = [71818,119747,103218,136083,77891,162245,105764,125076,130771,61931,55320,38430,101887];
+  const fosOnlyData = [null,null,null,null,null,null,null,null,null,null,null,null,66183];
+  const ga4Data = [null,null,null,null,null,null,null,null,null,null,null,null,76481];
+  const goalData = Array(13).fill(175000);
+
   window.charts.histSocial = new Chart(histSocialEl, {
-    type:'bar', data: {
-      labels:['Jan 2026','Feb 2026','Mar 2026'],
+    type:'line', data: {
+      labels: histLabels,
       datasets:[
         {
-          label:'All Social Referrals (FOS + non-FOS)',
-          data:[55320,38430,0],
-          backgroundColor:'rgba(0,0,0,0.75)',
-          borderRadius:6,
-          borderSkipped:false
+          label:'All Social Referrals',
+          data: allSocialData,
+          borderColor: C.primetime,
+          backgroundColor: 'rgba(13,29,100,0.08)',
+          fill: true,
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: C.primetime,
+          pointHoverRadius: 6,
+          tension: 0.3
         },
         {
-          label:'@FOS Posts Only (UTM-Segmented)',
-          data:[0,0,66183],
-          backgroundColor:C.scoreboard,
-          borderRadius:{topLeft:0,topRight:0,bottomLeft:6,bottomRight:6},
-          borderSkipped:false
+          label:'FOS Posts Only (UTM)',
+          data: fosOnlyData,
+          borderColor: C.scoreboard,
+          backgroundColor: C.scoreboard,
+          borderWidth: 2.5,
+          pointRadius: 7,
+          pointStyle: 'rectRot',
+          pointBackgroundColor: C.scoreboard,
+          pointHoverRadius: 9,
+          spanGaps: false
         },
         {
-          label:'Non-FOS Social Referrals',
-          data:[0,0,35704],
-          backgroundColor:'rgba(25,108,252,0.25)',
-          borderRadius:{topLeft:6,topRight:6,bottomLeft:0,bottomRight:0},
-          borderSkipped:false
+          label:'GA4 Session Views',
+          data: ga4Data,
+          borderColor: C.turf,
+          backgroundColor: C.turf,
+          borderWidth: 2.5,
+          pointRadius: 7,
+          pointStyle: 'triangle',
+          pointBackgroundColor: C.turf,
+          pointHoverRadius: 9,
+          spanGaps: false
+        },
+        {
+          label:'175K Monthly Goal',
+          data: goalData,
+          borderColor: C.red,
+          borderWidth: 1.5,
+          borderDash: [8, 4],
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          fill: false
         }
       ]
     },
     options: {
       responsive:true,
+      interaction: { mode: 'index', intersect: false },
       plugins:{
-        legend:{display:true, position:'bottom', labels:{usePointStyle:true, pointStyle:'circle', padding:16, filter:item=>item.datasetIndex!==undefined}},
-        tooltip:{callbacks:{
-          label:ctx=>{
-            if(ctx.parsed.y===0) return null;
-            return ctx.dataset.label+': '+ctx.parsed.y.toLocaleString()+' views';
-          },
-          afterBody:ctx=>{
-            if(ctx[0].dataIndex===2){
-              const total = 66183+35704;
-              return ['Combined: '+total.toLocaleString()+' views'];
+        legend:{
+          display:true, position:'bottom',
+          labels:{usePointStyle:true, padding:16, font:{size:11}}
+        },
+        tooltip:{
+          callbacks:{
+            label:ctx=>{
+              if(ctx.parsed.y===null) return null;
+              const v = ctx.parsed.y.toLocaleString();
+              if(ctx.dataset.label==='175K Monthly Goal') return ctx.dataset.label;
+              return ctx.dataset.label+': '+v+' views';
+            },
+            afterBody:ctx=>{
+              const idx = ctx[0].dataIndex;
+              if(idx === 12){
+                return ['—','Combined (FOS + non-FOS): 101,887','FOS only: 66,183 (65%)','Non-FOS: 35,704 (35%)'];
+              }
+              const pct = Math.round((allSocialData[idx]/175000)*100);
+              return ['Goal attainment: '+pct+'%'];
             }
-            return [];
           }
-        }}
+        },
+        annotation: undefined
       },
       scales:{
-        x:{stacked:true, grid:{display:false}},
-        y:{stacked:true, beginAtZero:true, ticks:{callback:v=>v>=1000?(v/1000)+'K':v}, grid:{color:'#f0f1f3'}}
+        x:{ grid:{display:false} },
+        y:{
+          beginAtZero:true,
+          max: 200000,
+          ticks:{callback:v=>v>=1000?(v/1000)+'K':v},
+          grid:{color:'#f0f1f3'}
+        }
       }
     }
   });
