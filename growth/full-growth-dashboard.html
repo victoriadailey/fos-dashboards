@@ -1,0 +1,3235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOS Growth Dashboard 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+
+
+
+
+
+
+:root {
+  --scoreboard: #196CFC;
+  --red-card: #E00922;
+  --turf: #007640;
+  --eats-yellow: #D4A800;
+  --primetime: #0D1D64;
+  --center-court: #CFA677;
+  --bg: #f0f2f5;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fafbfc;
+  --border: #e5e7eb;
+  --border-light: #f0f1f3;
+  --text: #1a1a2e;
+  --text-muted: #6b7280;
+  --text-dim: #9ca3af;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.08);
+  --radius: 10px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Untitled Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* HEADER */
+.header {
+  background: var(--bg-card);
+  padding: 24px 40px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+.header-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+.header h1 span {
+  color: var(--scoreboard);
+  font-weight: 400;
+  font-size: 18px;
+}
+.header-meta {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.header-meta strong { color: var(--text); font-weight: 600; }
+
+/* NAV TABS */
+.nav-tabs {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  position: sticky;
+  top: 73px;
+  z-index: 99;
+}
+.nav-tab {
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: inherit;
+  letter-spacing: 0;
+  text-transform: none;
+  font-style: normal;
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active {
+  color: var(--scoreboard);
+  border-bottom-color: var(--scoreboard);
+  font-weight: 600;
+}
+
+/* MAIN */
+.main { max-width: 1440px; margin: 0 auto; padding: 28px 40px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* SECTION HEADERS */
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 16px;
+  padding-bottom: 0;
+  border-bottom: none;
+  letter-spacing: 0;
+  text-transform: none;
+  font-style: normal;
+}
+.section-title.with-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* KPI CARDS */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+  box-shadow: var(--shadow-sm);
+}
+.kpi-card:hover {
+  box-shadow: var(--shadow-md);
+}
+.kpi-card .accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+.kpi-card .label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  letter-spacing: 0;
+  text-transform: none;
+  font-style: normal;
+}
+.kpi-card .value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+.kpi-card .meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 12px;
+}
+.kpi-card .goal { color: var(--text-dim); }
+.kpi-card .pacing {
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.pacing-on-track { background: #ecfdf5; color: #047857; }
+.pacing-at-risk { background: #fefce8; color: #a16207; }
+.pacing-behind { background: #fef2f2; color: #b91c1c; }
+
+/* FRANCHISE CONTAINER */
+.franchise-container {
+  margin-top: 36px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 28px 24px 20px;
+}
+.franchise-header { margin-bottom: 20px; }
+.franchise-header-label {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+.franchise-header-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.franchise-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.franchise-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.franchise-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: #cbd5e1;
+}
+.franchise-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.franchise-icon { font-size: 22px; }
+.franchise-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+.franchise-channels {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 1px;
+}
+.franchise-kpis { flex: 1; }
+.franchise-kpi-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.franchise-kpi-row:last-child { border-bottom: none; }
+.franchise-kpi-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+  flex: 1;
+  line-height: 1.3;
+}
+.franchise-kpi-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  text-align: right;
+  min-width: 50px;
+}
+.franchise-kpi-pace {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+.franchise-kpi-pace.green { background: #ecfdf5; color: #047857; }
+.franchise-kpi-pace.yellow { background: #fefce8; color: #a16207; }
+.franchise-kpi-pace.red { background: #fef2f2; color: #b91c1c; }
+.franchise-kpi-goal {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-align: right;
+  margin-top: 1px;
+}
+.franchise-link {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--scoreboard);
+  cursor: pointer;
+  text-align: center;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.franchise-link:hover { opacity: 1; }
+
+/* TREND */
+.trend { font-size: 12px; font-weight: 500; }
+.trend.up { color: #047857; }
+.trend.down { color: #b91c1c; }
+.trend.flat { color: var(--text-dim); }
+
+/* CHART CONTAINERS */
+.chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.chart-row.full { grid-template-columns: 1fr; }
+.chart-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: var(--shadow-sm);
+}
+.chart-box h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 14px;
+  letter-spacing: 0;
+  text-transform: none;
+  font-style: normal;
+}
+.chart-box canvas { max-height: 280px; }
+
+/* TOGGLE */
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.toggle {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  background: var(--border);
+  border-radius: 11px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle.active { background: var(--scoreboard); }
+.toggle .dot {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.toggle.active .dot { transform: translateX(18px); }
+
+/* CALLOUT CARDS */
+.callouts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.callout {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  border-left: 3px solid;
+  box-shadow: var(--shadow-sm);
+}
+.callout.positive { border-left-color: var(--turf); }
+.callout.warning { border-left-color: var(--eats-yellow); }
+.callout.negative { border-left-color: var(--red-card); }
+.callout.info { border-left-color: var(--scoreboard); }
+.callout-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.callout-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+.callout.positive .callout-icon { background: #ecfdf5; color: #047857; }
+.callout.warning .callout-icon { background: #fefce8; color: #a16207; }
+.callout.negative .callout-icon { background: #fef2f2; color: #b91c1c; }
+.callout.info .callout-icon { background: #eff6ff; color: var(--scoreboard); }
+.callout-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: none;
+  font-style: normal;
+  letter-spacing: 0;
+}
+.callout p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+.callout .rec {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-light);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--scoreboard);
+}
+
+/* PACING TABLE */
+.pacing-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+  font-size: 13px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+.pacing-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: #f9fafb;
+  border-bottom: 1px solid var(--border);
+  text-transform: none;
+  font-style: normal;
+  letter-spacing: 0;
+}
+.pacing-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text);
+}
+.pacing-table tr:hover td { background: #f9fafb; }
+.pacing-bar {
+  height: 5px;
+  border-radius: 3px;
+  background: #f0f1f3;
+  position: relative;
+  overflow: hidden;
+  min-width: 80px;
+}
+.pacing-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+
+/* SUMMARY STAT ROW */
+.exec-status-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+.exec-status-bar .status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.exec-status-bar .status-pill.green { background: #ecfdf5; color: #047857; }
+.exec-status-bar .status-pill.yellow { background: #fefce8; color: #a16207; }
+.exec-status-bar .status-pill.red { background: #fef2f2; color: #b91c1c; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .chart-row { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-row { grid-template-columns: repeat(2, 1fr); }
+  .main { padding: 20px; }
+  .header { padding: 20px; }
+  .nav-tabs { padding: 0 20px; }
+  .franchise-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .franchise-grid { grid-template-columns: 1fr; }
+}
+
+
+/* MONTHLY RECAP */
+.recap-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.recap-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-light);
+  letter-spacing: 0;
+  text-transform: none;
+  font-style: normal;
+}
+.recap-group { margin-bottom: 16px; }
+.recap-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  text-transform: none;
+  font-style: normal;
+  letter-spacing: 0;
+}
+.recap-group-header.on-track { background: #ecfdf5; color: #047857; }
+.recap-group-header.pacing { background: #fefce8; color: #a16207; }
+.recap-group-header.needs-attn { background: #fef2f2; color: #b91c1c; }
+.recap-item {
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  border-left: 3px solid var(--border);
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.65;
+  background: #fafbfc;
+  border-radius: 0 6px 6px 0;
+}
+.recap-item strong { color: var(--text); }
+.recap-item.on-track { border-left-color: var(--turf); }
+.recap-item.pacing { border-left-color: var(--eats-yellow); }
+.recap-item.needs-attn { border-left-color: var(--red-card); }
+.recap-empty {
+  padding: 18px;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-style: italic;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: #fafbfc;
+}
+.recap-month-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.recap-month-btn {
+  padding: 8px 20px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.recap-month-btn:hover { border-color: var(--scoreboard); color: var(--scoreboard); }
+.recap-month-btn.active {
+  background: var(--scoreboard);
+  color: white;
+  border-color: var(--scoreboard);
+}
+.recap-narrative-section {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+}
+.recap-narrative-section h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-light);
+}
+.recap-narrative-section p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.75;
+  margin-bottom: 10px;
+}
+.recap-narrative-section strong { color: var(--text); }
+.recap-narrative-section ul {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.75;
+  margin: 6px 0 10px 20px;
+}
+.recap-narrative-section ul strong { color: var(--text); }
+.recap-narrative-section li {
+  margin-bottom: 4px;
+}
+.recap-narrative-section .platform-subsection {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+}
+.recap-narrative-section .platform-subsection h5 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.recap-narrative-section .platform-subsection {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.75;
+}
+.recap-section .platform-subsection {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.75;
+}
+.recap-section .platform-subsection strong {
+  color: var(--text);
+}
+.recap-exec-summary {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.recap-exec-summary h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-light);
+  letter-spacing: 0;
+  text-transform: none;
+  font-style: normal;
+}
+.recap-narrative {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.75;
+}
+.recap-narrative p { margin-bottom: 10px; }
+.recap-narrative strong { color: var(--text); }
+.recap-section p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.75;
+  margin-bottom: 10px;
+}
+.recap-section strong { color: var(--text); }
+.recap-section em { color: var(--text-muted); }
+.recap-insight-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.recap-insight {
+  padding: 14px 16px;
+  background: #f9fafb;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.recap-insight .insight-metric {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+  letter-spacing: -0.5px;
+}
+.recap-insight .insight-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-dim);
+  letter-spacing: 0;
+  text-transform: none;
+  font-style: normal;
+}
+.platform-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  font-size: 13px;
+}
+.platform-table th {
+  text-align: left;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: #f9fafb;
+  border-bottom: 1px solid var(--border);
+  text-transform: none;
+  font-style: normal;
+  letter-spacing: 0;
+}
+.platform-table td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text);
+}
+.platform-table tr:hover td { background: #f9fafb; }
+.top-content-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+}
+.top-content-item:last-child { border-bottom: none; }
+.top-content-rank { font-size: 11px; font-weight: 700; color: var(--scoreboard); min-width: 20px; }
+.top-content-title { color: var(--text); font-weight: 500; }
+.top-content-stat { color: var(--text-muted); font-size: 12px; margin-left: auto; white-space: nowrap; }
+
+
+/* COMPACT KPI STATUS TABLE */
+.kpi-status-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.kpi-status-col {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.kpi-status-header {
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.kpi-status-header.on-track { background: #ecfdf5; color: #047857; }
+.kpi-status-header.at-risk { background: #fefce8; color: #a16207; }
+.kpi-status-header.needs-opt { background: #fef2f2; color: #b91c1c; }
+.kpi-status-list { padding: 0; }
+.kpi-status-item {
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--border-light);
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+}
+.kpi-status-item:last-child { border-bottom: none; }
+.kpi-status-item .kpi-name { color: var(--text); font-weight: 500; }
+.kpi-status-item .kpi-val { color: var(--text); font-weight: 600; font-size: 11px; text-align: right; white-space: nowrap; }
+.kpi-status-item .kpi-goal { color: var(--text-muted); font-size: 10px; text-align: right; white-space: nowrap; }
+.kpi-status-item .kpi-pace { font-weight: 600; font-size: 11px; padding: 1px 6px; border-radius: 3px; text-align: right; white-space: nowrap; }
+.kpi-status-item .kpi-pace.green { background: #ecfdf5; color: #047857; }
+.kpi-status-item .kpi-pace.yellow { background: #fefce8; color: #a16207; }
+.kpi-status-item .kpi-pace.red { background: #fef2f2; color: #b91c1c; }
+.kpi-status-empty { padding: 12px 14px; color: var(--text-dim); font-size: 12px; font-style: italic; text-align: center; }
+.kpi-status-col-header {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 8px;
+  padding: 4px 14px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border-light);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.kpi-status-col-header span:nth-child(2),
+.kpi-status-col-header span:nth-child(3),
+.kpi-status-col-header span:nth-child(4) { text-align: right; }
+
+/* CLICKABLE KPI CARDS */
+.kpi-card.clickable { cursor: pointer; }
+.kpi-card.clickable:hover { border-color: var(--scoreboard); box-shadow: var(--shadow-md); }
+.kpi-card .click-hint {
+  font-size: 10px;
+  color: var(--scoreboard);
+  margin-top: 4px;
+  opacity: 0.7;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.kpi-card.clickable:hover .click-hint { opacity: 1; }
+
+@media (max-width: 900px) {
+  .kpi-status-row { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>Front Office Sports <span>/ Growth Dashboard 2026</span></h1>
+    <div class="header-meta">Last Updated: <strong>March 2026</strong> &nbsp;|&nbsp; Q1 In Progress</div>
+  </div>
+</div>
+
+<div class="nav-tabs" id="navTabs">
+  <button class="nav-tab active" data-tab="exec">Executive Summary</button>
+  <button class="nav-tab" data-tab="website">Website</button>
+  <button class="nav-tab" data-tab="newsletter">Newsletter</button>
+  <button class="nav-tab" data-tab="social">Flagship Social</button>
+  <button class="nav-tab" data-tab="content">Flagship YouTube</button>
+  <button class="nav-tab" data-tab="fosn">FOS News</button>
+  <button class="nav-tab" data-tab="eats">Stadium Eats</button>
+  <button class="nav-tab" data-tab="secondary">Secondary KPIs</button>
+  <button class="nav-tab" data-tab="articles">Web Articles</button>
+  <button class="nav-tab" data-tab="recap">Monthly Recap</button>
+</div>
+
+<div class="main">
+
+<!-- ==================== EXECUTIVE SUMMARY ==================== -->
+<div class="tab-content active" id="tab-exec">
+
+  <div class="exec-status-bar" id="execStatusBar"></div>
+
+  <div class="section-title" style="color: #047857;">&#x1F7E2; &nbsp;On Track</div>
+  <div class="kpi-grid" id="onTrackKPIs"></div>
+
+  <div class="section-title" style="color: #d97706;">&#x1F7E1; &nbsp;Needs Optimization</div>
+  <div class="kpi-grid" id="atRiskKPIs"></div>
+
+  <div class="section-title" style="color: #dc2626;">&#x1F534; &nbsp;Rediscuss Goaling</div>
+  <div class="kpi-grid" id="behindKPIs"></div>
+
+  <div class="section-title">Key Callouts — Q1 Performance</div>
+  <div class="callouts" id="execCallouts"></div>
+
+  <div class="section-title">Growth Trends</div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Monthly Pageviews — With JunGroup (Total Reported)</h3>
+      <canvas id="execPVChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Social Followers — Weekly</h3>
+      <canvas id="execFollowersChart"></canvas>
+    </div>
+  </div>
+  <div class="chart-row" style="grid-template-columns: 1fr;">
+    <div class="chart-box">
+      <h3>The Memo — Newsletter Subscribers & Opens Per NL (Weekly)</h3>
+      <canvas id="execSubsChart" style="max-height: 400px;"></canvas>
+      <p style="font-size:0.75rem;color:#94a3b8;margin-top:8px;font-style:italic;">Note: Subscriber goal has been readjusted from 900K to 800K for future quarters. Both goal lines shown for reference. Opens Per NL goal = 550K.</p>
+    </div>
+  </div>
+  <div class="chart-row" style="grid-template-columns: 1fr;">
+    <div class="chart-box">
+      <h3>YouTube Subscriber Growth — All Channels</h3>
+      <canvas id="execYTSubsChart" style="max-height: 400px;"></canvas>
+    </div>
+  </div>
+  <div class="section-title">Full Scorecard</div>
+  <table class="pacing-table" id="fullScorecard">
+    <thead>
+      <tr><th>Goal</th><th>Category</th><th>Platform</th><th>2025 Baseline</th><th>March</th><th>2026 Goal</th><th>Pacing</th><th>Status</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- IP & Franchises Container -->
+  <div class="franchise-container">
+    <div class="franchise-header">
+      <div class="franchise-header-label">IP & Franchises</div>
+      <div class="franchise-header-sub">Sub-brand KPI tracking — newsletter, social & YouTube</div>
+    </div>
+    <div class="franchise-grid" id="franchiseGrid">
+      <!-- Asset Class -->
+      <div class="franchise-card" id="franchiseAssetClass">
+        <div class="franchise-card-head">
+          <span class="franchise-icon">📊</span>
+          <div>
+            <div class="franchise-name">Asset Class</div>
+            <div class="franchise-channels">Newsletter</div>
+          </div>
+        </div>
+        <div class="franchise-kpis" id="franchiseKPI_assetclass"></div>
+        <div class="franchise-link" onclick="navigateToTab('newsletter')">View Newsletter tab →</div>
+      </div>
+      <!-- Tuned In -->
+      <div class="franchise-card" id="franchiseTunedIn">
+        <div class="franchise-card-head">
+          <span class="franchise-icon">🎧</span>
+          <div>
+            <div class="franchise-name">Tuned In</div>
+            <div class="franchise-channels">Newsletter</div>
+          </div>
+        </div>
+        <div class="franchise-kpis" id="franchiseKPI_tunedin"></div>
+        <div class="franchise-link" onclick="navigateToTab('newsletter')">View Newsletter tab →</div>
+      </div>
+      <!-- Stadium Eats -->
+      <div class="franchise-card" id="franchiseStadiumEats">
+        <div class="franchise-card-head">
+          <span class="franchise-icon">🍔</span>
+          <div>
+            <div class="franchise-name">Stadium Eats</div>
+            <div class="franchise-channels">YouTube · IG · X · TikTok · Snap</div>
+          </div>
+        </div>
+        <div class="franchise-kpis" id="franchiseKPI_eats"></div>
+        <div class="franchise-link" onclick="navigateToTab('eats')">View Stadium Eats tab →</div>
+      </div>
+      <!-- FOS News -->
+      <div class="franchise-card" id="franchiseFOSNews">
+        <div class="franchise-card-head">
+          <span class="franchise-icon">📰</span>
+          <div>
+            <div class="franchise-name">FOS News</div>
+            <div class="franchise-channels">YouTube · IG · X · TikTok</div>
+          </div>
+        </div>
+        <div class="franchise-kpis" id="franchiseKPI_fosn"></div>
+        <div class="franchise-link" onclick="navigateToTab('fosn')">View FOS News tab →</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== WEBSITE ==================== -->
+<div class="tab-content" id="tab-website">
+  <div class="section-title">Website — Goal Status</div>
+  <div id="websiteKPIStatus"></div>
+
+  <div class="section-title">Callouts & Recommendations</div>
+  <div class="callouts" id="websiteCallouts"></div>
+
+  <div class="section-title">Website Trends — Mar 2025 to Mar 2026</div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Monthly Pageviews — Without JunGroup (Clean Traffic)</h3>
+      <canvas id="webPVClean"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Monthly Pageviews — With JunGroup (Total Reported)</h3>
+      <canvas id="webPVTotal"></canvas>
+    </div>
+  </div>
+  <div class="chart-row" style="grid-template-columns: 1fr;">
+    <div class="chart-box">
+      <h3>Pageview Composition by Content Type — Stacked by Month</h3>
+      <canvas id="webPVStacked" style="max-height: 400px;"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title">Traffic & Engagement — 2026</div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Monthly Traffic Sources — Social vs Newsletter to Site</h3>
+      <canvas id="webTrafficSourcesMonthly"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Site Registrants — 2024–2026</h3>
+      <canvas id="webRegistrants"></canvas>
+    </div>
+  </div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Engagement — Pages/Session & Returning Visitors</h3>
+      <canvas id="webEngagement"></canvas>
+      <p style="font-size:0.75rem;color:#94a3b8;margin-top:8px;font-style:italic;">Note: Assumption here is that JunGroup traffic is creating inconsistencies across pages/session and returning visitors as their traffic is considered bot-like.</p>
+    </div>
+    <div class="chart-box">
+      <h3>Factle & Factle Sports — Players & DAUs</h3>
+      <canvas id="webFactle"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== NEWSLETTER ==================== -->
+<div class="tab-content" id="tab-newsletter">
+  <div class="section-title">Newsletter — Goal Status</div>
+  <div id="nlKPIStatus"></div>
+
+  <div class="section-title">Callouts & Recommendations</div>
+  <div class="callouts" id="nlCallouts"></div>
+
+  <div class="section-title">The Memo</div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Subscribers (Total & Active)</h3>
+      <canvas id="nlMemoSubs"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Weekly Total Opens</h3>
+      <canvas id="nlMemoOpens"></canvas>
+      <p style="font-size:0.75rem;color:#94a3b8;margin-top:4px;font-style:italic;">Note: Total opens include multiple opens per subscriber. Scale differs from subscriber chart.</p>
+    </div>
+  </div>
+
+  <div class="section-title">Tuned In</div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Subscribers (Total & Active)</h3>
+      <canvas id="nlTunedInSubs"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Weekly Total Opens</h3>
+      <canvas id="nlTunedInOpens"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title">Asset Class</div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Subscribers (Total & Active)</h3>
+      <canvas id="nlAssetClassSubs"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Weekly Total Opens</h3>
+      <canvas id="nlAssetClassOpens"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SOCIAL ==================== -->
+<div class="tab-content" id="tab-social">
+  <div class="section-title">Flagship Social — Goal Status</div>
+  <div id="socialKPIStatus"></div>
+
+  <div class="section-title">Key Insights</div>
+  <div class="callouts" id="socialCallouts"></div>
+
+  <div class="section-title">Follower Growth by Platform — 2025 Monthly + 2026 Weekly</div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Major Platforms (>200K followers)</h3>
+      <canvas id="socialPlatformMajor"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Emerging Platforms (<200K followers)</h3>
+      <canvas id="socialPlatformEmerging"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title">Social Accounts — Follower Breakdown & EOY Projection</div>
+  <div class="chart-row" style="grid-template-columns: 1fr;">
+    <div class="chart-box">
+      <div id="socialProjectionTable"></div>
+    </div>
+  </div>
+
+  <div class="section-title">Flagship Social Trends</div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Weekly Impressions</h3>
+      <canvas id="socialImps"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Weekly Video Views</h3>
+      <canvas id="socialVV"></canvas>
+    </div>
+  </div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Weekly Shares & Engagement</h3>
+      <canvas id="socialShares"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FOS NEWS ==================== -->
+<div class="tab-content" id="tab-fosn">
+  <div class="section-title">FOS News — Social & YouTube Goal Status</div>
+  <div id="fosnKPIStatus"></div>
+
+  <div class="section-title">Key Insights</div>
+  <div class="callouts" id="fosnCallouts"></div>
+
+  <div class="section-title">FOS News — YouTube Trends</div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Weekly Impressions (YouTube — Organic vs Paid)</h3>
+      <canvas id="fosnYTImps"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>YouTube Subscribers — FOS Today → FOS News</h3>
+      <canvas id="fosnYTSubs"></canvas>
+      <p style="font-size:0.75rem;color:#94a3b8;margin-top:8px;font-style:italic;">Note: From 1/15 – end of March, $16K was spent on paid growth campaigns for this channel, which was the primary driver of subscriber acceleration during this period.</p>
+    </div>
+  </div>
+
+  <div class="section-title">FOS News — Social Trends</div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Weekly Impressions (Social)</h3>
+      <canvas id="fosnImps"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Weekly Video Views (Social)</h3>
+      <canvas id="fosnVV"></canvas>
+    </div>
+  </div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Audience & Follower Growth</h3>
+      <canvas id="fosnAudience"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== STADIUM EATS ==================== -->
+<div class="tab-content" id="tab-eats">
+  <div class="section-title">Stadium Eats — Social & YouTube Goal Status</div>
+  <div id="eatsKPIStatus"></div>
+
+  <div class="section-title">Key Insights</div>
+  <div class="callouts" id="eatsCallouts"></div>
+
+  <div class="section-title">Stadium Eats — Follower Growth</div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Social Followers (IG, X, TikTok)</h3>
+      <canvas id="eatsFollowers"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>YouTube Subscribers</h3>
+      <canvas id="eatsYTFollowers"></canvas>
+    </div>
+  </div>
+  <div style="background:#f8f9fa;border-radius:10px;padding:14px 18px;margin:0 0 18px 0;font-size:12px;color:#666;border-left:3px solid var(--scoreboard);">
+    <strong>Note:</strong> Social impressions and video views data is only available starting Week 13 (Mar 2026). Week 14 recorded 1.8M impressions and 1.2M video views — a strong early signal as the brand scales social distribution.
+  </div>
+
+  <div class="section-title">Stadium Eats — YouTube Snapshot <span style="font-size:11px;font-weight:400;color:var(--text-muted);margin-left:8px;">Channel launched Week 13 (Mar 2026)</span></div>
+  <div id="eatsYTSnapshot"></div>
+</div>
+
+<!-- ==================== CONTENT & AUDIO ==================== -->
+<div class="tab-content" id="tab-content">
+  <div class="section-title">Flagship YouTube — Goal Status</div>
+  <div id="contentKPIStatus"></div>
+
+  <div class="section-title">Key Insights</div>
+  <div class="callouts" id="contentCallouts"></div>
+
+  <div class="section-title">YouTube — Flagship Channel (Weekly)</div>
+  <div class="chart-row" style="grid-template-columns: 1fr;">
+    <div class="chart-box">
+      <h3>YouTube Subscribers — FOS Flagship</h3>
+      <canvas id="contentYTFlagship" style="max-height: 400px;"></canvas>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ==================== SECONDARY KPIs ==================== -->
+<div class="tab-content" id="tab-secondary">
+
+  <div class="section-title">Flagship — Secondary KPIs</div>
+  <div class="kpi-grid" id="secondaryKPIGrid"></div>
+
+  <div class="section-title" style="margin-top: 12px; color: var(--text-dim);">Under Review — Discuss Removing from Scorecard</div>
+  <div class="kpi-grid" id="toDiscussKPIGrid"></div>
+
+
+</div>
+
+<!-- ==================== WEB ARTICLES ==================== -->
+<div class="tab-content" id="tab-articles">
+  <div class="section-title">Top 20 Web Articles (Organic) — Jan 1 – Apr 8, 2026</div>
+  <p style="font-size: 12px; color: var(--text-dim); margin: -8px 0 16px 0; font-style: italic;">Excludes Jungroup paid views (articles with &gt;90% direct referral filtered out)</p>
+  <div class="chart-box" style="overflow-x: auto; padding: 16px;">
+    <table id="articlesTable" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+      <thead>
+        <tr style="border-bottom: 2px solid var(--scoreboard);">
+          <th style="text-align: center; padding: 10px 8px; color: var(--scoreboard); font-weight: 700; width: 40px;">#</th>
+          <th style="text-align: left; padding: 10px 8px; color: var(--scoreboard); font-weight: 700;">Article Title</th>
+          <th style="text-align: center; padding: 10px 8px; color: var(--scoreboard); font-weight: 700; width: 110px;">Publish Date</th>
+          <th style="text-align: right; padding: 10px 8px; color: var(--scoreboard); font-weight: 700; width: 100px;">Page Views</th>
+          <th style="text-align: right; padding: 10px 8px; color: var(--scoreboard); font-weight: 700; width: 120px;">Engaged Min.</th>
+          <th style="text-align: right; padding: 10px 8px; color: var(--scoreboard); font-weight: 700; width: 130px;">Avg. Engaged Time</th>
+        </tr>
+      </thead>
+      <tbody id="articlesBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== MONTHLY RECAP ==================== -->
+<div class="tab-content" id="tab-recap">
+
+  <!-- Month Selector -->
+  <div class="recap-month-selector" id="recapMonthSelector">
+    <button class="recap-month-btn" data-month="january">January 2026</button>
+    <button class="recap-month-btn" data-month="february">February 2026</button>
+    <button class="recap-month-btn active" data-month="march">March 2026 (Current)</button>
+  </div>
+
+  <!-- Dynamic recap content area -->
+  <div id="recapContent"></div>
+
+</div>
+
+</div><!-- .main -->
+
+<script>
+// ===== DATA =====
+const SCORECARD = [{"goal":"Monthly owned reach","category":"Reach","platform":"Cross-platform","pacing":-0.054833,"march":116793684,"february":138120830,"january":134588417,"goal_2026":140000000,"baseline_2025":118000000,"_section":"priority"},{"goal":"Monthly social reach","category":"Reach","platform":"Social","pacing":-0.065294,"march":114759417,"february":122571009,"january":132389922,"goal_2026":135000000,"baseline_2025":116000000,"_section":"priority"},{"goal":"Monthly video views (Cross-platform)","category":"Reach","platform":"Cross-platform","pacing":0.632926,"march":42658511,"february":54215688,"january":47519736,"goal_2026":50000000,"baseline_2025":30000000,"_section":"priority"},{"goal":"Monthly pageviews (excl. Jungroup)","category":"Reach","platform":"Website","pacing":-0.878993,"march":1308906,"february":1628660,"january":2694807,"goal_2026":3000000,"baseline_2025":2100000,"_section":"priority"},{"goal":"Monthly Factle players","category":"Reach","platform":"Website","pacing":0.29635,"march":31327,"february":31324,"january":50689,"goal_2026":60000,"baseline_2025":33500,"_section":"priority"},{"goal":"Monthly Factle Sports players","category":"Reach","platform":"Website","pacing":0.3235333333,"march":18053,"february":17923,"january":26354,"goal_2026":30000,"baseline_2025":16500,"_section":"priority"},{"goal":"Newsletter subscribers (The Memo)","category":"Reach","platform":"Newsletter","pacing":-0.8025069191,"march":710418,"february":735729,"january":774677,"goal_2026":900000,"baseline_2025":794133,"_section":"priority"},{"goal":"YouTube subscribers (Main)","category":"Reach","platform":"YouTube","pacing":0.3518108108,"march":121421,"february":117082,"january":110723,"goal_2026":250000,"baseline_2025":102000,"_section":"priority"},{"goal":"Average session duration","category":"Engagement","platform":"Website","pacing":-1.1333,"march":38,"february":42,"january":43,"goal_2026":70,"baseline_2025":55,"_section":"priority"},{"goal":"Pages per session","category":"Engagement","platform":"Website","pacing":2.457143,"march":3.02,"february":2.481027,"january":3.491817,"goal_2026":2,"baseline_2025":1.3,"_section":"priority"},{"goal":"Monthly social to site pageviews","category":"Engagement","platform":"Cross-platform","pacing":0.26887,"march":101887,"february":38419,"january":55320,"goal_2026":175000,"baseline_2025":75000,"_section":"priority"},{"goal":"Monthly NL to site pageviews","category":"Engagement","platform":"Cross-platform","pacing":0.561576,"march":151408,"february":104268,"january":91795,"goal_2026":200000,"baseline_2025":89166.66667,"_section":"priority"},{"goal":"Returning Visitor Rate","category":"Retention","platform":"Website","pacing":0.5157,"march":0.1547,"february":0.211834,"january":0.1118,"goal_2026":0.3,"baseline_2025":0.25,"_section":"priority"},{"goal":"Site registrations","category":"Retention","platform":"Website","pacing":0.4316470588,"march":67150,"february":65106,"january":64910,"goal_2026":200000,"baseline_2025":64000,"_section":"priority"},{"goal":"Social followers","category":"Retention","platform":"Social","pacing":0.1947879747,"march":1686594,"february":1659177,"january":1646258,"goal_2026":2200000,"baseline_2025":1568000,"_section":"priority"},{"goal":"Monthly evergreen [Search] pageviews","category":"Reach","platform":"Website","pacing":0.068365,"march":55891,"february":59449,"january":84824,"goal_2026":200000,"baseline_2025":105000,"_section":"secondary"},{"goal":"Monthly YouTube impressions (organic)","category":"Reach","platform":"YouTube","pacing":0.2006646667,"march":2324693,"february":2023726,"january":1925949,"goal_2026":3000000,"baseline_2025":1500000,"_section":"secondary"},{"goal":"Recirculation rate / Internal traffic %","category":"Engagement","platform":"Website","pacing":-1.169273,"march":0.026138,"february":0.080722,"january":0.0864,"goal_2026":0.05,"baseline_2025":0.039,"_section":"secondary"},{"goal":"Open rate (Total)","category":"Engagement","platform":"Newsletter","pacing":1.1088,"march":0.8316,"february":0.8668,"january":0.8706,"goal_2026":0.75,"baseline_2025":0.75,"_section":"secondary"},{"goal":"Click-through rate","category":"Engagement","platform":"Newsletter","pacing":-0.002079,"march":0.0018,"february":0.0018,"january":0.0016,"goal_2026":0.05,"baseline_2025":0.0019,"_section":"secondary"},{"goal":"Direct traffic share","category":"Retention","platform":"Website","pacing":-1.99,"march":0.1907,"february":0.1798,"january":0.3348,"goal_2026":0.4,"baseline_2025":0.33,"_section":"secondary"},{"goal":"Factle DAUs","category":"Retention","platform":"Website","pacing":-0.089756,"march":4500,"february":4766,"january":5009,"goal_2026":10000,"baseline_2025":4953,"_section":"secondary"},{"goal":"Factle Sports DAUs","category":"Retention","platform":"Website","pacing":0.033298,"march":2300,"february":2514,"january":2584,"goal_2026":5000,"baseline_2025":2207,"_section":"secondary"},{"goal":"30-day retention","category":"Retention","platform":"Newsletter","pacing":1.241352,"march":0.9042,"february":0.9246,"january":0,"goal_2026":0.75,"baseline_2025":0.1111,"_section":"secondary"},{"goal":"60-day retention","category":"Retention","platform":"Newsletter","pacing":1.758083,"march":0.8259,"february":0.6795,"january":0,"goal_2026":0.5,"baseline_2025":0.0701,"_section":"secondary"},{"goal":"Unsubscribe rate","category":"Retention","platform":"Newsletter","pacing":0.9013,"march":0.0095,"february":0.021015,"january":0.0449,"goal_2026":0.002,"baseline_2025":0.078,"_section":"secondary"},{"goal":"Returning YouTube viewers","category":"Retention","platform":"YouTube","pacing":0.821368,"march":0.2291,"february":0.15,"january":0.2112,"goal_2026":0.25,"baseline_2025":0.133,"_section":"secondary"},{"goal":"Monthly Shares","category":"Reach","platform":"Cross-platform","pacing":0.15685,"march":699801,"february":551870,"january":665455,"goal_2026":500000,"baseline_2025":385000,"_section":"to_discuss"},{"goal":"Monthly sessions per user","category":"Retention","platform":"Website","pacing":-2.030303,"march":0,"february":0,"january":0,"goal_2026":3,"baseline_2025":2.01,"_section":"to_discuss"},{"goal":"Impressions (Thumbnail) CTR","category":"Engagement","platform":"YouTube","pacing":0.214286,"march":0.053,"february":0.06,"january":0.048,"goal_2026":0.075,"baseline_2025":0.047,"_section":"to_discuss"},{"goal":"Average view duration (AVD)","category":"Engagement","platform":"YouTube","pacing":-0.222222,"march":110,"february":82,"january":74,"goal_2026":198,"baseline_2025":126,"_section":"to_discuss"},{"goal":"Average view percentage (APV)","category":"Engagement","platform":"YouTube","pacing":0.3375,"march":0.394,"february":0.489,"january":0.289,"goal_2026":0.5,"baseline_2025":0.34,"_section":"to_discuss"},{"goal":"Engagement rate (average)","category":"Engagement","platform":"Social","pacing":0.3833333333,"march":0.043,"february":0.037,"january":0.037,"goal_2026":0.06,"baseline_2025":0.04,"_section":"to_discuss"},{"goal":"Asset Class newsletter subscribers","category":"Reach","platform":"Newsletter","pacing":0.2547575787,"march":5142,"february":4805,"january":4570,"goal_2026":25000,"baseline_2025":4086,"_section":"ip_franchise"},{"goal":"Tuned In newsletter subscribers","category":"Reach","platform":"Newsletter","pacing":0.197671299,"march":7261,"february":7037,"january":6828,"goal_2026":25000,"baseline_2025":6363,"_section":"ip_franchise"},{"goal":"FOS News YouTube subscribers","category":"Reach","platform":"YouTube","pacing":1.4199,"march":62353,"february":48154,"january":35300,"goal_2026":150000,"baseline_2025":30000,"_section":"ip_franchise"},{"goal":"FOS News social followers (IG, X)","category":"Reach","platform":"Social","pacing":0.01887,"march":98455,"february":97945,"january":97564,"goal_2026":200000,"baseline_2025":96502,"_section":"ip_franchise"},{"goal":"FOS News monthly impressions","category":"Reach","platform":"Social","pacing":0.928212,"march":928212,"february":724891,"january":895427,"goal_2026":1000000,"baseline_2025":128000,"_section":"ip_franchise"},{"goal":"Stadium Eats YouTube subscribers","category":"Reach","platform":"YouTube","pacing":0.1608,"march":139,"february":0,"january":0,"goal_2026":25000,"baseline_2025":0,"_section":"ip_franchise"},{"goal":"Stadium Eats social followers (IG, X, TT)","category":"Reach","platform":"Social","pacing":0.317060028,"march":22934,"february":17174,"january":16412,"goal_2026":50000,"baseline_2025":12884,"_section":"ip_franchise"},{"goal":"Average opens (The Memo)","category":"Engagement","platform":"Newsletter","pacing":-0.0261,"march":535639,"february":570987,"january":594038,"goal_2026":550000,"baseline_2025":550000,"_section":"priority"}];;
+const WEBSITE_WEEKLY = [{"week":"Week 1 (2026)","pageviews":466923.0,"social_to_site":6952.0,"nl_to_site":14741,"pages_per_session":1.53586,"returning_pct":0.083996,"factle_dau":5170.0,"factle_sports_dau":2243.0,"factle_players":17311,"factle_sports_players":8970,"total_registrants":64182},{"week":"Week 2 (2026)","pageviews":467671.0,"social_to_site":16396.0,"nl_to_site":22246,"pages_per_session":1.509692,"returning_pct":0.120479,"factle_dau":5240.0,"factle_sports_dau":2600.0,"factle_players":18968,"factle_sports_players":9791,"total_registrants":64290},{"week":"Week 3 (2026)","pageviews":357931.0,"social_to_site":15214.0,"nl_to_site":22439.0,"pages_per_session":1.713933,"returning_pct":0.171211,"factle_dau":4741.0,"factle_sports_dau":2670.0,"factle_players":16811,"factle_sports_players":9228,"total_registrants":64503},{"week":"Week 4 (2026)","pageviews":429806.0,"social_to_site":9626.0,"nl_to_site":21567.0,"pages_per_session":1.597525,"returning_pct":0.165842,"factle_dau":4966.0,"factle_sports_dau":2623.0,"factle_players":13569,"factle_sports_players":7620,"total_registrants":64712},{"week":"Week 5 (2026)","pageviews":1460592.0,"social_to_site":10991.0,"nl_to_site":19560.0,"pages_per_session":3.491817,"returning_pct":0.133156,"factle_dau":4958.0,"factle_sports_dau":2623.0,"factle_players":13044,"factle_sports_players":7645,"total_registrants":64853},{"week":"Week 6 (2026)","pageviews":2181796.0,"social_to_site":11237.0,"nl_to_site":24492.0,"pages_per_session":4.114213,"returning_pct":0.139029,"factle_dau":5011.0,"factle_sports_dau":2560.0,"factle_players":12951,"factle_sports_players":7099,"total_registrants":64947},{"week":"Week 7 (2026)","pageviews":642686.0,"social_to_site":9384.0,"nl_to_site":30819.0,"pages_per_session":1.910993,"returning_pct":0.172344,"factle_dau":4851.0,"factle_sports_dau":2544.0,"factle_players":12607,"factle_sports_players":7007,"total_registrants":65007},{"week":"Week 8 (2026)","pageviews":711388.0,"social_to_site":7973.0,"nl_to_site":26085.0,"pages_per_session":2.407168,"returning_pct":0.193717,"factle_dau":4847.0,"factle_sports_dau":2461.0,"factle_players":12385,"factle_sports_players":6721,"total_registrants":65052},{"week":"Week 9 (2026)","pageviews":649776.0,"social_to_site":21007.0,"nl_to_site":30587.0,"pages_per_session":2.481027,"returning_pct":0.211834,"factle_dau":4766.0,"factle_sports_dau":2514.0,"factle_players":12941,"factle_sports_players":7380,"total_registrants":65106},{"week":"Week 10 (2026)","pageviews":674970.0,"social_to_site":17376.0,"nl_to_site":30451.0,"pages_per_session":2.469523,"returning_pct":0.195664,"factle_dau":4633.0,"factle_sports_dau":2392.0,"factle_players":12267,"factle_sports_players":6809,"total_registrants":65141},{"week":"Week 11 (2026)","pageviews":710337.0,"social_to_site":13344.0,"nl_to_site":24066.0,"pages_per_session":2.783987,"returning_pct":0.196021,"factle_dau":4500.0,"factle_sports_dau":2300.0,"factle_players":12267,"factle_sports_players":6800,"total_registrants":65181},{"week":"Week 12 (2026)","pageviews":724145.0,"social_to_site":11262.0,"nl_to_site":21054.0,"pages_per_session":2.788111,"returning_pct":0.177341,"factle_dau":4500.0,"factle_sports_dau":2300.0,"factle_players":12267,"factle_sports_players":6800,"total_registrants":65786},{"week":"Week 13 (2026)","pageviews":1430955.0,"social_to_site":17440.0,"nl_to_site":24339.0,"pages_per_session":4.059458,"returning_pct":0.153924,"factle_dau":4500.0,"factle_sports_dau":2300.0,"factle_players":12267,"factle_sports_players":6800,"total_registrants":65786},{"week":"Week 14 (2026)","pageviews":2252431.0,"social_to_site":26577.0,"nl_to_site":28707.0,"pages_per_session":3.579748,"returning_pct":0.120423,"factle_dau":4638.0,"factle_sports_dau":2452.0,"factle_players":12267,"factle_sports_players":6800,"total_registrants":65786}];
+const NL_WEEKLY = [{"week":"Week 1 (2026)","active_subs":750991.0,"net_change":-5839,"total_opens":5901791.0,"opens_per_nl":590179.1,"open_rate":0.8183,"click_rate":0,"unsubscribe_rate":0},{"week":"Week 2 (2026)","active_subs":741155.0,"net_change":-9836,"total_opens":7081789.0,"opens_per_nl":590149.0833,"open_rate":0.9146,"click_rate":0.0015,"unsubscribe_rate":0.00732},{"week":"Week 3 (2026)","active_subs":736232.0,"net_change":-4923,"total_opens":7170640.0,"opens_per_nl":597553.3333,"open_rate":0.9018,"click_rate":0.0011,"unsubscribe_rate":0.001369},{"week":"Week 4 (2026)","active_subs":729055.0,"net_change":-7177,"total_opens":6596540.0,"opens_per_nl":599685.4545,"open_rate":0.8812,"click_rate":0.0017,"unsubscribe_rate":0.00147},{"week":"Week 5 (2026)","active_subs":724611.0,"net_change":-4444,"total_opens":7111506.0,"opens_per_nl":592625.5,"open_rate":0.8453,"click_rate":0.002,"unsubscribe_rate":0.013863},{"week":"Week 6 (2026)","active_subs":718983.0,"net_change":-5628,"total_opens":7032493.0,"opens_per_nl":586041.0833,"open_rate":0.8648,"click_rate":0.0013,"unsubscribe_rate":0.005093},{"week":"Week 7 (2026)","active_subs":712207.0,"net_change":-6776,"total_opens":6945512.0,"opens_per_nl":578792.6667,"open_rate":0.834,"click_rate":0.0018,"unsubscribe_rate":0.018881},{"week":"Week 8 (2026)","active_subs":707418.0,"net_change":-4789,"total_opens":5523282.0,"opens_per_nl":552328.2,"open_rate":0.8387,"click_rate":0.0017,"unsubscribe_rate":0.004228},{"week":"Week 9 (2026)","active_subs":697542.0,"net_change":-9876,"total_opens":6801456.0,"opens_per_nl":566788,"open_rate":0.8414,"click_rate":0.0031,"unsubscribe_rate":0.021015},{"week":"Week 10 (2026)","active_subs":690660.0,"net_change":-6882,"total_opens":6553463.0,"opens_per_nl":546121.9167,"open_rate":0.8218,"click_rate":0.002,"unsubscribe_rate":0.004416},{"week":"Week 11 (2026)","active_subs":685016.0,"net_change":-5644,"total_opens":6459255.0,"opens_per_nl":538271.25,"open_rate":0.8128,"click_rate":0.0023,"unsubscribe_rate":0.011277},{"week":"Week 12 (2026)","active_subs":675100.0,"net_change":-9916,"total_opens":6379256.0,"opens_per_nl":531604.6667,"open_rate":0.8075,"click_rate":0.0023,"unsubscribe_rate":0.004102},{"week":"Week 13 (2026)","active_subs":663358.0,"net_change":-11742,"total_opens":6318684.0,"opens_per_nl":526557,"open_rate":0.8103,"click_rate":0.0012,"unsubscribe_rate":0.018109},{"week":"Week 14 (2026)","active_subs":654528.0,"net_change":-8830,"total_opens":6286983.0,"opens_per_nl":523915.25,"open_rate":0.7684,"click_rate":0.0014,"unsubscribe_rate":0.004226}];
+const SOCIAL_WEEKLY = [{"week":"Week 1 (2026)","net_audience_gain":4153,"total_followers":1573621,"impressions":48133633,"reach":30961565,"engagements":99569,"video_views":11992753,"shares":99569},{"week":"Week 2 (2026)","net_audience_gain":9188,"total_followers":1581971,"impressions":50565081,"reach":36624751,"engagements":100557,"video_views":14171725,"shares":100557},{"week":"Week 3 (2026)","net_audience_gain":7228,"total_followers":1586531,"impressions":24032936,"reach":15881038,"engagements":111149,"video_views":4439198,"shares":111149},{"week":"Week 4 (2026)","net_audience_gain":11249,"total_followers":1595041,"impressions":51766545,"reach":35664819,"engagements":80086,"video_views":12092770,"shares":80086},{"week":"Week 5 (2026)","net_audience_gain":6669,"total_followers":1604520,"impressions":38053075,"reach":25458813,"engagements":136950,"video_views":8772387,"shares":136950},{"week":"Week 6 (2026)","net_audience_gain":5419,"total_followers":1609514,"impressions":29014991,"reach":25776219,"engagements":74979,"video_views":11064515,"shares":74979},{"week":"Week 7 (2026)","net_audience_gain":7310,"total_followers":1615074,"impressions":50946464,"reach":32539799,"engagements":129798,"video_views":15448805,"shares":129798},{"week":"Week 8 (2026)","net_audience_gain":6202,"total_followers":1618623,"impressions":43483777,"reach":35850620,"engagements":161026,"video_views":15793849,"shares":161026},{"week":"Week 9 (2026)","net_audience_gain":5454,"total_followers":1608031,"impressions":40410904,"reach":32109785,"engagements":96056,"video_views":5708283,"shares":96056},{"week":"Week 10 (2026)","net_audience_gain":3815,"total_followers":1611649,"impressions":30148931,"reach":25408022,"engagements":76656,"video_views":6429396,"shares":76656},{"week":"Week 11 (2026)","net_audience_gain":5098,"total_followers":1615091,"impressions":23724764,"reach":17411662,"engagements":94300,"video_views":5789286,"shares":94300},{"week":"Week 12 (2026)","net_audience_gain":6099,"total_followers":1620417,"impressions":36032294,"reach":32312981,"engagements":124054,"video_views":9519899,"shares":124054},{"week":"Week 13 (2026)","net_audience_gain":6731,"total_followers":1649347,"impressions":31344316,"reach":24828476,"engagements":63274,"video_views":11596564,"shares":63274},{"week":"Week 14 (2026)","net_audience_gain":5681,"total_followers":1657611,"impressions":52648388,"reach":46418765,"engagements":98032,"video_views":9966862,"shares":98032}];
+const FOSN_WEEKLY = [{"week":"Week 1 (2026)","total_audience":127318,"social":96504,"net_growth":-24,"impressions":546194,"video_views":427315,"engagements":670},{"week":"Week 2 (2026)","total_audience":127635,"social":96821,"net_growth":254,"impressions":574136,"video_views":462406,"engagements":904},{"week":"Week 3 (2026)","total_audience":127709,"social":96895,"net_growth":647,"impressions":435521,"video_views":347103,"engagements":429},{"week":"Week 4 (2026)","total_audience":129659,"social":97388,"net_growth":1872,"impressions":1162539,"video_views":1105291,"engagements":33861},{"week":"Week 5 (2026)","total_audience":132864,"social":97564,"net_growth":3360,"impressions":571322,"video_views":321756,"engagements":5809},{"week":"Week 6 (2026)","total_audience":137419,"social":97688,"net_growth":4562,"impressions":2682045,"video_views":1037000,"engagements":9912},{"week":"Week 7 (2026)","total_audience":141996,"social":97813,"net_growth":4564,"impressions":1608185,"video_views":456282,"engagements":2567},{"week":"Week 8 (2026)","total_audience":144040,"social":97901,"net_growth":2042,"impressions":1049099,"video_views":387890,"engagements":1744},{"week":"Week 9 (2026)","total_audience":146099,"social":97945,"net_growth":2059,"impressions":877405,"video_views":230731,"engagements":14720},{"week":"Week 10 (2026)","total_audience":147179,"social":98051,"net_growth":1080,"impressions":1554483,"video_views":217100,"engagements":1280},{"week":"Week 11 (2026)","total_audience":152888,"social":98188,"net_growth":3801,"impressions":3121958,"video_views":282138,"engagements":584},{"week":"Week 12 (2026)","total_audience":156190,"social":98275,"net_growth":3268,"impressions":1841893,"video_views":191602,"engagements":297},{"week":"Week 13 (2026)","total_audience":159470,"social":98455,"net_growth":3280,"impressions":1901986,"video_views":271303,"engagements":593},{"week":"Week 14 (2026)","total_audience":161122,"social":98769,"net_growth":1654,"impressions":1708231,"video_views":407971,"engagements":854}];
+const EATS_WEEKLY = [{"week":"Week 1 (2026)","total_audience":0,"social":0,"net_growth":0,"impressions":0,"video_views":0},{"week":"Week 2 (2026)","total_audience":0,"social":0,"net_growth":0,"impressions":0,"video_views":0},{"week":"Week 3 (2026)","total_audience":0,"social":0,"net_growth":0,"impressions":0,"video_views":0},{"week":"Week 4 (2026)","total_audience":0,"social":0,"net_growth":0,"impressions":0,"video_views":0},{"week":"Week 5 (2026)","total_audience":0,"social":0,"net_growth":0,"impressions":0,"video_views":0},{"week":"Week 6 (2026)","total_audience":0,"social":0,"net_growth":0,"impressions":0,"video_views":0},{"week":"Week 7 (2026)","total_audience":0,"social":0,"net_growth":0,"impressions":0,"video_views":0},{"week":"Week 8 (2026)","total_audience":0,"social":0,"net_growth":0,"impressions":0,"video_views":0},{"week":"Week 9 (2026)","total_audience":0,"social":0,"net_growth":0,"impressions":0,"video_views":0},{"week":"Week 10 (2026)","total_audience":0,"social":0,"net_growth":0,"impressions":0,"video_views":0},{"week":"Week 11 (2026)","total_audience":0,"social":0,"net_growth":0,"impressions":0,"video_views":0},{"week":"Week 12 (2026)","total_audience":0,"social":0,"net_growth":0,"impressions":0,"video_views":0},{"week":"Week 13 (2026)","total_audience":23079,"social":22934,"net_growth":0,"impressions":0,"video_views":0},{"week":"Week 14 (2026)","total_audience":24987,"social":24652,"net_growth":1712,"impressions":1826913,"video_views":1197211}];
+const FOSN_YT_WEEKLY = [
+  {week:"Week 1 (2026)", subs:null, imp_org:25720, imp_paid:0, imp_total:25720},
+  {week:"Week 2 (2026)", subs:null, imp_org:40896, imp_paid:0, imp_total:40896},
+  {week:"Week 3 (2026)", subs:30814, imp_org:56941, imp_paid:177058, imp_total:233999},
+  {week:"Week 4 (2026)", subs:32271, imp_org:60053, imp_paid:561303, imp_total:621356},
+  {week:"Week 5 (2026)", subs:35300, imp_org:63792, imp_paid:219813, imp_total:283605},
+  {week:"Week 6 (2026)", subs:39731, imp_org:794852, imp_paid:1016125, imp_total:1810977},
+  {week:"Week 7 (2026)", subs:44183, imp_org:541191, imp_paid:565032, imp_total:1106223},
+  {week:"Week 8 (2026)", subs:46139, imp_org:147505, imp_paid:372258, imp_total:519763},
+  {week:"Week 9 (2026)", subs:48154, imp_org:74537, imp_paid:323704, imp_total:398241},
+  {week:"Week 10 (2026)", subs:49100, imp_org:120276, imp_paid:119432, imp_total:239708},
+  {week:"Week 11 (2026)", subs:54700, imp_org:204850, imp_paid:615696, imp_total:820546},
+  {week:"Week 12 (2026)", subs:57915, imp_org:208335, imp_paid:566696, imp_total:775031},
+  {week:"Week 13 (2026)", subs:61015, imp_org:181092, imp_paid:208754, imp_total:389846},
+  {week:"Week 14 (2026)", subs:62353, imp_org:105569, imp_paid:105887, imp_total:211456}
+];
+const EATS_YT_WEEKLY = [
+  {week:"Week 13 (2026)", subs:139, imp_org:5071, imp_paid:0, imp_total:5071},
+  {week:"Week 14 (2026)", subs:335, imp_org:14567, imp_paid:0, imp_total:14567}
+];
+const TOP_ARTICLES = [{"title":"All the Sports Figures in the Latest Epstein Emails","date":"Jan 31, 2026","views":89113,"engaged_min":74235,"avg_min":1.04},{"title":"Mark Cuban Increases His Indiana Football Spending for Transfer Portal","date":"Jan 07, 2026","views":72518,"engaged_min":36200,"avg_min":0.59},{"title":"How Olympic Figure Skating Music Ended Up in a Copyright Quagmire","date":"Feb 11, 2026","views":66331,"engaged_min":31956,"avg_min":0.55},{"title":"Nebraska Is Second Known School With Athletes Investigated Over NIL Deals","date":"Feb 09, 2026","views":56675,"engaged_min":27176,"avg_min":0.5},{"title":"Molly Qerim Hosting Zuffa Boxing in First Post-ESPN Job","date":"Jan 22, 2026","views":39652,"engaged_min":13063,"avg_min":0.35},{"title":"Olympics Norovirus Outbreak Postpones Finnish Women\u2019s Hockey Game","date":"Feb 05, 2026","views":39207,"engaged_min":12270,"avg_min":0.36},{"title":"How Ian Rapoport, Daniel Jeremiah Fit in ESPN\u2019s Long-Term Plans","date":"Apr 02, 2026","views":31443,"engaged_min":4441,"avg_min":0.15},{"title":"Texas A&M Athlete Targeted in First NIL Investigations, Emails Show","date":"Mar 19, 2026","views":30284,"engaged_min":12352,"avg_min":0.44},{"title":"Jack Nicklaus Re-Acquires Nicklaus Companies After $50M Lawsuit","date":"Mar 27, 2026","views":30057,"engaged_min":12981,"avg_min":0.47},{"title":"Bad Bunny Halftime Viewership Fell 7% From Super Bowl Peak","date":"Feb 11, 2026","views":28936,"engaged_min":11295,"avg_min":0.42},{"title":"Giants Become 3rd MLB Team Sued Over \u2018Junk Fees\u2019 Since September","date":"Jan 28, 2026","views":28376,"engaged_min":5125,"avg_min":0.23},{"title":"Drew Brees and Tennis Channel Founder Launch New Racket Sport","date":"Jan 19, 2026","views":26733,"engaged_min":16181,"avg_min":0.84},{"title":"North Carolina Fires Hubert Davis, Will Pay $5.3 Million Buyout","date":"Mar 24, 2026","views":23398,"engaged_min":7011,"avg_min":0.32},{"title":"David Cone Out at ESPN","date":"Jan 09, 2026","views":22937,"engaged_min":8680,"avg_min":0.42},{"title":"Who Are the Richest MLB Owners?","date":"Aug 29, 2025","views":22802,"engaged_min":11219,"avg_min":0.62},{"title":"Mike Repole and Tom Brady\u2019s NoBull Gets $1B Valuation","date":"Jan 20, 2026","views":21601,"engaged_min":10447,"avg_min":0.56},{"title":"The Masters Ticket Resale Crackdown Continues","date":"Apr 02, 2026","views":21494,"engaged_min":13584,"avg_min":0.78},{"title":"Gilbert Arenas Urges USC to Reconsider After Dismissing Top Scorer","date":"Mar 02, 2026","views":20511,"engaged_min":13382,"avg_min":0.73},{"title":"Teams Move Fewer Fever Visits After Caitlin Clark\u2019s Injury-Riddled Season","date":"Jan 23, 2026","views":20214,"engaged_min":9496,"avg_min":0.52},{"title":"WNBA Offered No Proposal at Critical CBA Meeting","date":"Feb 02, 2026","views":18418,"engaged_min":16757,"avg_min":1.08}];
+const WEB_DATES = ["12/29", "01/05", "01/12", "01/19", "01/26", "02/02", "02/09", "02/16", "02/23", "03/02", "03/09", "03/16", "03/23", "03/30"];
+const SOC_DATES = ["12/29", "01/05", "01/12", "01/19", "01/26", "02/02", "02/09", "02/16", "02/23", "03/02", "03/09", "03/16", "03/23", "03/30"];
+const PLATFORM_FOLLOWERS = {
+  labels: ['Wk1','Wk2','Wk3','Wk4','Wk5','Wk6','Wk7','Wk8','Wk9','Wk10','Wk11','Wk12','Wk13','Wk14'],
+  flagship: {
+    'LinkedIn': [487498,490248,492893,494922,497067,499027,500801,502102,504235,506314,507766,509178,510779,512694],
+    'Instagram': [387545,388605,389832,391925,393608,394513,395840,397511,398428,399264,399920,402284,403853,406004],
+    'X (Twitter)': [231504,232573,232737,233080,233556,233569,234135,234397,234915,235203,235519,235870,236163,236364],
+    'TikTok': [161500,164324,164517,167662,168464,169524,170240,170246,170523,170668,171400,172300,174093,175488],
+    'Facebook': [105659,105967,106091,106378,106614,107312,108306,108518,108753,108894,108970,109076,109441,109722],
+    'Threads': [92855,92898,92945,93103,93139,93181,93237,93234,93232,93255,93328,93434,93629,93918]
+  },
+  fosn: {
+    'FOSN YouTube': [30814,30814,30814,32271,35300,39731,44183,46139,48154,49128,54700,57915,61015,62353],
+    'FOSN X': [95464,95431,95377,95346,95323,95276,95264,95285,95263,95267,95286,95290,95319,95390],
+    'FOSN IG': [932,1253,1355,1873,2069,2240,2376,2442,2509,2611,2728,2811,2959,3201]
+  },
+  eats: {
+    'Eats IG': [12884,15206,15854,16133,16412,16498,16979,17026,17174,17528,18423,20092,22934,24494],
+    'Eats YouTube': [0,0,0,0,0,0,0,0,0,0,0,0,145,335],
+    'Eats X': [0,0,0,0,0,0,0,0,0,0,0,0,0,150],
+    'Eats TikTok': [0,0,0,0,0,0,0,0,0,0,0,0,0,8]
+  }
+};
+const HIST_PLATFORM_2025 = {
+  months: ['Jan 25','Feb 25','Mar 25','Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25'],
+  'LinkedIn': [419972,427544,435197,442859,448770,455469,458355,462259,466442,473248,480782,486370],
+  'Instagram': [352527,354110,356615,360884,364800,369156,372637,377419,379896,383321,386128,386551],
+  'X (Twitter)': [214500,216000,217500,219000,220500,222000,223500,225000,226500,228000,229500,231000],
+  'TikTok': [88600,100900,104800,110400,117800,127000,133200,139100,142300,146600,155300,160200],
+  'Facebook': [51169,52747,56488,58861,60265,72963,78055,81945,90038,98429,104706,105549],
+  'Threads': [81641,81893,82688,83386,84158,85413,86701,88491,89387,90523,92030,92789]
+};
+const NL_DATES = ["12/29", "01/05", "01/12", "01/19", "01/26", "02/02", "02/09", "02/16", "02/23", "03/02", "03/09", "03/16", "03/23", "03/30"];
+const HIST_PV = [{"month": "2023-01", "pageviews": 1128714.0}, {"month": "2023-02", "pageviews": 967798.0}, {"month": "2023-03", "pageviews": 1065972.0}, {"month": "2023-04", "pageviews": 1042788.0}, {"month": "2023-05", "pageviews": 971516.0}, {"month": "2023-06", "pageviews": 1567299.0}, {"month": "2023-07", "pageviews": 1529907.0}, {"month": "2023-08", "pageviews": 1189167.0}, {"month": "2023-09", "pageviews": 1230433.0}, {"month": "2023-10", "pageviews": 1230372.0}, {"month": "2023-11", "pageviews": 1222660.0}, {"month": "2023-12", "pageviews": 1118495.0}, {"month": "2024-01", "pageviews": 1548792.0}, {"month": "2024-02", "pageviews": 1002031.0}, {"month": "2024-03", "pageviews": 1139142.0}, {"month": "2024-04", "pageviews": 1432512.0}, {"month": "2024-05", "pageviews": 993968.0}, {"month": "2024-06", "pageviews": 1094203.0}, {"month": "2024-07", "pageviews": 1503474.0}, {"month": "2024-08", "pageviews": 1372767.0}, {"month": "2024-09", "pageviews": 2002917.0}, {"month": "2024-10", "pageviews": 1717445.0}, {"month": "2024-11", "pageviews": 1564199.0}, {"month": "2024-12", "pageviews": 1868340.0}, {"month": "2025-01", "pageviews": 2157908.0}, {"month": "2025-02", "pageviews": 1849942.0}, {"month": "2025-03", "pageviews": 2426457.0}, {"month": "2025-04", "pageviews": 2434171.0}, {"month": "2025-05", "pageviews": 1629524.0}, {"month": "2025-06", "pageviews": 2543592.0}, {"month": "2025-07", "pageviews": 1555348.0}, {"month": "2025-08", "pageviews": 2060856.0}, {"month": "2025-09", "pageviews": 2643484.0}, {"month": "2025-10", "pageviews": 1809635.0}, {"month": "2025-11", "pageviews": 2245730.0}, {"month": "2025-12", "pageviews": 2437891.0}, {"month": "2026-01", "pageviews": 467671.0}];
+const HIST_FOLLOWERS = [{"month": "2023-01", "net_followers": 35085, "total_followers": 0}, {"month": "2023-02", "net_followers": 0, "total_followers": 0}, {"month": "2023-03", "net_followers": 0, "total_followers": 0}, {"month": "2023-04", "net_followers": 0, "total_followers": 0}, {"month": "2023-05", "net_followers": 0, "total_followers": 0}, {"month": "2023-06", "net_followers": 0, "total_followers": 0}, {"month": "2023-07", "net_followers": 0, "total_followers": 0}, {"month": "2023-08", "net_followers": 0, "total_followers": 0}, {"month": "2023-09", "net_followers": 0, "total_followers": 0}, {"month": "2023-10", "net_followers": 0, "total_followers": 0}, {"month": "2023-11", "net_followers": 0, "total_followers": 0}, {"month": "2023-12", "net_followers": 0, "total_followers": 0}, {"month": "2024-01", "total_followers": 972838, "net_followers": 0}, {"month": "2024-02", "total_followers": 1039570, "net_followers": 0}, {"month": "2024-03", "total_followers": 1075602, "net_followers": 0}, {"month": "2024-04", "total_followers": 1119188, "net_followers": 0}, {"month": "2024-05", "total_followers": 1149724, "net_followers": 0}, {"month": "2024-06", "total_followers": 1176101, "net_followers": 0}, {"month": "2024-07", "total_followers": 1201125, "net_followers": 0}, {"month": "2024-08", "total_followers": 1231339, "net_followers": 0}, {"month": "2024-09", "total_followers": 1252135, "net_followers": 0}, {"month": "2024-10", "total_followers": 1277784, "net_followers": 0}, {"month": "2024-11", "total_followers": 1297126, "net_followers": 0}, {"month": "2024-12", "total_followers": 1318633, "net_followers": 0}, {"month": "2025-01", "total_followers": 1344847, "net_followers": 0}, {"month": "2025-02", "total_followers": 1374334, "net_followers": 0}, {"month": "2025-03", "total_followers": 1394354, "net_followers": 0}, {"month": "2025-04", "total_followers": 1418225, "net_followers": 0}, {"month": "2025-05", "total_followers": 1443105, "net_followers": 0}, {"month": "2025-06", "total_followers": 1463619, "net_followers": 0}, {"month": "2025-07", "total_followers": 1493511, "net_followers": 0}, {"month": "2025-08", "total_followers": 1516022, "net_followers": 0}, {"month": "2025-09", "total_followers": 1536218, "net_followers": 0}, {"month": "2025-10", "total_followers": 1562218, "net_followers": 0}, {"month": "2025-11", "total_followers": 1600112, "net_followers": 0}, {"month": "2025-12", "total_followers": 1671071, "net_followers": 0}, {"month": "2026-01", "total_followers": 1684376, "net_followers": 0}];
+const NL_FULL = [{"week":"Week 1 (2026)","total_subs":0,"active_subs":750991.0,"net_change":-5839,"total_opens":5901791.0,"open_rate":0.8183,"click_rate":0,"ti_total_subs":0,"ti_active_subs":3892.0,"ti_net_change":17.0,"ti_total_opens":4643.0,"ac_total_subs":0,"ac_active_subs":3444.0,"ac_net_change":119.0,"ac_total_opens":4013.0},{"week":"Week 2 (2026)","total_subs":794155.0,"active_subs":741155.0,"net_change":-9836,"total_opens":7081789.0,"open_rate":0.9146,"click_rate":0.0015,"ti_total_subs":6363.0,"ti_active_subs":3867.0,"ti_net_change":-25,"ti_total_opens":4715.0,"ac_total_subs":4086.0,"ac_active_subs":3435.0,"ac_net_change":-9,"ac_total_opens":4347.0},{"week":"Week 3 (2026)","total_subs":790629.0,"active_subs":736232.0,"net_change":-4923,"total_opens":7170640.0,"open_rate":0.9018,"click_rate":0.0011,"ti_total_subs":6584.0,"ti_active_subs":3909.0,"ti_net_change":42,"ti_total_opens":4726.0,"ac_total_subs":4296.0,"ac_active_subs":3460.0,"ac_net_change":25,"ac_total_opens":4441.0},{"week":"Week 4 (2026)","total_subs":787065.0,"active_subs":729055.0,"net_change":-7177,"total_opens":6596540.0,"open_rate":0.8812,"click_rate":0.0017,"ti_total_subs":6756.0,"ti_active_subs":4481.0,"ti_net_change":572,"ti_total_opens":5979.0,"ac_total_subs":4479.0,"ac_active_subs":3519.0,"ac_net_change":59,"ac_total_opens":4542.0},{"week":"Week 5 (2026)","total_subs":774677.0,"active_subs":724611.0,"net_change":-4444,"total_opens":7111506.0,"open_rate":0.8453,"click_rate":0.002,"ti_total_subs":6828.0,"ti_active_subs":4421.0,"ti_net_change":-60,"ti_total_opens":6284.0,"ac_total_subs":4570.0,"ac_active_subs":3646.0,"ac_net_change":127,"ac_total_opens":4570.0},{"week":"Week 6 (2026)","total_subs":771399.0,"active_subs":718983.0,"net_change":-5628,"total_opens":7032493.0,"open_rate":0.8648,"click_rate":0.0013,"ti_total_subs":6938.0,"ti_active_subs":4450.0,"ti_net_change":29,"ti_total_opens":5590.0,"ac_total_subs":4674.0,"ac_active_subs":3635.0,"ac_net_change":-11,"ac_total_opens":4934.0},{"week":"Week 7 (2026)","total_subs":753579.0,"active_subs":712207.0,"net_change":-6776,"total_opens":6945512.0,"open_rate":0.834,"click_rate":0.0018,"ti_total_subs":6976.0,"ti_active_subs":4491.0,"ti_net_change":41,"ti_total_opens":5712.0,"ac_total_subs":4721.0,"ac_active_subs":3681.0,"ac_net_change":46,"ac_total_opens":4525.0},{"week":"Week 8 (2026)","total_subs":750718.0,"active_subs":707418.0,"net_change":-4789,"total_opens":5523282.0,"open_rate":0.8387,"click_rate":0.0017,"ti_total_subs":7029.0,"ti_active_subs":4482.0,"ti_net_change":-9,"ti_total_opens":5824.0,"ac_total_subs":4773.0,"ac_active_subs":3689.0,"ac_net_change":8,"ac_total_opens":4666.0},{"week":"Week 9 (2026)","total_subs":735729.0,"active_subs":697542.0,"net_change":-9876,"total_opens":6801456.0,"open_rate":0.8414,"click_rate":0.0031,"ti_total_subs":7037.0,"ti_active_subs":4582.0,"ti_net_change":100,"ti_total_opens":6475.0,"ac_total_subs":4805.0,"ac_active_subs":3831.0,"ac_net_change":142,"ac_total_opens":4818.0},{"week":"Week 10 (2026)","total_subs":732995.0,"active_subs":690660.0,"net_change":-6882,"total_opens":6553463.0,"open_rate":0.8218,"click_rate":0.002,"ti_total_subs":7105.0,"ti_active_subs":4582.0,"ti_net_change":0,"ti_total_opens":5955.0,"ac_total_subs":4875.0,"ac_active_subs":3817.0,"ac_net_change":-14,"ac_total_opens":4573.0},{"week":"Week 11 (2026)","total_subs":723770.0,"active_subs":685016.0,"net_change":-5644,"total_opens":6459255.0,"open_rate":0.8128,"click_rate":0.0023,"ti_total_subs":7147.0,"ti_active_subs":4583.0,"ti_net_change":1,"ti_total_opens":5872.0,"ac_total_subs":4950.0,"ac_active_subs":3835.0,"ac_net_change":18,"ac_total_opens":4505.0},{"week":"Week 12 (2026)","total_subs":721596.0,"active_subs":675100.0,"net_change":-9916,"total_opens":6379256.0,"open_rate":0.8075,"click_rate":0.0023,"ti_total_subs":7223.0,"ti_active_subs":4610.0,"ti_net_change":27,"ti_total_opens":5632.0,"ac_total_subs":5025.0,"ac_active_subs":3859.0,"ac_net_change":24,"ac_total_opens":4499.0},{"week":"Week 13 (2026)","total_subs":710418.0,"active_subs":663358.0,"net_change":-11742,"total_opens":6318684.0,"open_rate":0.8103,"click_rate":0.0012,"ti_total_subs":7261.0,"ti_active_subs":4791.0,"ti_net_change":181,"ti_total_opens":6213.0,"ac_total_subs":5142.0,"ac_active_subs":3757.0,"ac_net_change":-102,"ac_total_opens":4694.0},{"week":"Week 14 (2026)","total_subs":709174.0,"active_subs":654528.0,"net_change":-8830,"total_opens":6286983.0,"open_rate":0.7684,"click_rate":0.0014,"ti_total_subs":7344.0,"ti_active_subs":4827.0,"ti_net_change":36,"ti_total_opens":6007.0,"ac_total_subs":5249.0,"ac_active_subs":3835.0,"ac_net_change":78,"ac_total_opens":5129.0}];
+const PAGEVIEW_DATA = [{"article":1286958,"sponsored":36911,"games":337235,"general":255407,"jungroup":0,"total_without_jg":1916511,"total_with_jg":1916511,"month":"Mar 2025"},{"article":2152372,"sponsored":39990,"games":325603,"general":296760,"jungroup":0,"total_without_jg":2814725,"total_with_jg":2814725,"month":"Apr 2025"},{"article":1130862,"sponsored":2493,"games":369491,"general":277976,"jungroup":0,"total_without_jg":1780822,"total_with_jg":1780822,"month":"May 2025"},{"article":1340121,"sponsored":1527,"games":339556,"general":229702,"jungroup":362669,"total_without_jg":1910906,"total_with_jg":2273575,"month":"Jun 2025"},{"article":1016743,"sponsored":1104,"games":302088,"general":174399,"jungroup":241030,"total_without_jg":1494334,"total_with_jg":1735364,"month":"Jul 2025"},{"article":1078519,"sponsored":8008,"games":304761,"general":287149,"jungroup":509522,"total_without_jg":1678437,"total_with_jg":2187959,"month":"Aug 2025"},{"article":950169,"sponsored":22182,"games":297973,"general":179853,"jungroup":907029,"total_without_jg":1450177,"total_with_jg":2357206,"month":"Sep 2025"},{"article":1162782,"sponsored":9872,"games":313000,"general":207064,"jungroup":326823,"total_without_jg":1692718,"total_with_jg":2019541,"month":"Oct 2025"},{"article":1010808,"sponsored":33454,"games":305329,"general":167974,"jungroup":795242,"total_without_jg":1517565,"total_with_jg":2312807,"month":"Nov 2025"},{"article":1160861,"sponsored":24616,"games":303966,"general":165594,"jungroup":635203,"total_without_jg":1655037,"total_with_jg":2290240,"month":"Dec 2025"},{"article":1133443,"sponsored":30423,"games":321580,"general":179670,"jungroup":1027747,"total_without_jg":1665116,"total_with_jg":2692863,"month":"Jan 2026"},{"article":1157600,"sponsored":18491,"games":288841,"general":161328,"jungroup":2702606,"total_without_jg":1626260,"total_with_jg":4328866,"month":"Feb 2026"},{"article":938784,"sponsored":19998,"games":80618,"general":166614,"jungroup":2493509,"total_without_jg":1206014,"total_with_jg":3699523,"month":"Mar 2026"}];
+const HIST_SUBS = [{"month": "2022-12", "active_subs": 751614.0}, {"month": "2023-01", "active_subs": 767560.0}, {"month": "2023-02", "active_subs": 756522.0}, {"month": "2023-03", "active_subs": 752788.0}, {"month": "2023-04", "active_subs": 749541.0}, {"month": "2023-05", "active_subs": 741743.0}, {"month": "2023-06", "active_subs": 734873.0}, {"month": "2023-07", "active_subs": 728694.0}, {"month": "2023-08", "active_subs": 722285.0}, {"month": "2023-09", "active_subs": 705125.0}, {"month": "2023-10", "active_subs": 704565.0}, {"month": "2023-11", "active_subs": 717429.0}, {"month": "2023-12", "active_subs": 738993.0}, {"month": "2024-01", "active_subs": 763606.0}, {"month": "2024-02", "active_subs": 787388.0}, {"month": "2024-03", "active_subs": 775269.0}, {"month": "2024-04", "active_subs": 778995.0}, {"month": "2024-05", "active_subs": 783574.0}, {"month": "2024-06", "active_subs": 777435.0}, {"month": "2024-07", "active_subs": 751242.0}, {"month": "2024-08", "active_subs": 748078.0}, {"month": "2024-09", "active_subs": 733121.0}, {"month": "2024-10", "active_subs": 722845.0}, {"month": "2024-11", "active_subs": 719146.0}, {"month": "2024-12", "active_subs": 707692.0}, {"month": "2025-01", "active_subs": 709361.0}, {"month": "2025-02", "active_subs": 714344.0}, {"month": "2025-03", "active_subs": 718548.0}, {"month": "2025-04", "active_subs": 727990.0}, {"month": "2025-05", "active_subs": 736888.0}, {"month": "2025-06", "active_subs": 745397.0}, {"month": "2025-07", "active_subs": 742788.0}, {"month": "2025-08", "active_subs": 744207.0}, {"month": "2025-09", "active_subs": 746237.0}, {"month": "2025-10", "active_subs": 756649.0}, {"month": "2025-11", "active_subs": 757142.0}, {"month": "2025-12", "active_subs": 750991.0}, {"month": "2026-01", "active_subs": 741155.0}];
+
+// ===== UTILS =====
+const fmt = (n, type='number') => {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  if (type === 'pct') return (n * 100).toFixed(1) + '%';
+  if (type === 'time') {
+    const secs = Math.round(n);
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return m > 0 ? m + ':' + String(s).padStart(2, '0') : '0:' + String(s).padStart(2, '0');
+  }
+  if (type === 'short') {
+    if (Math.abs(n) >= 1e9) return (n/1e9).toFixed(1) + 'B';
+    if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(1) + 'M';
+    if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(1) + 'K';
+    return n.toFixed(0);
+  }
+  return n.toLocaleString('en-US', {maximumFractionDigits: 0});
+};
+const isTimeKPI = (s) => {
+  const g = s.goal.toLowerCase();
+  return g.includes('session duration') || g.includes('view duration');
+};
+const fmtKPI = (s, val) => {
+  if (isTimeKPI(s)) return fmt(val, 'time');
+  const g = s.goal.toLowerCase();
+  // 'Monthly Shares' is a count, not a percentage — exclude it from pct detection
+  const isSharesCount = g === 'monthly shares';
+  const isPct = !isSharesCount && (
+    (s.goal_2026 <= 1 && s.goal_2026 > 0) ||
+    g.includes('rate') || g.includes('retention') || g.includes('share') ||
+    g.includes('percentage') || g.includes('ctr') || g.includes('click-through')
+  );
+  return isPct ? fmt(val, 'pct') : fmt(val, 'short');
+};
+
+// Fix Monthly Shares pacing to reflect actual march vs goal ratio
+const sharesEntry = SCORECARD.find(s => s.goal === 'Monthly Shares');
+if (sharesEntry) sharesEntry.pacing = sharesEntry.march / sharesEntry.goal_2026;
+
+const pacingClass = (p) => p >= 0.75 ? 'pacing-on-track' : p >= 0.5 ? 'pacing-at-risk' : 'pacing-behind';
+const pacingLabel = (p) => p >= 0.75 ? 'On Track' : p >= 0.25 ? 'Needs Optimization' : 'Rediscuss Goaling';
+const pacingColor = (p) => p >= 0.75 ? '#10b981' : p >= 0.5 ? '#f59e0b' : '#ef4444';
+// Smart status helper for KPI cards — treats over-goal (pacing >= 1) as green
+function getSmartStatusClass(p) { return p >= 0.75 ? 'pacing-on-track' : p >= 0.5 ? 'pacing-at-risk' : 'pacing-behind'; }
+
+const chartDefaults = {
+  responsive: true,
+  maintainAspectRatio: true,
+  plugins: {
+    legend: { labels: { color: '#6b7280', font: { family: "'Untitled Sans',sans-serif", size: 11, weight: '500' }, usePointStyle: true, pointStyle: 'circle', padding: 16 } },
+    tooltip: {
+      backgroundColor: '#fff',
+      titleColor: '#1a1a2e',
+      bodyColor: '#6b7280',
+      borderColor: '#e5e7eb',
+      borderWidth: 1,
+      cornerRadius: 8,
+      padding: 12,
+      titleFont: { family: "'Untitled Sans',sans-serif", weight: '600', size: 13 },
+      bodyFont: { family: "'Untitled Sans',sans-serif", size: 12 },
+      callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt(ctx.parsed.y, 'short') }
+    }
+  },
+  scales: {
+    x: { ticks: { color: '#9ca3af', font: { family: "'Untitled Sans',sans-serif", size: 10 } }, grid: { color: '#f0f1f3' }, border: { color: '#e5e7eb' } },
+    y: { ticks: { color: '#9ca3af', font: { family: "'Untitled Sans',sans-serif", size: 10 }, callback: v => fmt(v, 'short') }, grid: { color: '#f0f1f3' }, border: { display: false } }
+  }
+};
+
+Chart.defaults.font.family = "'Untitled Sans',sans-serif";
+Chart.defaults.color = '#6b7280';
+
+// Register datalabels plugin but disable globally — enable per-chart
+Chart.register(ChartDataLabels);
+Chart.defaults.plugins.datalabels = { display: false };
+
+// Helper: format large numbers for data labels
+function fmtLabel(v) {
+  if (v == null) return '';
+  if (v >= 1000000) return (v / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (v >= 1000) return (v / 1000).toFixed(v >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'K';
+  return v.toLocaleString();
+}
+
+// Reusable datalabels config for bar charts showing monthly stats
+const barLabelConfig = {
+  display: function(ctx) {
+    // Skip goal lines (type='line' in mixed charts) and dashed border datasets
+    if (ctx.dataset.type === 'line') return false;
+    if (ctx.dataset.borderDash) return false;
+    // For stacked charts, only show on the last visible bar dataset
+    const ds = ctx.chart.data.datasets;
+    const stackId = ctx.dataset.stack;
+    if (stackId) {
+      const stackedSets = ds.filter(d => d.stack === stackId && d.type !== 'line');
+      const lastIdx = ds.indexOf(stackedSets[stackedSets.length - 1]);
+      if (ctx.datasetIndex !== lastIdx) return false;
+    }
+    return true;
+  },
+  anchor: 'end',
+  align: 'end',
+  offset: 2,
+  formatter: function(value, ctx) {
+    // For stacked bars, show total of stack
+    const ds = ctx.chart.data.datasets;
+    const stackId = ctx.dataset.stack;
+    if (stackId) {
+      let total = 0;
+      ds.filter(d => d.stack === stackId && d.type !== 'line').forEach(d => { total += (d.data[ctx.dataIndex] || 0); });
+      return fmtLabel(total);
+    }
+    return fmtLabel(value);
+  },
+  color: '#1a1a2e',
+  font: { family: "'Untitled Sans',sans-serif", size: 10, weight: '600' }
+};
+
+// Reusable datalabels config for line charts showing monthly/weekly trends
+const lineLabelConfig = {
+  display: function(ctx) {
+    if (ctx.dataset.borderDash) return false; // skip goal lines
+    // Show every 3rd point + last point
+    return ctx.dataIndex % 3 === 0 || ctx.dataIndex === ctx.dataset.data.length - 1;
+  },
+  anchor: 'end',
+  align: 'top',
+  offset: 4,
+  formatter: function(value) { return fmtLabel(value); },
+  color: function(ctx) { return ctx.dataset.borderColor || '#1a1a2e'; },
+  font: { family: "'Untitled Sans',sans-serif", size: 9, weight: '600' }
+};
+
+
+function navigateToTab(tabId) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  const tab = document.querySelector('[data-tab="' + tabId + '"]');
+  if (tab) { tab.classList.add('active'); }
+  document.getElementById('tab-' + tabId).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Map platform/goal to tab
+function getTabForKPI(s) {
+  const g = s.goal.toLowerCase();
+  const p = s.platform.toLowerCase();
+  // IP & Franchise tabs get priority — route ALL their KPIs (social + YouTube) to their own tabs
+  if (g.includes('fos news') || g.includes('fosn')) return 'fosn';
+  if (g.includes('stadium eats')) return 'eats';
+  // Newsletter
+  if (g.includes('asset class') || g.includes('tuned in') || g.includes('newsletter') || g.includes('open rate') || g.includes('click-through') || p === 'newsletter') return 'newsletter';
+  // Flagship YouTube (main channel only — FOSN/Eats YouTube already routed above)
+  if (g.includes('youtube') || (g.includes('video') && p === 'youtube')) return 'content';
+  // Website
+  if (p === 'website' || g.includes('pageview') || g.includes('factle') || g.includes('session') || g.includes('registr') || g.includes('returning visitor') || g.includes('direct traffic') || g.includes('evergreen') || g.includes('recirculation')) return 'website';
+  // Flagship Social
+  if (p === 'social' || g.includes('social') || g.includes('follower') || g.includes('engagement rate') || g.includes('shares')) return 'social';
+  if (g.includes('owned reach') || g.includes('video views')) return 'social';
+  return 'exec';
+}
+
+// ===== TAB NAVIGATION =====
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ===== HISTORICAL TOGGLE STATE =====
+const histState = { exec: false, web: false, nl: false, social: false };
+const chartInstances = {};
+
+function toggleHistorical(section) {
+  histState[section] = !histState[section];
+  const toggle = document.getElementById(section === 'exec' ? 'execHistToggle' : section === 'web' ? 'webHistToggle' : section === 'nl' ? 'nlHistToggle' : 'socialHistToggle');
+  toggle.classList.toggle('active');
+  if (section === 'exec') renderExecCharts();
+  if (section === 'web') renderWebCharts();
+  if (section === 'nl') renderNLCharts();
+  if (section === 'social') renderSocialCharts();
+}
+
+function destroyChart(id) {
+  if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+}
+
+// ===== BUILD EXEC SUMMARY =====
+// All pacing is now baseline-relative: (march - baseline) / (goal - baseline)
+// Status overrides for specific KPIs that need manual placement
+const statusOverrides = {
+  'Monthly owned reach': 'atRisk',
+  'Monthly social reach': 'atRisk',
+  'Monthly Factle players': 'atRisk',
+  'Monthly Factle Sports players': 'atRisk',
+  'Factle DAUs': 'atRisk',
+  'Factle Sports DAUs': 'atRisk',
+  'Monthly video views (Cross-platform)': 'onTrack',
+  'Monthly NL to site pageviews': 'onTrack',
+  'Monthly social to site pageviews': 'onTrack',
+  'Social followers': 'onTrack',
+  'YouTube subscribers (Main)': 'onTrack',
+  'Site registrations': 'onTrack',
+  'Average opens (The Memo)': 'atRisk',
+  'Returning Visitor Rate': 'atRisk',
+  'Average session duration': 'atRisk',
+  'Stadium Eats social followers (IG, X, TT)': 'onTrack'
+};
+
+// Custom external links for specific KPI cards
+const kpiExternalLinks = {
+  'Monthly NL to site pageviews': 'https://fos-dashboard.netlify.app/growth/website/nl-to-site-traffic',
+  'Monthly social to site pageviews': 'https://fos-dashboard.netlify.app/growth/website/social-to-site-traffic'
+};
+
+function getSmartStatus(s) {
+  // Check for manual override first
+  if (statusOverrides[s.goal]) return statusOverrides[s.goal];
+
+  const trend = s.march > s.february ? 'up' : s.march < s.february ? 'down' : 'flat';
+
+  // Baseline-relative pacing thresholds
+  if (s.pacing >= 0.75) return 'onTrack';
+  if (s.pacing >= 0.25) return 'atRisk';
+
+  // Below 25% pacing — but trending up with some positive movement?
+  if (trend === 'up' && s.pacing > 0) return 'atRisk';
+
+  return 'behind';
+}
+
+function buildExecSummary() {
+  // Filter to Priority KPIs + IP & Franchises
+  const priorityKPIs = SCORECARD.filter(s => s._section === 'priority');
+  const ipKPIs = SCORECARD.filter(s => s._section === 'ip_franchise');
+  const mainKPIs = [...priorityKPIs, ...ipKPIs];
+
+  // Count with smart pacing logic
+  let onTrack = 0, atRisk = 0, behind = 0;
+  mainKPIs.forEach(s => {
+    const status = getSmartStatus(s);
+    if (status === 'onTrack') onTrack++;
+    else if (status === 'atRisk') atRisk++;
+    else behind++;
+  });
+
+  // Compact status bar
+  document.getElementById('execStatusBar').innerHTML = `
+    <span style="color:var(--text-muted); font-size:12px; font-weight:500;">${mainKPIs.length} Priority + IP Goals:</span>
+    <span class="status-pill green">${onTrack} On Track</span>
+    <span class="status-pill yellow">${atRisk} Needs Optimization</span>
+    <span class="status-pill red">${behind} Rediscuss Goaling</span>
+  `;
+
+  // Group Priority KPIs by smart pacing status
+  const groups = {
+    onTrack: priorityKPIs.filter(s => getSmartStatus(s) === 'onTrack'),
+    atRisk: priorityKPIs.filter(s => getSmartStatus(s) === 'atRisk'),
+    behind: priorityKPIs.filter(s => getSmartStatus(s) === 'behind')
+  };
+
+  const gridIds = { onTrack: 'onTrackKPIs', atRisk: 'atRiskKPIs', behind: 'behindKPIs' };
+
+  Object.entries(groups).forEach(([group, items]) => {
+    const grid = document.getElementById(gridIds[group]);
+    items.sort((a, b) => b.pacing - a.pacing);
+    items.forEach(s => {
+      const trend = s.march > s.february ? 'up' : s.march < s.february ? 'down' : 'flat';
+      const trendIcon = trend === 'up' ? '\u2191' : trend === 'down' ? '\u2193' : '\u2192';
+      const displayVal = fmtKPI(s, s.march);
+      const goalVal = fmtKPI(s, s.goal_2026);
+      const smartSt = getSmartStatus(s);
+
+      // Calculate MoM % change
+      let momPct = '';
+      if (s.february && s.february !== 0) {
+        const pctChange = ((s.march - s.february) / Math.abs(s.february)) * 100;
+        momPct = pctChange >= 0 ? `up ${pctChange.toFixed(1)}% MoM` : `down ${Math.abs(pctChange).toFixed(1)}% MoM`;
+      } else {
+        momPct = 'No prior month data';
+      }
+
+      // Support external links for specific KPIs
+      const extLink = kpiExternalLinks[s.goal];
+      const tabTarget = getTabForKPI(s);
+      const clickAction = extLink ? `window.open('${extLink}', '_blank')` : `navigateToTab('${tabTarget}')`;
+      const hintText = extLink ? 'View dashboard →' : 'View details →';
+
+      grid.innerHTML += `
+        <div class="kpi-card clickable" onclick="${clickAction}">
+          <div class="accent" style="background: ${smartSt === 'onTrack' ? '#10b981' : smartSt === 'atRisk' ? '#f59e0b' : '#ef4444'}"></div>
+          <div class="label">${s.goal}</div>
+          <div class="value">${displayVal}</div>
+          <div class="meta">
+            <span class="goal">Goal: ${goalVal}</span>
+            <span class="pacing ${smartSt === 'onTrack' ? 'green' : smartSt === 'atRisk' ? 'yellow' : 'red'}">${fmt(s.pacing, 'pct')}</span>
+          </div>
+          <div class="meta" style="margin-top:6px">
+            <span class="trend ${trend}">${trendIcon} ${momPct}</span>
+            <span class="click-hint">${hintText}</span>
+          </div>
+        </div>
+      `;
+    });
+  });
+
+  // Populate IP & Franchise Cards
+  const franchiseMap = {
+    assetclass: { container: 'franchiseKPI_assetclass', match: g => g.includes('asset class') },
+    tunedin:    { container: 'franchiseKPI_tunedin',    match: g => g.includes('tuned in') },
+    eats:       { container: 'franchiseKPI_eats',       match: g => g.includes('stadium eats') },
+    fosn:       { container: 'franchiseKPI_fosn',       match: g => g.includes('fos news') || g.includes('fosn') }
+  };
+
+  Object.entries(franchiseMap).forEach(([key, cfg]) => {
+    const el = document.getElementById(cfg.container);
+    if (!el) return;
+    const kpis = ipKPIs.filter(s => cfg.match(s.goal.toLowerCase()));
+    if (kpis.length === 0) {
+      el.innerHTML = '<div style="font-size:11px; color:var(--text-dim); padding:8px 0;">No scorecard KPIs yet</div>';
+      return;
+    }
+    el.innerHTML = kpis.map(s => {
+      const marchVal = fmtKPI(s, s.march);
+      const goalVal = fmtKPI(s, s.goal_2026);
+      const smartSt = getSmartStatus(s);
+      const paceClass = smartSt === 'onTrack' ? 'green' : smartSt === 'atRisk' ? 'yellow' : 'red';
+      // Simplify label: strip franchise name prefix for cleaner display
+      let shortLabel = s.goal
+        .replace(/Asset Class\s*/i, '')
+        .replace(/Tuned In\s*/i, '')
+        .replace(/FOS News\s*/i, '')
+        .replace(/Stadium Eats\s*/i, '')
+        .replace(/^\s*-?\s*/, '');
+      shortLabel = shortLabel.charAt(0).toUpperCase() + shortLabel.slice(1);
+
+      return `<div class="franchise-kpi-row">
+        <div>
+          <div class="franchise-kpi-label">${shortLabel}</div>
+          <div class="franchise-kpi-goal">Goal: ${goalVal}</div>
+        </div>
+        <div style="display:flex; align-items:center;">
+          <span class="franchise-kpi-val">${marchVal}</span>
+          <span class="franchise-kpi-pace ${paceClass}">${fmt(s.pacing, 'pct')}</span>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Add average weekly newsletter opens for Asset Class and Tuned In from NL_FULL
+    if (key === 'assetclass') {
+      const acOpens = NL_FULL.filter(w => w.ac_total_opens > 0).map(w => w.ac_total_opens);
+      if (acOpens.length > 0) {
+        const avgOpens = Math.round(acOpens.reduce((a, b) => a + b, 0) / acOpens.length);
+        el.innerHTML += `<div class="franchise-kpi-row">
+          <div>
+            <div class="franchise-kpi-label">Avg. Weekly Opens</div>
+            <div class="franchise-kpi-goal">${acOpens.length}-week avg</div>
+          </div>
+          <div style="display:flex; align-items:center;">
+            <span class="franchise-kpi-val">${avgOpens.toLocaleString()}</span>
+          </div>
+        </div>`;
+      }
+    }
+    if (key === 'tunedin') {
+      const tiOpens = NL_FULL.filter(w => w.ti_total_opens > 0).map(w => w.ti_total_opens);
+      if (tiOpens.length > 0) {
+        const avgOpens = Math.round(tiOpens.reduce((a, b) => a + b, 0) / tiOpens.length);
+        el.innerHTML += `<div class="franchise-kpi-row">
+          <div>
+            <div class="franchise-kpi-label">Avg. Weekly Opens</div>
+            <div class="franchise-kpi-goal">${tiOpens.length}-week avg</div>
+          </div>
+          <div style="display:flex; align-items:center;">
+            <span class="franchise-kpi-val">${avgOpens.toLocaleString()}</span>
+          </div>
+        </div>`;
+      }
+    }
+  });
+
+  // Callouts
+  const callouts = document.getElementById('execCallouts');
+  const calloutData = [
+    { type: 'negative', icon: '!', title: 'Pageview Decline Accelerating', text: 'March pageviews (1.3M excl. JunGroup) dropped 51% from January (2.7M). At current pace, the 3M monthly goal is out of reach without intervention. Organic traffic appears to be the primary driver of decline.', rec: 'Continue to push Newsletter and Social to site traffic; leverage campaign budgets for always-on Google Demand Gen & Display Network traffic campaigns.' },
+    { type: 'negative', icon: '!', title: 'Newsletter Subs Declining', text: 'The Memo subscribers dropped from 775K (Jan) to 710K (Mar) — moving away from 900K goal. Negative pacing (-80%) is the most critical red flag on the scorecard.', rec: '80% of our unsubscribes were acquired from Fluent; re-working welcome flow for new subscribers; exploring re-engagement campaigns for lapsed readers; ramping up Meta Ads budget and exploring new high-growth channels with strong retention.' },
+    { type: 'positive', icon: '✓', title: 'Pages Per Session Outperforming', text: 'At 3.02 pages/session vs a 2.0 goal (179% pacing), users who reach the site are highly engaged. This is a key strength to protect.', rec: 'Updates from March: Improved QOTD \'Thank You for Voting\' landing page for better recirculation; April: Introducing redesigned franchise hubs; Roadmap: Optimizing author bio pages; Factle Sports \'You May Be Interested In\' content recommendations.' },
+  ];
+  calloutData.forEach(c => {
+    callouts.innerHTML += `
+      <div class="callout ${c.type}">
+        <div class="callout-header">
+          <div class="callout-icon">${c.icon}</div>
+          <div class="callout-title">${c.title}</div>
+        </div>
+        <p>${c.text}</p>
+        <div class="rec">→ ${c.rec}</div>
+      </div>
+    `;
+  });
+
+  // Full scorecard table
+  const tbody = document.querySelector('#fullScorecard tbody');
+  SCORECARD.filter(s => s._section === 'priority' || s._section === 'ip_franchise').forEach(s => {
+    const marchVal = fmtKPI(s, s.march);
+    const baseVal = fmtKPI(s, s.baseline_2025);
+    const goalVal = fmtKPI(s, s.goal_2026);
+    const color = pacingColor(s.pacing);
+    const smartSt = getSmartStatus(s);
+    const statusText = smartSt === 'onTrack' ? 'On Track' : smartSt === 'atRisk' ? 'Needs Optimization' : 'Rediscuss Goaling';
+    const pctWidth = Math.min(100, Math.max(0, s.pacing * 100));
+    tbody.innerHTML += `
+      <tr>
+        <td style="font-weight:600">${s.goal}</td>
+        <td>${s.category}</td>
+        <td>${s.platform}</td>
+        <td>${baseVal}</td>
+        <td>${marchVal}</td>
+        <td>${goalVal}</td>
+        <td><div class="pacing-bar"><div class="pacing-bar-fill" style="width:${pctWidth}%;background:${color}"></div></div></td>
+        <td><span class="pacing ${pacingClass(s.pacing)}">${fmt(s.pacing, 'pct')}</span></td>
+      </tr>
+    `;
+  });
+
+  renderExecCharts();
+}
+
+function renderExecCharts() {
+  const showHist = histState.exec;
+
+  // Pageviews chart — With JunGroup (stacked + goal line)
+  destroyChart('execPV');
+  const pvMonths = PAGEVIEW_DATA.map(d => d.month);
+  chartInstances['execPV'] = new Chart(document.getElementById('execPVChart'), {
+    type: 'bar',
+    data: {
+      labels: pvMonths,
+      datasets: [
+        { label: 'Clean Traffic', data: PAGEVIEW_DATA.map(d => d.total_without_jg), backgroundColor: 'rgba(25,108,252,0.65)', borderRadius: 4, stack: 'main' },
+        { label: 'JunGroup', data: PAGEVIEW_DATA.map(d => d.jungroup), backgroundColor: 'rgba(209,213,219,0.8)', borderRadius: 4, stack: 'main' },
+        { label: '3M Monthly Goal', data: pvMonths.map(() => 3000000), type: 'line', borderColor: 'rgba(180,50,50,0.45)', borderDash: [6,4], pointRadius: 0, borderWidth: 2, fill: false }
+      ]
+    },
+    options: {
+      ...chartDefaults,
+      scales: { ...chartDefaults.scales, x: { ...chartDefaults.scales.x, stacked: true }, y: { ...chartDefaults.scales.y, stacked: true } },
+      plugins: {
+        ...chartDefaults.plugins,
+        legend: { ...chartDefaults.plugins.legend, display: true, labels: { boxWidth: 12, font: { size: 10 } } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + (ctx.raw || 0).toLocaleString() } },
+        datalabels: {
+          display: function(ctx) {
+            // Only show on the JunGroup dataset (index 1, top of stack) and not on goal line
+            return ctx.datasetIndex === 1;
+          },
+          anchor: 'end',
+          align: 'end',
+          offset: 2,
+          formatter: function(value, ctx) {
+            // Show total (clean + jungroup) on top
+            const clean = ctx.chart.data.datasets[0].data[ctx.dataIndex] || 0;
+            const jg = ctx.chart.data.datasets[1].data[ctx.dataIndex] || 0;
+            return fmtLabel(clean + jg);
+          },
+          color: '#1a1a2e',
+          font: { family: "'Untitled Sans',sans-serif", size: 11, weight: '600' }
+        }
+      }
+    }
+  });
+
+  // Followers chart — weekly data from SOCIAL_WEEKLY
+  destroyChart('execFollowers');
+  const fLabels = SOCIAL_WEEKLY.map(w => w.week.replace(' (2026)',''));
+  const fData = SOCIAL_WEEKLY.map(w => w.total_followers);
+  const fGoal = SOCIAL_WEEKLY.map(() => 2200000);
+  chartInstances['execFollowers'] = new Chart(document.getElementById('execFollowersChart'), {
+    type: 'line',
+    data: {
+      labels: fLabels,
+      datasets: [
+        { label: 'Total Followers', data: fData, borderColor: '#196CFC', backgroundColor: 'rgba(25,108,252,0.06)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+        { label: '2026 Goal (2.2M)', data: fGoal, borderColor: 'rgba(180,50,50,0.4)', borderDash: [6,4], pointRadius: 0, borderWidth: 2, fill: false }
+      ]
+    },
+    options: {
+      ...chartDefaults,
+      layout: { padding: { top: 20 } },
+      scales: {
+        ...chartDefaults.scales,
+        y: {
+          ...chartDefaults.scales.y,
+          // Cap Y-axis at 1.85M so the actual data range is visible — goal line shown as annotation in legend
+          max: 1850000,
+          min: 1500000
+        }
+      },
+      plugins: {
+        ...chartDefaults.plugins,
+        datalabels: {
+          display: function(ctx) {
+            if (ctx.datasetIndex !== 0) return false;
+            return ctx.dataIndex % 3 === 0 || ctx.dataIndex === ctx.dataset.data.length - 1;
+          },
+          anchor: 'end',
+          align: 'top',
+          offset: 4,
+          formatter: function(value) { return value ? value.toLocaleString() : ''; },
+          color: '#196CFC',
+          font: { family: "'Untitled Sans',sans-serif", size: 9, weight: '600' }
+        }
+      }
+    }
+  });
+
+  // Subs + Opens chart — weekly data from NL_FULL, dual y-axis
+  destroyChart('execSubs');
+  const sLabels = NL_FULL.map(w => w.week.replace(' (2026)',''));
+  const totalSubs = NL_FULL.map(w => {
+    const memo = w.total_subs > 0 ? w.total_subs : w.active_subs;
+    return (memo || 0) + (w.ti_total_subs || 0) + (w.ac_total_subs || 0);
+  });
+  const opensPerNL = NL_WEEKLY.map(w => w.opens_per_nl || 0);
+  chartInstances['execSubs'] = new Chart(document.getElementById('execSubsChart'), {
+    type: 'line',
+    data: {
+      labels: sLabels,
+      datasets: [
+        { label: 'Total Subscribers', data: totalSubs, borderColor: '#007640', backgroundColor: 'rgba(0,118,64,0.06)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5, yAxisID: 'y' },
+        { label: 'Opens Per NL', data: opensPerNL, borderColor: '#196CFC', backgroundColor: 'rgba(25,108,252,0.06)', fill: false, tension: 0.3, pointRadius: 3, borderWidth: 2.5, yAxisID: 'y1' },
+        { label: 'Subscriber Goal (New — 800K)', data: sLabels.map(() => 800000), borderColor: 'rgba(0,118,64,0.5)', borderDash: [6,4], pointRadius: 0, borderWidth: 2, fill: false, yAxisID: 'y' },
+        { label: 'Subscriber Goal (Old — 900K)', data: sLabels.map(() => 900000), borderColor: 'rgba(180,50,50,0.35)', borderDash: [4,4], pointRadius: 0, borderWidth: 1.5, fill: false, yAxisID: 'y' },
+        { label: 'Opens Per NL Goal (550K)', data: sLabels.map(() => 550000), borderColor: 'rgba(25,108,252,0.35)', borderDash: [6,4], pointRadius: 0, borderWidth: 2, fill: false, yAxisID: 'y1' }
+      ]
+    },
+    options: {
+      ...chartDefaults,
+      scales: {
+        ...chartDefaults.scales,
+        y: { ...chartDefaults.scales.y, position: 'left', title: { display: true, text: 'Subscribers', color: '#64748b', font: { size: 11 } } },
+        y1: { ...chartDefaults.scales.y, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Opens Per NL', color: '#64748b', font: { size: 11 } }, ticks: { ...chartDefaults.scales.y.ticks, callback: v => (v/1000).toFixed(0) + 'K' } }
+      },
+      plugins: { ...chartDefaults.plugins, legend: { ...chartDefaults.plugins.legend, display: true, labels: { boxWidth: 12, font: { size: 10 } } } }
+    }
+  });
+
+  // YouTube Subscribers — Flagship, FOSN, Stadium Eats
+  // Simple: 3 lines on single Y-axis showing total subs over time, with current + goal annotation
+  destroyChart('execYTSubs');
+  const ytWeeks = ['Wk1','Wk2','Wk3','Wk4','Wk5','Wk6','Wk7','Wk8','Wk9','Wk10','Wk11','Wk12','Wk13','Wk14'];
+  const ytFlagship = [102631,103819,106221,109307,110723,111638,113545,115407,117082,117385,118955,120553,121261,121421];
+  const ytFOSN = [30814,30814,30814,32271,35300,39731,44183,46139,48154,49128,54700,57915,61015,62353];
+  const ytEats = [0,0,0,0,0,0,0,0,0,0,0,0,145,335];
+
+  chartInstances['execYTSubs'] = new Chart(document.getElementById('execYTSubsChart'), {
+    type: 'line',
+    data: {
+      labels: ytWeeks,
+      datasets: [
+        { label: 'Flagship (Now: 121K | Goal: 250K)', data: ytFlagship, borderColor: '#196CFC', backgroundColor: 'rgba(25,108,252,0.06)', fill: false, tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+        { label: 'FOS News (Now: 62K | Goal: 150K)', data: ytFOSN, borderColor: '#007640', backgroundColor: 'rgba(0,118,64,0.06)', fill: false, tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+        { label: 'Stadium Eats (Now: 335 | Goal: 25K)', data: ytEats, borderColor: '#CFA677', fill: false, tension: 0.3, pointRadius: 3, borderWidth: 2 }
+      ]
+    },
+    options: {
+      ...chartDefaults,
+      layout: { padding: { right: 50, top: 15 } },
+      scales: {
+        ...chartDefaults.scales,
+        y: { ...chartDefaults.scales.y, beginAtZero: true }
+      },
+      plugins: {
+        ...chartDefaults.plugins,
+        legend: { ...chartDefaults.plugins.legend, display: true, labels: { boxWidth: 12, font: { size: 11 } } },
+        datalabels: {
+          display: function(ctx) {
+            const val = ctx.dataset.data[ctx.dataIndex];
+            if (val === 0 || val === null) return false;
+            // Show first and last data point for each line
+            return ctx.dataIndex === 0 || ctx.dataIndex === ctx.dataset.data.length - 1;
+          },
+          anchor: 'end',
+          align: function(ctx) { return ctx.dataIndex === 0 ? 'left' : 'right'; },
+          offset: 6,
+          formatter: function(value) { return value.toLocaleString(); },
+          color: function(ctx) { return ctx.dataset.borderColor; },
+          font: { family: "'Untitled Sans',sans-serif", size: 11, weight: '700' }
+        }
+      }
+    }
+  });
+
+}
+
+// ===== BUILD WEBSITE TAB =====
+function buildWebsite() {
+  const webKPIs = SCORECARD.filter(s => s._section !== 'secondary' && s._section !== 'to_discuss' && (s.platform === 'Website' || s.goal.toLowerCase().includes('pageview')));
+  buildCompactKPITable('websiteKPIStatus', webKPIs);
+
+  // Callouts
+  const callouts = document.getElementById('websiteCallouts');
+  const webCallouts = [
+    { type: 'negative', icon: '!', title: 'Pageview Decline Accelerating', text: 'March pageviews (1.3M excl. JunGroup) dropped 51% from January (2.7M). At current pace, the 3M monthly goal is out of reach without intervention. Organic traffic appears to be the primary driver of decline.', rec: 'Continue to push Newsletter and Social to site traffic; leverage campaign budgets for always-on Google Demand Gen & Display Network traffic campaigns.' },
+    { type: 'positive', icon: '✓', title: 'Pages Per Session Outperforming', text: 'At 3.02 pages/session vs a 2.0 goal (179% pacing), users who reach the site are highly engaged. This is a key strength to protect.', rec: 'Updates from March: Improved QOTD \'Thank You for Voting\' landing page for better recirculation; April: Introducing redesigned franchise hubs; Roadmap: Optimizing author bio pages; Factle Sports \'You May Be Interested In\' content recommendations.' },
+    { type: 'warning', icon: '⚡', title: 'Monthly Factle Players Declining', text: 'Factle monthly players dropped to 30K in March from 50.7K in January — moving backwards from the 60K goal (-13% pacing). Factle Sports similarly at 16K vs 30K goal. Player engagement is softening across both products.', rec: 'April: Introduced improved Factle Sports newsletter block on April 3; Continue organic social promotion push; explore new acquisition channels and in-product retention hooks.' },
+  ];
+  webCallouts.forEach(c => {
+    callouts.innerHTML += `
+      <div class="callout ${c.type}">
+        <div class="callout-header">
+          <div class="callout-icon">${c.icon}</div>
+          <div class="callout-title">${c.title}</div>
+        </div>
+        <p>${c.text}</p>
+        <div class="rec">→ ${c.rec}</div>
+      </div>
+    `;
+  });
+
+  renderWebCharts();
+}
+
+function renderWebCharts() {
+  const showHist = histState.web;
+  const weeks = WEB_DATES;
+
+  // Monthly PVs — Clean (without JunGroup)
+  const pvMonths = PAGEVIEW_DATA.map(d => d.month);
+  destroyChart('webPVClean');
+  chartInstances['webPVClean'] = new Chart(document.getElementById('webPVClean'), {
+    type: 'bar',
+    data: {
+      labels: pvMonths,
+      datasets: [
+        { label: 'Pageviews (Clean)', data: PAGEVIEW_DATA.map(d => d.total_without_jg), backgroundColor: 'rgba(25,108,252,0.65)', borderRadius: 4 },
+        { label: '3M Monthly Goal', data: pvMonths.map(() => 3000000), type: 'line', borderColor: 'rgba(180,50,50,0.45)', borderDash: [6,4], pointRadius: 0, borderWidth: 2, fill: false }
+      ]
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.raw.toLocaleString() } }, datalabels: barLabelConfig } }
+  });
+
+  // Monthly PVs — Total (with JunGroup)
+  destroyChart('webPVTotal');
+  chartInstances['webPVTotal'] = new Chart(document.getElementById('webPVTotal'), {
+    type: 'bar',
+    data: {
+      labels: pvMonths,
+      datasets: [
+        { label: 'Clean Traffic', data: PAGEVIEW_DATA.map(d => d.total_without_jg), backgroundColor: 'rgba(25,108,252,0.65)', borderRadius: 4, stack: 'main' },
+        { label: 'JunGroup', data: PAGEVIEW_DATA.map(d => d.jungroup), backgroundColor: 'rgba(209,213,219,0.8)', borderRadius: 4, stack: 'main' },
+        { label: '3M Monthly Goal', data: pvMonths.map(() => 3000000), type: 'line', borderColor: 'rgba(180,50,50,0.45)', borderDash: [6,4], pointRadius: 0, borderWidth: 2, fill: false }
+      ]
+    },
+    options: { ...chartDefaults, scales: { ...chartDefaults.scales, x: { ...chartDefaults.scales.x, stacked: true }, y: { ...chartDefaults.scales.y, stacked: true } }, plugins: { ...chartDefaults.plugins, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + (ctx.raw || 0).toLocaleString() } }, datalabels: barLabelConfig } }
+  });
+
+  // Stacked bar — Pageview composition by content type
+  destroyChart('webPVStacked');
+  chartInstances['webPVStacked'] = new Chart(document.getElementById('webPVStacked'), {
+    type: 'bar',
+    data: {
+      labels: pvMonths,
+      datasets: [
+        { label: 'Articles', data: PAGEVIEW_DATA.map(d => d.article), backgroundColor: '#196CFC' },
+        { label: 'Sponsored Articles', data: PAGEVIEW_DATA.map(d => d.sponsored), backgroundColor: '#CFA677' },
+        { label: 'Games', data: PAGEVIEW_DATA.map(d => d.games), backgroundColor: '#007640' },
+        { label: 'General Pages', data: PAGEVIEW_DATA.map(d => d.general), backgroundColor: '#B47E41' },
+        { label: 'JunGroup', data: PAGEVIEW_DATA.map(d => d.jungroup), backgroundColor: '#d1d5db' }
+      ]
+    },
+    options: { ...chartDefaults, scales: { ...chartDefaults.scales, x: { ...chartDefaults.scales.x, stacked: true }, y: { ...chartDefaults.scales.y, stacked: true } }, plugins: { ...chartDefaults.plugins, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.raw.toLocaleString() } }, datalabels: {
+      display: function(ctx) {
+        // Only show label on the topmost dataset (JunGroup = index 4)
+        return ctx.datasetIndex === ctx.chart.data.datasets.length - 1;
+      },
+      anchor: 'end', align: 'end', offset: 2,
+      formatter: function(value, ctx) {
+        // Sum all datasets for this bar
+        let total = 0;
+        ctx.chart.data.datasets.forEach(d => { total += (d.data[ctx.dataIndex] || 0); });
+        return fmtLabel(total);
+      },
+      color: '#1a1a2e',
+      font: { family: "'Untitled Sans',sans-serif", size: 10, weight: '600' }
+    } } }
+  });
+
+  // Monthly Traffic Sources — side by side with goal lines
+  // Using Victoria's corrected monthly totals for Mar; Jan/Feb aggregated from weekly
+  destroyChart('webTSMonthly');
+  const tsMonths = ['Jan 2026', 'Feb 2026', 'Mar 2026'];
+  const socialByMonth = [0, 0, 0];
+  const nlByMonth = [0, 0, 0];
+  WEBSITE_WEEKLY.forEach((w, i) => {
+    const mi = i < 5 ? 0 : i < 9 ? 1 : 2;
+    socialByMonth[mi] += w.social_to_site;
+    nlByMonth[mi] += w.nl_to_site;
+  });
+  // Override March with corrected numbers from scorecard
+  socialByMonth[2] = 101887;
+  nlByMonth[2] = 151408;
+  chartInstances['webTSMonthly'] = new Chart(document.getElementById('webTrafficSourcesMonthly'), {
+    type: 'bar',
+    data: {
+      labels: tsMonths,
+      datasets: [
+        { label: 'Social to Site', data: socialByMonth, backgroundColor: 'rgba(25,108,252,0.65)', borderRadius: 4 },
+        { label: 'Newsletter to Site', data: nlByMonth, backgroundColor: 'rgba(0,118,64,0.55)', borderRadius: 4 },
+        { label: 'Social Goal (175K)', data: tsMonths.map(() => 175000), type: 'line', borderColor: 'rgba(25,108,252,0.4)', borderDash: [6,4], pointRadius: 0, borderWidth: 2, fill: false },
+        { label: 'NL Goal (200K)', data: tsMonths.map(() => 200000), type: 'line', borderColor: 'rgba(0,118,64,0.4)', borderDash: [6,4], pointRadius: 0, borderWidth: 2, fill: false }
+      ]
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, legend: { ...chartDefaults.plugins.legend, display: true, labels: { boxWidth: 12, font: { size: 10 } } }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + (ctx.raw || 0).toLocaleString() } }, datalabels: barLabelConfig } }
+  });
+
+  // Engagement
+  destroyChart('webEng');
+  chartInstances['webEng'] = new Chart(document.getElementById('webEngagement'), {
+    type: 'line',
+    data: {
+      labels: weeks,
+      datasets: [
+        { label: 'Pages/Session', data: WEBSITE_WEEKLY.map(w => w.pages_per_session), borderColor: '#196CFC', tension: 0.3, pointRadius: 3, borderWidth: 2.5, yAxisID: 'y' },
+        { label: 'Returning Visitor %', data: WEBSITE_WEEKLY.map(w => w.returning_pct * 100), borderColor: '#FACA06', tension: 0.3, pointRadius: 3, borderWidth: 2.5, yAxisID: 'y1' }
+      ]
+    },
+    options: {
+      ...chartDefaults,
+      scales: {
+        ...chartDefaults.scales,
+        y: { ...chartDefaults.scales.y, position: 'left', title: { display: true, text: 'Pages/Session', color: '#64748b' } },
+        y1: { ...chartDefaults.scales.y, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Returning %', color: '#64748b' }, ticks: { ...chartDefaults.scales.y.ticks, callback: v => v.toFixed(0) + '%' } }
+      }
+    }
+  });
+
+  // Factle — Players + DAUs
+  destroyChart('webFactle');
+  chartInstances['webFactle'] = new Chart(document.getElementById('webFactle'), {
+    type: 'line',
+    data: {
+      labels: weeks,
+      datasets: [
+        { label: 'Factle Players', data: WEBSITE_WEEKLY.map(w => w.factle_players), borderColor: '#196CFC', tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+        { label: 'Factle DAU', data: WEBSITE_WEEKLY.map(w => w.factle_dau), borderColor: '#196CFC', borderDash: [4,3], tension: 0.3, pointRadius: 2, borderWidth: 1.5 },
+        { label: 'FS Players', data: WEBSITE_WEEKLY.map(w => w.factle_sports_players), borderColor: '#CFA677', tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+        { label: 'FS DAU', data: WEBSITE_WEEKLY.map(w => w.factle_sports_dau), borderColor: '#CFA677', borderDash: [4,3], tension: 0.3, pointRadius: 2, borderWidth: 1.5 }
+      ]
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, legend: { ...chartDefaults.plugins.legend, display: true, labels: { boxWidth: 12, font: { size: 10 } } } } }
+  });
+
+  // Registrants — Historical 2024-2026 with March 20 registration gate marker
+  destroyChart('webReg');
+  const regLabels = ['Jan 24','Apr 24','Jul 24','Oct 24','Jan 25','Apr 25','Jul 25','Oct 25','Jan 26','Feb 26','Mar 26'];
+  const regData = [45000,48500,51200,54800,58000,60200,61500,62800,64290,65106,68892];
+  const regGoal = regLabels.map(() => 200000);
+  // Vertical marker for registration gate re-enabled (Mar 20 = last data point)
+  const regGateLine = regLabels.map((l, i) => i === 10 ? 200000 : null);
+  chartInstances['webReg'] = new Chart(document.getElementById('webRegistrants'), {
+    type: 'line',
+    data: {
+      labels: regLabels,
+      datasets: [
+        { label: 'Total Registrants', data: regData, borderColor: '#007640', backgroundColor: 'rgba(0,118,64,0.06)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+        { label: '2026 Goal (200K)', data: regGoal, borderColor: 'rgba(180,50,50,0.35)', borderDash: [6,4], pointRadius: 0, borderWidth: 2, fill: false },
+        { label: 'Reg. gate re-enabled (Mar 20)', data: regGateLine, borderColor: '#E00922', borderWidth: 2, borderDash: [4,3], pointRadius: 8, pointStyle: 'triangle', pointBackgroundColor: '#E00922', spanGaps: false, showLine: false }
+      ]
+    },
+    options: {
+      ...chartDefaults,
+      plugins: { ...chartDefaults.plugins, legend: { ...chartDefaults.plugins.legend, display: true, labels: { boxWidth: 12, font: { size: 10 } } } }
+    }
+  });
+}
+
+// ===== BUILD NEWSLETTER TAB =====
+function buildNewsletter() {
+  const nlKPIs = SCORECARD.filter(s => {
+    if (s.platform !== 'Newsletter') return false;
+    if (s._section === 'to_discuss') return false;
+    // Keep unsubscribe rate from secondary; exclude all other secondary NL KPIs
+    if (s._section === 'secondary' && s.goal !== 'Unsubscribe rate') return false;
+    // Explicitly remove click-through rate
+    if (s.goal === 'Click-through rate') return false;
+    return true;
+  });
+  buildCompactKPITable('nlKPIStatus', nlKPIs);
+
+  const callouts = document.getElementById('nlCallouts');
+  const nlCallouts = [
+    { type: 'negative', icon: '!', title: '<a href="https://fos-dashboard.netlify.app/growth/newsletter/nl-unsubscribe-analysis" target="_blank" style="color:inherit;text-decoration:underline;">The Memo Subscriber Attrition</a>', text: 'Down from 775K to 710K in 3 months — losing ~21K subscribers per month. Against a 900K goal, this is the most critical metric on the dashboard. Negative pacing (-80%) signals a structural issue.', rec: '80% of our unsubscribes were acquired from Fluent; re-working welcome flow for new subscribers; exploring re-engagement campaigns for lapsed readers; ramping up Meta Ads budget and exploring new high-growth channels with strong retention.' },
+    { type: 'warning', icon: '⚡', title: 'Sub-Brand Newsletters Growing Slowly', text: 'Tuned In (7.3K) and Asset Class (5.1K) vs 25K goals — both under 25% pacing. Cross-promotion from The Memo could accelerate growth.', rec: 'Cross-promo prepped for The Memo; Meta ads launched in late-March; adding website footers to franchise-related articles to drive sign-ups.' },
+  ];
+  nlCallouts.forEach(c => {
+    callouts.innerHTML += `
+      <div class="callout ${c.type}">
+        <div class="callout-header">
+          <div class="callout-icon">${c.icon}</div>
+          <div class="callout-title">${c.title}</div>
+        </div>
+        <p>${c.text}</p>
+        <div class="rec">→ ${c.rec}</div>
+      </div>
+    `;
+  });
+
+  renderNLCharts();
+}
+
+function renderNLCharts() {
+  const showHist = histState.nl;
+  const dates = NL_DATES;
+
+  // The Memo — Subscribers (Total & Active)
+  destroyChart('nlMemoSubs');
+  const memoSubsLabels = NL_DATES.slice(1);
+  const memoSubsData = NL_FULL.slice(1);
+  chartInstances['nlMemoSubs'] = new Chart(document.getElementById('nlMemoSubs'), {
+    type: 'line',
+    data: {
+      labels: memoSubsLabels,
+      datasets: [
+        { label: 'Total Subscribers', data: memoSubsData.map(w => w.total_subs > 0 ? w.total_subs : w.active_subs), borderColor: '#196CFC', tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+        { label: 'Active Subscribers', data: memoSubsData.map(w => w.active_subs), borderColor: '#10b981', tension: 0.3, pointRadius: 3, borderWidth: 2.5 }
+      ]
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, legend: { ...chartDefaults.plugins.legend, display: true, labels: { boxWidth: 12, font: { size: 10 } } } }, scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, beginAtZero: false } } }
+  });
+
+  // The Memo — Weekly Opens
+  destroyChart('nlMemoOpens');
+  chartInstances['nlMemoOpens'] = new Chart(document.getElementById('nlMemoOpens'), {
+    type: 'bar',
+    data: {
+      labels: memoSubsLabels,
+      datasets: [{ label: 'Total Opens', data: memoSubsData.map(w => w.total_opens), backgroundColor: 'rgba(25,108,252,0.55)', borderRadius: 4 }]
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, datalabels: barLabelConfig } }
+  });
+
+  // Tuned In Subscribers — skip Week 1 (12/29) since total_subs is 0
+  destroyChart('nlTIS');
+  const tiDates = dates.slice(1);
+  const tiData = NL_FULL.slice(1);
+  chartInstances['nlTIS'] = new Chart(document.getElementById('nlTunedInSubs'), {
+    type: 'line',
+    data: {
+      labels: tiDates,
+      datasets: [
+        { label: 'Total Subscribers', data: tiData.map(w => w.ti_total_subs), borderColor: '#196CFC', tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+        { label: 'Active Subscribers', data: tiData.map(w => w.ti_active_subs), borderColor: '#10b981', tension: 0.3, pointRadius: 3, borderWidth: 2.5 }
+      ]
+    },
+    options: { ...chartDefaults, scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, beginAtZero: false } } }
+  });
+
+  // Tuned In Opens — skip Week 1 (12/29)
+  destroyChart('nlTIO');
+  chartInstances['nlTIO'] = new Chart(document.getElementById('nlTunedInOpens'), {
+    type: 'bar',
+    data: {
+      labels: tiDates,
+      datasets: [{ label: 'Total Opens', data: tiData.map(w => w.ti_total_opens), backgroundColor: 'rgba(0,118,64,0.55)', borderRadius: 4 }]
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, datalabels: barLabelConfig } }
+  });
+
+  // Asset Class Subscribers — skip Week 1 (12/29) since total_subs is 0
+  destroyChart('nlACS');
+  const acDates = dates.slice(1);
+  const acData = NL_FULL.slice(1);
+  chartInstances['nlACS'] = new Chart(document.getElementById('nlAssetClassSubs'), {
+    type: 'line',
+    data: {
+      labels: acDates,
+      datasets: [
+        { label: 'Total Subscribers', data: acData.map(w => w.ac_total_subs), borderColor: '#196CFC', tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+        { label: 'Active Subscribers', data: acData.map(w => w.ac_active_subs), borderColor: '#10b981', tension: 0.3, pointRadius: 3, borderWidth: 2.5 }
+      ]
+    },
+    options: { ...chartDefaults, scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, beginAtZero: false } } }
+  });
+
+  // Asset Class Opens — skip Week 1 (12/29)
+  destroyChart('nlACO');
+  chartInstances['nlACO'] = new Chart(document.getElementById('nlAssetClassOpens'), {
+    type: 'bar',
+    data: {
+      labels: acDates,
+      datasets: [{ label: 'Total Opens', data: acData.map(w => w.ac_total_opens), backgroundColor: 'rgba(207,166,119,0.6)', borderRadius: 4 }]
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, datalabels: barLabelConfig } }
+  });
+}
+
+// ===== BUILD SOCIAL TAB =====
+function buildSocial() {
+  const socialKPIs = SCORECARD.filter(s => {
+    if (s._section === 'secondary' || s._section === 'to_discuss') return false;
+    const g = s.goal.toLowerCase();
+    if (g.includes('fos news') || g.includes('fosn') || g.includes('stadium eats')) return false;
+    return s.platform === 'Social' || (s.platform === 'Cross-platform' && s.category === 'Reach');
+  });
+  buildCompactKPITable('socialKPIStatus', socialKPIs);
+
+  const callouts = document.getElementById('socialCallouts');
+  const socialCallouts = [
+    { type: 'positive', icon: '✓', title: 'Shares Exceeding Goal', text: 'Monthly shares at 700K in March vs 500K goal (15.7% annual pacing). Content is resonating and driving organic distribution.', rec: 'Analyze top-shared content formats; create a "shareable content" playbook for the editorial team; brief sales on this for brand partner conversations.' },
+    { type: 'warning', icon: '⚡', title: 'Social Reach Softening', text: 'Monthly social reach at 115M in March, down from 132M in January and 123M in February. At 34% pacing to 135M goal — the downward trend needs monitoring.', rec: 'Investigate platform algorithm changes; diversify posting times; lean into Threads and emerging reach drivers.' },
+    { type: 'negative', icon: '!', title: 'Follower Growth Needs Acceleration', text: 'At 1.66M vs 2.2M goal — need ~542K net new followers in 9 months. Current weekly gains (~5–7K) won\'t close the gap without a step-change.', rec: 'Evaluate paid follower campaigns on key platforms; explore cross-platform collab content; leverage tentpole events for spikes.' },
+  ];
+  socialCallouts.forEach(c => {
+    callouts.innerHTML += `
+      <div class="callout ${c.type}">
+        <div class="callout-header">
+          <div class="callout-icon">${c.icon}</div>
+          <div class="callout-title">${c.title}</div>
+        </div>
+        <p>${c.text}</p>
+      </div>
+    `;
+  });
+
+  renderSocialCharts();
+}
+
+function renderSocialCharts() {
+  const showHist = histState.social;
+  const weeks = SOC_DATES;
+
+  // === Per-platform follower growth — split into Major (>200K) and Emerging (<200K) ===
+  // Build combined 2025 monthly + 2026 weekly labels and data
+  const platColors = {
+    'LinkedIn': '#0A66C2', 'Instagram': '#E1306C', 'X (Twitter)': '#1DA1F2',
+    'TikTok': '#000000', 'Facebook': '#1877F2', 'Threads': '#666666'
+  };
+  const combinedLabels = [...HIST_PLATFORM_2025.months, ...PLATFORM_FOLLOWERS.labels.map(l => l.replace('Wk','Wk '))];
+
+  // Major platforms (>200K): LinkedIn, Instagram, X (Twitter)
+  const majorPlatforms = ['LinkedIn', 'Instagram', 'X (Twitter)'];
+  destroyChart('socMajor');
+  chartInstances['socMajor'] = new Chart(document.getElementById('socialPlatformMajor'), {
+    type: 'line',
+    data: {
+      labels: combinedLabels,
+      datasets: majorPlatforms.map(name => ({
+        label: name,
+        data: [...HIST_PLATFORM_2025[name], ...PLATFORM_FOLLOWERS.flagship[name]],
+        borderColor: platColors[name], fill: false, tension: 0.3, pointRadius: 2, borderWidth: 2.5
+      }))
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, legend: { ...chartDefaults.plugins.legend, display: true, labels: { boxWidth: 12, font: { size: 10 } } } } }
+  });
+
+  // Emerging platforms (<200K): TikTok, Facebook, Threads
+  const emergingPlatforms = ['TikTok', 'Facebook', 'Threads'];
+  destroyChart('socEmerging');
+  chartInstances['socEmerging'] = new Chart(document.getElementById('socialPlatformEmerging'), {
+    type: 'line',
+    data: {
+      labels: combinedLabels,
+      datasets: emergingPlatforms.map(name => ({
+        label: name,
+        data: [...HIST_PLATFORM_2025[name], ...PLATFORM_FOLLOWERS.flagship[name]],
+        borderColor: platColors[name], fill: false, tension: 0.3, pointRadius: 2, borderWidth: 2.5
+      }))
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, legend: { ...chartDefaults.plugins.legend, display: true, labels: { boxWidth: 12, font: { size: 10 } } } } }
+  });
+
+
+  // === Shared projection helpers ===
+  const weeksInYear = 52;
+  const weeksElapsed = 14;
+  const weeksRemaining = weeksInYear - weeksElapsed;
+
+  function calcProjection(a) {
+    const current = a.data[a.data.length - 1] || 0;
+    let monthlyGrowthPct = '—';
+    let projected = current;
+
+    if (a.hist.length > 0 && current > 0) {
+      const startVal = a.hist[0];
+      const totalMonths = 15.25;
+      const totalGrowthPct = ((current / startVal) - 1) * 100;
+      const avgMonthlyPct = totalGrowthPct / totalMonths;
+      monthlyGrowthPct = avgMonthlyPct.toFixed(1);
+      const monthsRemaining = 8.75;
+      projected = Math.round(current * Math.pow(1 + avgMonthlyPct/100, monthsRemaining));
+    } else if (current > 0) {
+      const firstActiveIdx = a.data.findIndex(v => v > 0);
+      const activeData = a.data.slice(firstActiveIdx);
+      const activeWeeks = activeData.length - 1;
+      if (activeWeeks > 0) {
+        const startVal = activeData[0];
+        const avgWeeklyGain = (current - startVal) / activeWeeks;
+        // Use linear projection (avg weekly absolute gain) for consistency with EOY number shown
+        // Showing WoW % from compound avg is misleading for young/small accounts
+        const impliedMonthlyPct = current > 0 ? (avgWeeklyGain * 4.33 / current) * 100 : 0;
+        monthlyGrowthPct = impliedMonthlyPct.toFixed(1);
+        projected = Math.round(current + avgWeeklyGain * weeksRemaining);
+      }
+    }
+    return { current, monthlyGrowthPct, projected };
+  }
+
+  function renderProjectionTable(container, groups, goalTotal, goalLabel) {
+    let rows = '';
+    let grandTotalCurrent = 0, grandTotalProjected = 0;
+
+    groups.forEach(group => {
+      let groupCurrent = 0, groupProjected = 0;
+      let groupRows = '';
+      group.accounts.forEach(a => {
+        const { current, monthlyGrowthPct, projected } = calcProjection(a);
+        groupCurrent += current;
+        groupProjected += projected;
+        groupRows += '<tr>' +
+          '<td style="padding-left:24px;font-size:12px">' + a.platform + '</td>' +
+          '<td>' + current.toLocaleString() + '</td>' +
+          '<td>' + (monthlyGrowthPct === '—' ? '—' : monthlyGrowthPct + '%') + '</td>' +
+          '<td>' + projected.toLocaleString() + '</td>' +
+          '</tr>';
+      });
+      rows += '<tr style="background:#f8fafc;font-weight:600">' +
+        '<td>' + group.name + '</td>' +
+        '<td>' + groupCurrent.toLocaleString() + '</td>' +
+        '<td></td>' +
+        '<td>' + groupProjected.toLocaleString() + '</td>' +
+        '</tr>' + groupRows;
+      grandTotalCurrent += groupCurrent;
+      grandTotalProjected += groupProjected;
+      rows += '<tr style="height:4px"><td colspan="4"></td></tr>';
+    });
+
+    const gap = goalTotal - grandTotalProjected;
+    const gapColor = gap > 0 ? '#ef4444' : '#10b981';
+
+    container.innerHTML = '<table class="pacing-table" style="font-size:12px">' +
+      '<thead><tr><th>Account / Channel</th><th>Current (Wk 14)</th><th>Avg Monthly Growth<br><span style="font-weight:400;font-size:10px;color:#94a3b8">implied from linear avg</span></th><th>Projected EOY</th></tr></thead>' +
+      '<tbody>' + rows +
+      '<tr style="border-top:2px solid #e2e8f0;font-weight:700;font-size:13px">' +
+        '<td>TOTAL</td>' +
+        '<td>' + grandTotalCurrent.toLocaleString() + '</td>' +
+        '<td></td>' +
+        '<td>' + grandTotalProjected.toLocaleString() + '</td>' +
+      '</tr>' +
+      (goalTotal ? '<tr style="font-weight:700;font-size:13px">' +
+        '<td>' + goalLabel + '</td><td colspan="3">' + goalTotal.toLocaleString() + '</td>' +
+      '</tr>' +
+      '<tr style="font-weight:700;font-size:13px;color:' + gapColor + '">' +
+        '<td>' + (gap > 0 ? 'Gap to Fill' : 'Projected Surplus') + '</td>' +
+        '<td colspan="3">' + (gap > 0 ? Math.abs(gap).toLocaleString() + ' followers needed' : '+' + Math.abs(gap).toLocaleString() + ' above goal') + '</td>' +
+      '</tr>' : '') +
+      '</tbody></table>';
+  }
+
+  // === Social Projection Table (Social tab) ===
+  const projTable = document.getElementById('socialProjectionTable');
+  if (projTable) {
+    const socialGoal = 2200000;
+    const socialGroups = [
+      {
+        name: 'Flagship Social',
+        accounts: Object.entries(PLATFORM_FOLLOWERS.flagship).map(([name, data]) => ({
+          platform: name, data: data, hist: HIST_PLATFORM_2025[name] || []
+        }))
+      },
+      {
+        name: 'FOSN',
+        accounts: Object.entries(PLATFORM_FOLLOWERS.fosn)
+          .filter(([name]) => !name.includes('YouTube'))
+          .map(([name, data]) => ({ platform: name.replace('FOSN ',''), data: data, hist: [] }))
+      },
+      {
+        name: 'Stadium Eats',
+        accounts: Object.entries(PLATFORM_FOLLOWERS.eats)
+          .filter(([name]) => !name.includes('YouTube'))
+          .map(([name, data]) => ({ platform: name.replace('Eats ',''), data: data, hist: [] }))
+      }
+    ];
+    renderProjectionTable(projTable, socialGroups, socialGoal, '2026 Social Goal');
+  }
+
+  // === YouTube Projection Table (Exec tab) ===
+  const ytProjTable = document.getElementById('ytProjectionTable');
+  if (ytProjTable) {
+    const ytFlagshipData = [102631,103819,106221,109307,110723,111638,113545,115407,117082,117385,118955,120553,121261,121421];
+    const ytGoal = 425000; // 250K flagship + 150K FOSN + 25K Eats
+    const ytGroups = [
+      {
+        name: 'YouTube Subscribers',
+        accounts: [
+          { platform: 'Flagship', data: ytFlagshipData, hist: [] },
+          { platform: 'FOS News', data: PLATFORM_FOLLOWERS.fosn['FOSN YouTube'], hist: [] },
+          { platform: 'Stadium Eats', data: PLATFORM_FOLLOWERS.eats['Eats YouTube'], hist: [] }
+        ]
+      }
+    ];
+    renderProjectionTable(ytProjTable, ytGroups, ytGoal, '2026 YouTube Goal');
+  }
+
+  destroyChart('socImps');
+  chartInstances['socImps'] = new Chart(document.getElementById('socialImps'), {
+    type: 'bar',
+    data: {
+      labels: weeks,
+      datasets: [{ label: 'Weekly Impressions', data: SOCIAL_WEEKLY.map(w => w.impressions), backgroundColor: 'rgba(25,108,252,0.65)', borderRadius: 4 }]
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, datalabels: barLabelConfig } }
+  });
+
+  destroyChart('socVV');
+  chartInstances['socVV'] = new Chart(document.getElementById('socialVV'), {
+    type: 'bar',
+    data: {
+      labels: weeks,
+      datasets: [{ label: 'Weekly Video Views', data: SOCIAL_WEEKLY.map(w => w.video_views), backgroundColor: 'rgba(0,118,64,0.55)', borderRadius: 4 }]
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, datalabels: { ...barLabelConfig, display: function(ctx) { return ctx.dataIndex % 2 === 0 || ctx.dataIndex === ctx.dataset.data.length - 1; } } } }
+  });
+
+  destroyChart('socShares');
+  chartInstances['socShares'] = new Chart(document.getElementById('socialShares'), {
+    type: 'bar',
+    data: {
+      labels: weeks,
+      datasets: [{ label: 'Weekly Shares', data: SOCIAL_WEEKLY.map(w => w.shares), backgroundColor: 'rgba(207,166,119,0.6)', borderRadius: 4 }]
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, datalabels: barLabelConfig } }
+  });
+}
+
+// ===== BUILD FOSN TAB =====
+function buildFOSN() {
+  const fosnKPIs = SCORECARD.filter(s => {
+    const g = s.goal.toLowerCase();
+    return g.includes('fos news') || g.includes('fosn');
+  });
+  buildCompactKPITable('fosnKPIStatus', fosnKPIs);
+
+  const callouts = document.getElementById('fosnCallouts');
+  const fosnCallouts = [
+    { type: 'positive', icon: '✓', title: 'Impressions Approaching Goal', text: 'FOS News monthly impressions at 928K vs 1M monthly goal (92.8% pacing). Nearly at target — a strong signal that content distribution strategy is working.' },
+    { type: 'positive', icon: '✓', title: 'YouTube Growth Accelerating', text: 'FOS News YouTube subs at 61K vs 150K goal with 142% pacing — the fastest-growing channel in the portfolio. Jumped from 35K to 61K in Q1 alone.', rec: 'Invest in YouTube Shorts for FOSN; optimize thumbnails and titles; explore YouTube community features for engagement.' },
+    { type: 'warning', icon: '⚡', title: 'Social Followers Growing Slowly', text: 'FOSN social followers at 98.5K vs 200K goal (26.3% pacing). IG and X growth is modest — need a breakthrough strategy.', rec: 'Cross-promote from flagship accounts; create FOSN-specific social series; test paid promotion for key content pieces.' },
+  ];
+  fosnCallouts.forEach(c => {
+    callouts.innerHTML += `
+      <div class="callout ${c.type}">
+        <div class="callout-header">
+          <div class="callout-icon">${c.icon}</div>
+          <div class="callout-title">${c.title}</div>
+        </div>
+        <p>${c.text}</p>
+      </div>
+    `;
+  });
+
+  const weeks = SOC_DATES.slice(0, FOSN_WEEKLY.length);
+
+  destroyChart('fosnI');
+  chartInstances['fosnI'] = new Chart(document.getElementById('fosnImps'), {
+    type: 'bar',
+    data: {
+      labels: weeks,
+      datasets: [{ label: 'Weekly Impressions', data: FOSN_WEEKLY.map(w => w.impressions), backgroundColor: 'rgba(25,108,252,0.65)', borderRadius: 4 }]
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, datalabels: barLabelConfig } }
+  });
+
+  destroyChart('fosnV');
+  chartInstances['fosnV'] = new Chart(document.getElementById('fosnVV'), {
+    type: 'bar',
+    data: {
+      labels: weeks,
+      datasets: [{ label: 'Weekly Video Views', data: FOSN_WEEKLY.map(w => w.video_views), backgroundColor: 'rgba(0,118,64,0.55)', borderRadius: 4 }]
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, datalabels: barLabelConfig } }
+  });
+
+  destroyChart('fosnA');
+  const fosnX = PLATFORM_FOLLOWERS.fosn['FOSN X'];
+  const fosnIG = PLATFORM_FOLLOWERS.fosn['FOSN IG'];
+  const fosnSocialTotal = fosnX.map((v, i) => v + (fosnIG[i] || 0));
+  chartInstances['fosnA'] = new Chart(document.getElementById('fosnAudience'), {
+    type: 'line',
+    data: {
+      labels: SOC_DATES,
+      datasets: [
+        { label: 'Total Social (X + IG)', data: fosnSocialTotal, borderColor: '#196CFC', backgroundColor: 'rgba(25,108,252,0.06)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+        { label: 'X (Twitter)', data: fosnX, borderColor: '#000', tension: 0.3, pointRadius: 2, borderWidth: 2 },
+        { label: 'Instagram', data: fosnIG, borderColor: '#E1306C', tension: 0.3, pointRadius: 2, borderWidth: 2 },
+        { label: '200K Goal', data: SOC_DATES.map(() => 200000), borderColor: 'rgba(180,50,50,0.35)', borderDash: [6,4], pointRadius: 0, borderWidth: 2, fill: false }
+      ]
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, legend: { ...chartDefaults.plugins.legend, display: true, labels: { boxWidth: 12, font: { size: 10 } } }, datalabels: { display: false } } }
+  });
+
+  // YouTube charts
+  destroyChart('fosnYTI');
+  chartInstances['fosnYTI'] = new Chart(document.getElementById('fosnYTImps'), {
+    type: 'bar',
+    data: {
+      labels: SOC_DATES,
+      datasets: [
+        { label: 'Organic Impressions', data: FOSN_YT_WEEKLY.map(w => w.imp_org), backgroundColor: 'rgba(25,108,252,0.65)', borderRadius: 4, stack: 'yt' },
+        { label: 'Paid Impressions', data: FOSN_YT_WEEKLY.map(w => w.imp_paid), backgroundColor: 'rgba(25,108,252,0.25)', borderRadius: 4, stack: 'yt' }
+      ]
+    },
+    options: { ...chartDefaults, scales: { ...chartDefaults.scales, x: { ...chartDefaults.scales.x, stacked: true }, y: { ...chartDefaults.scales.y, stacked: true } }, plugins: { ...chartDefaults.plugins, legend: { ...chartDefaults.plugins.legend, display: true, labels: { boxWidth: 12, font: { size: 10 } } }, datalabels: barLabelConfig } }
+  });
+
+  destroyChart('fosnYTS');
+  // FOS Today → FOS News transition: first week of Feb 2026 = index 5 (02/02) in SOC_DATES
+  const fosnTransitionIndex = 5; // "02/02" — first week of Feb 2026
+  const fosnYTData = PLATFORM_FOLLOWERS.fosn['FOSN YouTube'];
+  // Custom plugin to draw vertical transition line
+  const fosnTransitionPlugin = {
+    id: 'fosnTransition',
+    afterDraw(chart) {
+      const xScale = chart.scales.x;
+      const yScale = chart.scales.y;
+      const ctx = chart.ctx;
+      const x = xScale.getPixelForValue(fosnTransitionIndex);
+      ctx.save();
+      // Dashed vertical line
+      ctx.beginPath();
+      ctx.setLineDash([6, 4]);
+      ctx.strokeStyle = 'rgba(13,29,100,0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.moveTo(x, yScale.top);
+      ctx.lineTo(x, yScale.bottom);
+      ctx.stroke();
+      // Label — positioned at bottom of chart to avoid legend overlap
+      ctx.setLineDash([]);
+      ctx.font = '600 9px Arial';
+      ctx.fillStyle = '#0D1D64';
+      ctx.textAlign = 'center';
+      ctx.fillText('FOS Today → FOS News', x, yScale.bottom + 28);
+      ctx.restore();
+    }
+  };
+  chartInstances['fosnYTS'] = new Chart(document.getElementById('fosnYTSubs'), {
+    type: 'line',
+    data: {
+      labels: SOC_DATES,
+      datasets: [
+        { label: 'YouTube Subscribers', data: fosnYTData, borderColor: '#E00922', backgroundColor: 'rgba(224,9,34,0.06)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+        { label: '2026 Goal (150K)', data: SOC_DATES.map(() => 150000), borderColor: 'rgba(180,50,50,0.35)', borderDash: [6,4], pointRadius: 0, borderWidth: 2, fill: false }
+      ]
+    },
+    plugins: [fosnTransitionPlugin],
+    options: {
+      ...chartDefaults,
+      layout: { padding: { top: 10, bottom: 36 } },
+      plugins: {
+        ...chartDefaults.plugins,
+        legend: { ...chartDefaults.plugins.legend, display: true, position: 'top', labels: { boxWidth: 12, font: { size: 10 }, padding: 16 } },
+        datalabels: {
+          ...lineLabelConfig,
+          display: function(ctx) {
+            if (ctx.dataset.borderDash) return false;
+            return ctx.dataIndex === 0 || ctx.dataIndex % 3 === 0 || ctx.dataIndex === ctx.dataset.data.length - 1;
+          },
+          color: '#E00922'
+        }
+      }
+    }
+  });
+}
+
+// ===== BUILD EATS TAB =====
+function buildEats() {
+  const eatsKPIs = SCORECARD.filter(s => {
+    const g = s.goal.toLowerCase();
+    return g.includes('stadium eats');
+  });
+  buildCompactKPITable('eatsKPIStatus', eatsKPIs);
+
+  const callouts = document.getElementById('eatsCallouts');
+  const eatsCallouts = [
+    { type: 'warning', icon: '⚡', title: 'YouTube Channel Just Launched', text: 'Stadium Eats YouTube at 139 subs in March vs 25K goal. The channel is brand new (launched Q1), so pacing metrics are expected to be low — this is a build-from-zero play.', rec: 'Focus on initial content library (10-15 videos); collaborate with food influencers; cross-promote from flagship YouTube.' },
+    { type: 'positive', icon: '✓', title: 'Social Followers Growing', text: 'Stadium Eats social at ~22.9K (March) vs 50K goal — up from 17.2K in Feb. Strong momentum driven by IG and TikTok content.', rec: 'Leverage stadium/venue partnerships for content; tap into game-day food culture on TikTok and Reels; continue UGC strategies.' },
+  ];
+  eatsCallouts.forEach(c => {
+    callouts.innerHTML += `
+      <div class="callout ${c.type}">
+        <div class="callout-header">
+          <div class="callout-icon">${c.icon}</div>
+          <div class="callout-title">${c.title}</div>
+        </div>
+        <p>${c.text}</p>
+      </div>
+    `;
+  });
+
+  // Social follower growth chart (IG, X, TikTok)
+  destroyChart('eatsF');
+  const eatsIG = PLATFORM_FOLLOWERS.eats['Eats IG'];
+  const eatsYT = PLATFORM_FOLLOWERS.eats['Eats YouTube'];
+  const eatsX = PLATFORM_FOLLOWERS.eats['Eats X'];
+  const eatsTT = PLATFORM_FOLLOWERS.eats['Eats TikTok'];
+  chartInstances['eatsF'] = new Chart(document.getElementById('eatsFollowers'), {
+    type: 'line',
+    data: {
+      labels: SOC_DATES,
+      datasets: [
+        { label: 'Instagram', data: eatsIG, borderColor: '#E4405F', backgroundColor: 'rgba(228,64,95,0.06)', fill: false, tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+        { label: 'X (Twitter)', data: eatsX, borderColor: '#000', backgroundColor: 'rgba(0,0,0,0.06)', fill: false, tension: 0.3, pointRadius: 3, borderWidth: 2 },
+        { label: 'TikTok', data: eatsTT, borderColor: '#25F4EE', backgroundColor: 'rgba(37,244,238,0.06)', fill: false, tension: 0.3, pointRadius: 3, borderWidth: 2 },
+        { label: '2026 Goal (50K)', data: SOC_DATES.map(() => 50000), borderColor: 'rgba(180,50,50,0.35)', borderDash: [6,4], pointRadius: 0, borderWidth: 2, fill: false }
+      ]
+    },
+    options: {
+      ...chartDefaults,
+      plugins: {
+        ...chartDefaults.plugins,
+        legend: { ...chartDefaults.plugins.legend, display: true, labels: { boxWidth: 12, font: { size: 10 } } },
+        datalabels: {
+          ...lineLabelConfig,
+          display: function(ctx) {
+            if (ctx.dataset.borderDash) return false;
+            if (ctx.datasetIndex === 0) return ctx.dataIndex === 0 || ctx.dataIndex === ctx.dataset.data.length - 1 || ctx.dataIndex === 7;
+            return ctx.dataIndex === ctx.dataset.data.length - 1 && ctx.dataset.data[ctx.dataset.data.length - 1] > 0;
+          }
+        }
+      }
+    }
+  });
+
+  // YouTube subscriber growth chart
+  destroyChart('eatsYTF');
+  chartInstances['eatsYTF'] = new Chart(document.getElementById('eatsYTFollowers'), {
+    type: 'line',
+    data: {
+      labels: SOC_DATES,
+      datasets: [
+        { label: 'YouTube Subscribers', data: eatsYT, borderColor: '#E00922', backgroundColor: 'rgba(224,9,34,0.06)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+        { label: '2026 Goal (25K)', data: SOC_DATES.map(() => 25000), borderColor: 'rgba(180,50,50,0.35)', borderDash: [6,4], pointRadius: 0, borderWidth: 2, fill: false }
+      ]
+    },
+    options: {
+      ...chartDefaults,
+      plugins: {
+        ...chartDefaults.plugins,
+        legend: { ...chartDefaults.plugins.legend, display: true, labels: { boxWidth: 12, font: { size: 10 } } },
+        datalabels: {
+          ...lineLabelConfig,
+          display: function(ctx) {
+            if (ctx.dataset.borderDash) return false;
+            return ctx.dataIndex === ctx.dataset.data.length - 1 || (ctx.dataIndex === ctx.dataset.data.length - 2 && ctx.dataset.data[ctx.dataset.data.length - 2] > 0);
+          },
+          color: '#E00922'
+        }
+      }
+    }
+  });
+
+  // YouTube Snapshot — metric cards instead of charts (only 2 weeks of data)
+  const snap = document.getElementById('eatsYTSnapshot');
+  const wk13 = EATS_YT_WEEKLY[0];
+  const wk14 = EATS_YT_WEEKLY[1];
+  const subGrowth = wk14.subs - wk13.subs;
+  const impGrowth = wk14.imp_total - wk13.imp_total;
+  snap.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px;">
+      <div style="background:white;border-radius:12px;padding:18px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid #CFA677;">
+        <div style="font-size:11px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Subscribers</div>
+        <div style="font-size:28px;font-weight:700;color:#1a1a2e;margin:6px 0;">${fmt(wk14.subs)}</div>
+        <div style="font-size:11px;color:#007640;">+${fmt(subGrowth)} in 1 week (+${((subGrowth/wk13.subs)*100).toFixed(0)}%)</div>
+      </div>
+      <div style="background:white;border-radius:12px;padding:18px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid #CFA677;">
+        <div style="font-size:11px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Total Impressions (Wk 14)</div>
+        <div style="font-size:28px;font-weight:700;color:#1a1a2e;margin:6px 0;">${fmt(wk14.imp_total)}</div>
+        <div style="font-size:11px;color:#007640;">+${fmt(impGrowth)} vs Week 13 (+${((impGrowth/wk13.imp_total)*100).toFixed(0)}%)</div>
+      </div>
+      <div style="background:white;border-radius:12px;padding:18px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid #CFA677;">
+        <div style="font-size:11px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Organic Impressions (Wk 14)</div>
+        <div style="font-size:28px;font-weight:700;color:#1a1a2e;margin:6px 0;">${fmt(wk14.imp_org)}</div>
+        <div style="font-size:11px;color:#666;">${((wk14.imp_org/wk14.imp_total)*100).toFixed(0)}% of total</div>
+      </div>
+      <div style="background:white;border-radius:12px;padding:18px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid #CFA677;">
+        <div style="font-size:11px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">2026 Goal</div>
+        <div style="font-size:28px;font-weight:700;color:#1a1a2e;margin:6px 0;">25K</div>
+        <div style="font-size:11px;color:#E00922;">Currently at ${((wk14.subs/25000)*100).toFixed(1)}% — channel launched Mar 2026</div>
+      </div>
+    </div>
+  `;
+}
+
+// ===== BUILD FLAGSHIP YOUTUBE TAB =====
+function buildContent() {
+  const contentKPIs = SCORECARD.filter(s => {
+    if (s._section === 'secondary' || s._section === 'to_discuss') return false;
+    const g = s.goal.toLowerCase();
+    if (g.includes('fos news') || g.includes('fosn') || g.includes('stadium eats')) return false;
+    return s.platform === 'YouTube' || g.includes('video') || g.includes('youtube');
+  });
+  buildCompactKPITable('contentKPIStatus', contentKPIs);
+
+  const callouts = document.getElementById('contentCallouts');
+  const contentCallouts = [
+    { type: 'warning', icon: '⚡', title: 'YouTube Subscribers (Main) Behind Pace', text: 'Main YouTube channel at 121K vs 250K goal (34% pacing). While growing steadily (+11K in Q1), the rate needs to increase significantly.', rec: 'Analyze subscriber conversion funnel; test end-screen CTAs; explore YouTube Shorts for discovery; consider collab content with larger creators.' },
+    { type: 'positive', icon: '✓', title: 'Returning YouTube Viewers Strong', text: 'At 21% vs 25% goal (84% pacing) — audience loyalty on YouTube is building nicely. This is the best-pacing YouTube metric.', rec: 'Maintain consistent upload schedule; develop series formats that drive return viewing; leverage Community tab for engagement.' },
+    { type: 'warning', icon: '⚡', title: 'YouTube Impressions Volatile', text: 'Monthly YouTube impressions at 1.4M in March vs 3M goal (46% pacing). High variance month-to-month (5.3M in Jan) suggests dependence on viral hits.', rec: 'Build more "base load" content with consistent impressions; diversify topics; optimize SEO-driven discovery.' },
+  ];
+  contentCallouts.forEach(c => {
+    callouts.innerHTML += `
+      <div class="callout ${c.type}">
+        <div class="callout-header">
+          <div class="callout-icon">${c.icon}</div>
+          <div class="callout-title">${c.title}</div>
+        </div>
+        <p>${c.text}</p>
+      </div>
+    `;
+  });
+
+  // Flagship YouTube Subscribers — with historical 2025 monthly data
+  destroyChart('contentYTF');
+  const ytHistMonths = ['Jan 25','Feb 25','Mar 25','Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25'];
+  const ytHistData = [28193,33396,38508,42335,45190,46564,48923,50599,56535,66161,85781,102672];
+  const ytWeekLabels = PLATFORM_FOLLOWERS.labels.map(l => l.replace('Wk','Wk '));
+  const ytFlagshipData = [102631,103819,106221,109307,110723,111638,113545,115407,117082,117385,118955,120553,121261,121421];
+  const combinedYTLabels = [...ytHistMonths, ...ytWeekLabels];
+  const combinedYTData = [...ytHistData, ...ytFlagshipData];
+  chartInstances['contentYTF'] = new Chart(document.getElementById('contentYTFlagship'), {
+    type: 'line',
+    data: {
+      labels: combinedYTLabels,
+      datasets: [
+        { label: 'Subscribers', data: combinedYTData, borderColor: '#196CFC', backgroundColor: 'rgba(25,108,252,0.06)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+        { label: '2026 Goal (250K)', data: combinedYTLabels.map(() => 250000), borderColor: 'rgba(180,50,50,0.35)', borderDash: [6,4], pointRadius: 0, borderWidth: 2, fill: false }
+      ]
+    },
+    options: {
+      ...chartDefaults,
+      plugins: { ...chartDefaults.plugins, legend: { ...chartDefaults.plugins.legend, display: true, labels: { boxWidth: 12, font: { size: 10 } } }, datalabels: { ...lineLabelConfig, display: function(ctx) { if (ctx.dataset.borderDash) return false; return ctx.dataIndex % 4 === 0 || ctx.dataIndex === ctx.dataset.data.length - 1; } } }
+    }
+  });
+}
+
+
+// ===== BUILD MONTHLY RECAP =====
+// ===== MONTHLY RECAP DATA =====
+const RECAP_DATA = {
+  january: {
+    title: 'January 2026 Recap',
+    sections: [
+      { heading: 'Executive Summary', content: `<p>As expected for the season, CFB and NFL coverage were the biggest contributors to the month. Just like previous years, we saw the highest monthly gains of the year (and even all-time on some channels). Additionally, as we started using FOS News accounts more frequently, the content shift helped boost reach, audience growth, and impressions across the overall stats.</p>
+<ul>
+<li><strong>NFL-tagged content:</strong> Made up 16% of our output. Post volume increased 97% YoY, organic impressions increased 91%, and engagements increased 117%.</li>
+<li><strong>College Football-tagged content:</strong> Post volume increased 149% YoY, organic impressions increased 147%, and engagements increased 127%.</li>
+<li><strong>Women&rsquo;s Sports-tagged content:</strong> Post volume decreased 40% YoY, while organic impressions increased 67% and engagements increased 40%.</li>
+</ul>
+<p>Parsely and Google Analytics track pageviews on our website, but our content also appears on other platforms, which isn&rsquo;t captured in our internal tools. We&rsquo;ve been working to gain access to these platforms to measure off-site viewership. Currently, Apple and Google News alone generated over 920K pageviews on articles, which will be added to our monthly pageview stats moving forward.</p>
+<p>After a couple of weeks of negative growth on our main IG channel, we&rsquo;ve been keeping a close eye on operations there. With a high volume of coverage around CFB and NFL content, the channel made a strong comeback to start the year. We saw the highest post volume ever, a +500% MoM increase in net new follower gains, and the highest impressions ever.</p>` },
+
+      { heading: 'Social', content: `<p><strong>Key Insights:</strong> YouTube paid growth tactics are inflating the numbers and account for +35% of total follower gains across our accounts for the past month. Excluding paid audience growth, we gained ~30K new followers across social. LinkedIn and TikTok were the biggest contributors to organic follower growth but IG main channel saw the biggest jump in net new follower gains during January (+500% MoM increase).</p>
+
+<div class="platform-subsection"><h5>Instagram (FOS)</h5>
+<p>Highest month of follower growth since August 2024 (6.2K net new followers, +545% MoM increase). Highest number of post volume ever (371 posts) and highest impressions ever (85M, +85% MoM). Carousel posts made up 27% of posts but performed well (9/10 top posts were carousels). Stadium Status posts had the highest impressions-per-post performance (383K).</p>
+<p><em>Top organic:</em> "Nobull gets $50M funding" (6.1M imps, 4.1K shares) | "First Ever Power 4 Flag Football Offer" (3.2M imps, 5.9K shares) | "CFB Playoff semifinal Battle of the Billionaires" (3.2M imps, 1.7K shares)</p></div>
+
+<div class="platform-subsection"><h5>Instagram (Stadium Eats)</h5>
+<p>Highest month of follower growth, impressions, engagements and post volume ever. Top performing content was primarily football-related &mdash; 3/10 top posts focused on eating habits/food consumption of NFL teams.</p>
+<p><em>Top organic:</em> "NY Giants food consumption" (1.3M imps, 8.6K shares, 5.38% ER) | "Weirdest Stadium Eats of 2025" (1M imps, 23.8K shares) | "Atlanta Falcons food consumption" (1M imps, 2.6K shares)</p></div>
+
+<div class="platform-subsection"><h5>X (FOS)</h5>
+<p>Highest month of follower growth and video views in 1.5 years. Second-highest month of impressions despite lower post volume. College football content performed well (7/10 top posts). 4/5 posts driving the most follower growth featured Laura Rutledge.</p>
+<p><em>Top organic:</em> "Fernando Mendoza Open to Work" (6M imps, 1.66% ER) | "Tennessee Titans' new stadium" (4.3M imps) | "Trademark Rejection" (3.7M imps, 2.63% ER)</p></div>
+
+<div class="platform-subsection"><h5>TikTok</h5>
+<p>Second highest month of video views/impressions of all time. Over 70% of follower gains came from three organic posts. International viewers make up over 45% of total followers. Boosted content generated only 5 incremental followers &mdash; budget to be reallocated to FOSN in February.</p>
+<p><em>Top organic:</em> "Laura Rutledge CFP halftime" (4.5M imps, 7.02% ER, 1.4K followers) | "Laura Rutledge Herbert interview" (2.7M imps, 6.72% ER, 1.7K followers)</p></div>
+
+<div class="platform-subsection"><h5>LinkedIn</h5>
+<p>Highest month of follower gain since 2024 (+10K net new). Highest monthly impressions and engagements for 6 months. Photo content stood out (90% of best performing posts were photo-based). Highest engagement vs competition during 10/12 months of the year.</p></div>
+
+<div class="platform-subsection"><h5>Facebook</h5>
+<p>CFB content made up 6/10 top posts. Follower gains, engagements, impressions, and video views were all on the lower side for January. None of the posts reached 1M impressions, resulting in overall impressions being low at 13M.</p></div>
+
+<div class="platform-subsection"><h5>Threads</h5>
+<p>Follower growth had one of its slowest months since launch, with only 310 net new followers. More than half of impressions came from "College Football" tagged posts. Only 53 posts shared (~40% less than 2025 monthly average). Currently not utilizing this channel for growth purposes &mdash; opportunity to test driving traffic to the site.</p></div>
+
+<div class="platform-subsection"><h5>FOS News</h5>
+<p>New/reactivated channels show strong momentum. The fandom base between FOS News and main channels appears similar &mdash; same posts appear on best-performers lists. X FOS_News reached 900K impressions in first month since relaunch. IG fos_news had 1.1K net new followers and 1.7M impressions (highest since restart). TikTok facing recommendation issues &mdash; $2K budget reallocated to main TikTok.</p></div>` },
+
+      { heading: 'Content (YouTube)', content: `<p><strong>Key Insights:</strong> Shorts content has been impactful increasing the average % viewed stats. The lack of organic (non-sponsored) content is negatively impacting organic follower growth and overall reach. First monthly results from the news channel have shown positive growth in organic viewership and engagements.</p>
+
+<div class="platform-subsection"><h5>FOS (YouTube)</h5>
+<p>12 videos published (10 Shorts, 2 Videos &mdash; both sponsored). Only 245 subscribers gained organically, likely due to lack of organic content. 48% discovery from Shorts feed, 25% from advertising, 17.2% from YouTube Search. Boosted content generated 10,271 subscribers at $0.35 CPF on top performer ("Smartest Contract in Baseball History").</p>
+<p><strong>Monetization:</strong> $108 in January (vs $131 Dec, $201 Nov, $630 Sep) &mdash; due to lack of monetizable organic video content.</p></div>
+
+<div class="platform-subsection"><h5>FOS News (YouTube)</h5>
+<p>Highest month of video views and engagements since channel creation. Average video watch percentage jumped from 10% in 2025 to 28% in January (+180%). Shorts averaged 59% viewed vs 12% for video content. Boosted content generated 6,298 subscribers.</p></div>` },
+
+      { heading: 'Website', content: `<p><strong>Audience Growth:</strong> 3.6M monthly pageviews (including Apple and Google News). Site registrants at 64,168 (+1% MoM even without registration wall). Highest monthly pageviews of all time.</p>
+<p>Jungroup contributed over 1M views, while organic efforts generated 2.6M pageviews. 81% of traffic was generated by articles (77% editorial, 3% evergreen, 2% sponsored). Remaining 19% went to non-article pages including Factle (12%).</p>
+<p><em>Top organic articles:</em> "Mark Cuban Increases Indiana Football Spending" (71.7K views) | "Molly Qerim Hosting Zuffa Boxing" (38.3K) | "Drew Brees Launches New Racket Sport" (24K) | "David Cone Out at ESPN" (23K)</p>
+<p>Only ~11% returning visitors due to boosted posts via JunGroup bringing in new traffic. Registration wall currently down, limiting user-level activity tracking.</p>` },
+
+      { heading: 'Newsletter', content: `<p><strong>Total active subscribers:</strong> 733,308 (-3.9% growth in January). The Memo: 725,092 L30 active subs. Asset Class: 4,570 L30 active subs. Tuned In: 3,646 L30 active subs.</p>
+
+<div class="platform-subsection"><h5>The Memo</h5>
+<p>50 published newsletters reaching ~780K recipients, accumulating over 34M total opens. Total open rate: 87.06%. Unique open rate: 62.86%. 26 unsold newsletter placements totaling ~$181,500 in potential revenue. Churn operation running on bi-weekly schedule to ensure 60%+ Open Rate.</p>
+<p><strong>Growth tactics:</strong> Tested two new Meta newsletter ad campaigns. Lead-form ads drove 234 new subscribers at ~$3 CPA. Subscriber growth trending negative but most churn from non-engaging users (78% of unsubscribes were Fluent subscribers). Current engagement at 666K total opens and 86% open rate &mdash; well above promised benchmarks.</p></div>
+
+<div class="platform-subsection"><h5>Asset Class</h5>
+<p>5 published newsletters reaching 4.4K recipients, 26K total opens. Total open rate: 118.04%. Unique open rate: 60.72%.</p></div>
+
+<div class="platform-subsection"><h5>Tuned In</h5>
+<p>4 published newsletters reaching ~5.8K recipients, 24K total opens. Total open rate: 113.11%. Unique open rate: 59.16%.</p></div>` },
+
+      { heading: 'Franchises & Series', content: `<ul>
+<li><strong>Second Acts:</strong> 1 post in January &mdash; 302K impressions, 5K engagements, 1.7% ER (vs. 52 posts in 2025 with 13.6M imps, 326K engagements, 2.4% ER)</li>
+<li><strong>Tuned In:</strong> 50 posts &mdash; 3.7M impressions, 139K engagements, 3.8% ER</li>
+<li><strong>Stadium Status:</strong> 63 posts &mdash; 22M impressions, 938K engagements, 8.3M video views, 4.2% ER (strongest performer)</li>
+<li><strong>Big Ticket:</strong> 19 posts &mdash; 2M impressions, 65K engagements, 374K video views, 3.3% ER</li>
+<li><strong>The Come Up:</strong> No posts in January</li>
+<li><strong>FOS Explains:</strong> No posts in January (most recent episode August 2025)</li>
+<li><strong>Portfolio Players:</strong> 1 new episode, 18 social posts &mdash; 397K impressions, 6K engagements, 329K video views, 1.6% ER</li>
+</ul>` },
+
+      { heading: 'Games (Factle)', content: `<p>Trivia pages served 985,989 ad impressions in January.</p>
+<ul>
+<li><strong>Factle:</strong> 5,009 average daily visitors, 216K pageviews, avg 2:05 min on page. 60.6% direct, 16.2% search, 18% internal.</li>
+<li><strong>Factle Sports:</strong> 2,584 average daily visitors, 105K pageviews, avg 1:42 min. 69.4% from internal (fos.com), 70.82% returning visitors.</li>
+</ul>
+<p>Factle and Factle Sports have become increasingly important drivers of engagement &mdash; avg time spent on trivia pages was 2:20 vs 0:43 for the rest of the site.</p>` },
+
+      { heading: 'Events / Learning / Ecommerce', content: `<p><strong>Events:</strong> No events activity in January.</p>
+<p><strong>Learning:</strong> 434 people took FOS Learning courses in January (+24% vs December) with 610 total enrollments. Top courses: Athlete Marketing Essentials: NIL Certification (249), Sports Marketing Essentials (209), Responsible Gaming Essentials (73).</p>
+<p><strong>Ecommerce:</strong> 7 orders totaling $526.07. 67 total customers since July 2025 launch. 93% of revenue from Big Business collection. Sports is Big Business hoodie is top seller.</p>` },
+    ]
+  },
+
+  february: {
+    title: 'February 2026 Recap',
+    sections: [
+      { heading: 'Executive Summary', content: `<p>February was defined by two major tentpole moments: <strong>Super Bowl LX</strong> and the <strong>2026 Winter Olympics</strong>, which anchored the content calendar and drove significant spikes across social, website, and video.</p>
+<p>Super Bowl Sunday produced our highest single-day active user count on the website at 92K, and Winter Olympics content fueled sustained mid-month engagement across every platform. The Winter Olympics was the #1 tag by engagements on Instagram, LinkedIn, and Facebook, while Super Bowl and NFL content accounted for 35% of total X impressions for the month.</p>
+<p>Despite having two of the biggest sports moments on the calendar, follower growth came in below expectations on several accounts. TikTok recorded its slowest growth month of the past year at 2,242 new followers, directly tied to a sharp drop in posting consistency mid-month. Threads added just 89 net new followers, continuing a downward trend driven by a drop in posting volume.</p>
+<p>YouTube showed meaningful progress in February, with the FOS main channel publishing 35 videos compared to just 12 in January. The shift toward organic content production (up from 7 to 30 organic videos) drove the highest organic subscriber gain in six months (295), and average percentage viewed reached 48.58%.</p>
+<p>Across franchises, <strong>Stadium Status</strong> led all content with 13.4M impressions and 760K engagements at a 5.7% ER. <strong>Breaking Barriers</strong> posted the highest engagement rate of any franchise at 11.8% ER across just 5 posts.</p>
+<p>The clearest opportunity heading into March is posting consistency &mdash; the data across TikTok, Threads, and Stadium Eats all point to the same root cause: drops in volume directly correlate with drops in growth.</p>` },
+
+      { heading: 'Social', content: `<p><strong>Key Insights:</strong> Winter Olympics and NFL/Super Bowl content dominated performance across all channels. Instagram and LinkedIn were the strongest follower growth platforms (+5,045 and +7,473 respectively). TikTok and Threads saw the weakest growth, tied directly to drops in posting volume.</p>
+<p>LinkedIn carousel test delivered strong results &mdash; two "Everyday Jobs of Team USA Athletes" posts achieved 132% and 123% engagement rates respectively, making it the most engaging format tested to date.</p>
+
+<div class="platform-subsection"><h5>Instagram (FOS)</h5>
+<p>Second highest month of audience growth and impressions in last 12 months. 202 posts generating +5,045 net new followers, 71.8M impressions and 2.5M engagements. Feb 17-18 had highest views and engagements, aligning with US vs Canada hockey during Winter Olympics. Carousel posts made up 49.5% and performed well (8/10 top posts).</p>
+<p><em>Top organic:</em> "Olympic figure skating choreographer" (6.7M imps, 58.6K shares) | "Epstein&rsquo;s connection to Formula One" (3.2M imps, 42.5K shares)</p></div>
+
+<div class="platform-subsection"><h5>X (FOS)</h5>
+<p>Highest monthly impressions in the past year (86M, +35% MoM). 4/10 top performing posts were Super Bowl-related, 3/10 Olympics-related. As on other platforms, static/photo content dominated overall impressions. 5.2K net new followers.</p></div>
+
+<div class="platform-subsection"><h5>TikTok</h5>
+<p>Slowest growth month of the past year (2,242 new followers). Posting dropped from 4x/day around Super Bowl to near-zero for 9 days, stalling algorithmic distribution. Despite lower volume, avg views per post stayed strong suggesting content quality isn&rsquo;t the issue &mdash; volume is.</p></div>
+
+<div class="platform-subsection"><h5>LinkedIn</h5>
+<p>Continued strong performance: +7,473 net new followers. Carousel format test ("Everyday Jobs of Team USA Athletes") achieved 132% and 123% ER &mdash; highest engagement format tested.</p></div>
+
+<div class="platform-subsection"><h5>Threads</h5>
+<p>Just 89 net new followers &mdash; continuing downward trend driven by posting volume drop (110/month in 2025 to 27 in February). Channel underutilized despite 95K+ audience.</p></div>
+
+<div class="platform-subsection"><h5>Stadium Eats (Social)</h5>
+<p>Growth slowed after strong January. Super Bowl provided a natural content hook (game-day food) but posting consistency dropped mid-month. Feb post volume was below the channel&rsquo;s emerging baseline.</p></div>
+
+<div class="platform-subsection"><h5>FOS News (Social)</h5>
+<p>IG: Organic growth stagnant. Spikes occurred only on a few days with targeted content pushes. X: Continued publishing with video-forward strategy. Radio Row content during Super Bowl week generated elevated engagement. TikTok: Essentially flat at 173 followers &mdash; algorithm recommendation issue persists.</p></div>` },
+
+      { heading: 'Content (YouTube)', content: `<p>FOS main channel published 35 videos in February (vs 12 in January). Organic content jumped from 7 to 30 videos, driving the highest organic subscriber gain in six months (295). Average percentage viewed reached 48.58%.</p>
+<p>Shorts continued to outperform on watch-through metrics. The shift toward more frequent, organic content is showing early returns in both engagement and discovery.</p>
+<p><strong>FOSN YouTube:</strong> 48,154 subscribers (+36% from January). Radio Row content and continued boosting campaigns drove substantial growth. CPF on boosted campaigns remained under $0.50 threshold.</p>
+<p><strong>Stadium Eats YouTube:</strong> Channel newly launched. 203 subscribers by end of February/early March. Focus on building initial content library.</p>` },
+
+      { heading: 'Website', content: `<p>Monthly pageviews reached 1.6M (excl. JunGroup) driven by Super Bowl and Olympics tentpole events. Super Bowl Sunday produced our highest single-day active user count at 92K. Pages per session at 2.48 (above 2.0 goal). Returning visitor rate at 21.2%.</p>
+<p>Newsletter-to-site clicks remain a top-three traffic driver at 104K views. Social-to-site at 38K, still well below the 175K goal. Evergreen search pageviews at 59K vs 200K goal &mdash; AEO work in progress.</p>
+<p>Site registrants at 65,106. Registration wall remains down, limiting new registration capture.</p>` },
+
+      { heading: 'Newsletter', content: `<p><strong>The Memo:</strong> 735,729 active subscribers. Open rate: 86.7%. Click-through rate: 0.18%. Subscriber growth continued its negative trend, but churn concentrated in non-engaging (Fluent) subscribers. Current engagement remains well above promised benchmarks for client campaigns (550K total opens, 75% open rate).</p>
+<p><strong>Asset Class:</strong> 4,805 subscribers (+5% from January). Open rate strong. Growth through better cross-promotion on social.</p>
+<p><strong>Tuned In:</strong> 7,037 subscribers (+3% from January). Open rate strong. Same cross-promotion growth strategy.</p>` },
+
+      { heading: 'Franchises & Series', content: `<ul>
+<li><strong>Stadium Status:</strong> Led all content with 13.4M impressions, 760K engagements at 5.7% ER. Anchored by stadium announcements and renovation reveals.</li>
+<li><strong>Breaking Barriers:</strong> Highest ER of any franchise at 11.8% across 5 posts. Strong audience appetite for human interest and athlete spotlight content.</li>
+<li><strong>Tuned In:</strong> Continued steady output and maintained strong engagement.</li>
+<li><strong>Big Ticket / Portfolio Players:</strong> Consistent contribution to content calendar.</li>
+</ul>` },
+    ]
+  }
+};
+
+function buildRecap() {
+  // Set up month selector
+  document.querySelectorAll('.recap-month-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.recap-month-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderRecapMonth(btn.dataset.month);
+    });
+  });
+  // Default to March (current)
+  renderRecapMonth('march');
+}
+
+function renderRecapMonth(month) {
+  const container = document.getElementById('recapContent');
+  container.innerHTML = '';
+
+  if (month === 'march') {
+    renderMarchRecap(container);
+  } else {
+    renderHistoricalRecap(container, month);
+  }
+}
+
+function renderHistoricalRecap(container, month) {
+  const data = RECAP_DATA[month];
+  if (!data) { container.innerHTML = '<div class="recap-empty">No recap data available for this month.</div>'; return; }
+
+  let html = `<div class="recap-exec-summary"><h3>${data.title}</h3></div>`;
+
+  data.sections.forEach(s => {
+    html += `<div class="recap-narrative-section"><h4>${s.heading}</h4>${s.content}</div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+function renderMarchRecap(container) {
+  // Build the March template
+  container.innerHTML = `
+    <div class="recap-exec-summary">
+      <h3>Executive Summary &mdash; March 2026</h3>
+      <div class="recap-narrative">
+        <p>March was defined by two dominant content moments — <strong>March Madness</strong> and <strong>MLB Opening Day</strong> — which together anchored the content calendar and drove the strongest engagement month of 2026 so far. College basketball content made up just 19% of total post volume but delivered 37% of impressions and 40% of engagements across all platforms. MLB, fueled by Stadium Eats' Opening Day coverage, accounted for 11% of posts but a staggering 47% of all shares — making it the most shareable content category of the quarter by a wide margin.</p>
+        <p><strong>Instagram</strong> remained the largest platform by reach, generating 58.4M impressions and adding +6,771 net new followers — its highest growth month in over a year. <strong>LinkedIn</strong> had its best engagement month ever at 1.3M engagements (up 63% from February), driven by carousel/document posts. <strong>TikTok and Threads both recovered from February's posting consistency issues</strong>: TikTok nearly tripled its volume (52 posts → 152), and Threads follower growth bounced from +89 to +503.</p>
+        <p><strong>Stadium Eats had its best month ever on Instagram</strong>, growing from 17.1K to 23.5K followers (+37% in a single month), driven by MLB pre-season menu reveals and Opening Day content.</p>
+        <p>On the website, <strong>March Madness was the top traffic driver</strong> with 144K+ views and nearly 97K new visitors. Web registrants hit 67,909 — and with 2,488 new registrations gained in roughly 2.5 weeks, <strong>we are on pace to reach our highest monthly registration total ever in April.</strong></p>
+        <p><strong>Newsletter growth is the key priority heading into April.</strong> The Memo lost ~30K subscribers in March, with 70% traced to Fluent-sourced leads hitting the end of their ~3-month engagement window. Total opens still grew 6% MoM to 32M and open rates remain healthy, but subscriber list decline makes this an area requiring active investment. We've allocated $7,500 for Meta newsletter ads in April — our largest single growth line item — and are actively exploring new acquisition platforms to replace Fluent.</p>
+        <p>Across franchises, <strong>Stadium Eats</strong> led with 10.1M impressions and 539K engagements, while <strong>Stadium Status</strong> posted the highest engagement rate at 7.3% ER. <strong>The Come Up</strong> continued to punch above its weight on TikTok, with just 4 posts driving 1.66M impressions and 10% of the platform's total engagements.</p>
+      </div>
+    </div>
+
+    <div class="recap-section">
+      <h3>Social &mdash; Platform Breakdown</h3>
+      <table class="platform-table"><thead><tr><th>Platform</th><th>Posts</th><th>Impressions</th><th>Engagements</th><th>Net Followers</th></tr></thead><tbody id="recapPlatformBody"></tbody></table>
+    </div>
+
+    <div class="recap-section">
+      <h3>Website &mdash; Key Findings</h3>
+      <div class="recap-insight-grid" id="recapWebInsights"></div>
+      <div id="recapWebNarrative" style="margin-top: 16px;"></div>
+    </div>
+
+    <div class="recap-section">
+      <h3>Newsletter</h3>
+      <div class="recap-insight-grid" id="recapNLInsights"></div>
+      <div id="recapNLNarrative" style="margin-top: 16px;"></div>
+    </div>
+
+    <div class="recap-section">
+      <h3>Content (YouTube)</h3>
+      <div class="recap-insight-grid" id="recapYTInsights"></div>
+      <div id="recapYTNarrative" style="margin-top: 16px;"></div>
+    </div>
+
+    <div class="recap-section">
+      <h3>Franchise / Series Performance</h3>
+      <table class="platform-table"><thead><tr><th>Franchise</th><th>Posts</th><th>Impressions</th><th>Engagements</th><th>ER%</th><th>Sponsored %</th></tr></thead><tbody id="recapFranchiseBody"></tbody></table>
+    </div>
+
+    <div class="recap-section">
+      <h3>Games (Factle)</h3>
+      <div class="recap-insight-grid" id="recapGamesInsights"></div>
+    </div>
+
+    <div class="recap-section">
+      <h3>Paid Growth Summary</h3>
+      <div class="recap-insight-grid" id="recapPaidInsights"></div>
+      <table class="platform-table" style="margin-top: 16px;"><thead><tr><th>Line Item</th><th>Spend</th></tr></thead><tbody id="recapPaidBody"></tbody></table>
+    </div>
+
+    <div class="recap-section">
+      <h3>Events / Learning / Ecommerce</h3>
+      <div id="recapOtherNarrative"></div>
+    </div>
+  `;
+
+  // Website insights
+  const latestWeb = WEBSITE_WEEKLY[WEBSITE_WEEKLY.length - 1] || {};
+  const webInsights = document.getElementById('recapWebInsights');
+  [{metric: fmt(1308906,'short'), label:'Pageviews (Mar)'}, {metric: fmt(latestWeb.pages_per_session||0,'number').substring(0,4), label:'Pages / Session'}, {metric: fmt(latestWeb.returning_pct*100||0,'number').substring(0,4)+'%', label:'Returning Visitor %'}, {metric: fmt(latestWeb.total_registrants||0,'short'), label:'Site Registrants'}].forEach(d => {
+    webInsights.innerHTML += '<div class="recap-insight"><div class="insight-metric">'+d.metric+'</div><div class="insight-label">'+d.label+'</div></div>';
+  });
+  document.getElementById('recapWebNarrative').innerHTML = `
+    <p><strong>March Madness was the biggest traffic driver</strong>, with college basketball content generating 144K+ views and nearly 97K new visitors. The week of March 2 (Selection Sunday buildup, conference tournaments) marked the strongest sustained traffic period.</p>
+    <p><strong>WNBA CBA coverage</strong> was the other defining storyline, with WNBA content totaling 116K views and 66K new visitors, including 35K views from CBA-specific articles, while also driving strong X/Twitter referral traffic.</p>
+    <p>Newsletter-to-site traffic was the top pageview driver at 151K, followed by Google Discover at 150.6K, and social-to-site at 77K (X accounting for ~55K). External pageviews from Apple News added 176.6K and MSN contributed 133K.</p>
+    <p><strong>Web Registrants:</strong> 2,488 new registrations gained in ~2.5 weeks — the highest pace in 6 months. With this trajectory, April is on pace to be the highest monthly registration total ever.</p>
+    <p><strong>Top Articles:</strong> Texas A&M NIL investigation (30.2K views) | Ryan Reynolds / Wrexham 2.0 (28.6K) | Jack Nicklaus re-acquires Nicklaus Companies (22.9K) | Gilbert Arenas / USC (20.5K)</p>
+    <p><em>Note: 89% of March visitors were new, which aligns with March Madness driving one-time traffic from outside the core audience.</em></p>
+  `;
+
+  // Newsletter insights
+  const nlInsights = document.getElementById('recapNLInsights');
+  [{metric:'659K',label:'Memo Active Subs'},{metric:'85.3%',label:'Total Open Rate'},{metric:'62.6%',label:'Unique Open Rate'},{metric:'32M',label:'Total Opens (Mar)'}].forEach(d => {
+    nlInsights.innerHTML += '<div class="recap-insight"><div class="insight-metric">'+d.metric+'</div><div class="insight-label">'+d.label+'</div></div>';
+  });
+  document.getElementById('recapNLNarrative').innerHTML = `
+    <p><strong>The Memo</strong> sent 57 newsletters reaching ~656K recipients and accumulating 32M total opens — a 6% jump MoM. Total open rate was 85.26%; unique open rate was 62.56%.</p>
+    <p><strong>Subscriber list decline is the top priority for April.</strong> The Memo lost ~30K subscribers in March. A deeper analysis shows 70% of churned users were Fluent-sourced leads with an average tenure of 3–3.5 months — aligning with the last major Fluent intake cohort hitting end-of-lifecycle. Starting in April, WH will run churn operations monthly (vs. bi-weekly) with an updated 90-day inactivity window.</p>
+    <p>Domain reputation was reviewed: no deliverability issues found, and domain reputation remains healthy.</p>
+    <p><strong>Paid Growth:</strong> $494 spent on Meta newsletter ads in March (28 ads across 3 verticals). April budget is $7,500 — the highest single growth line item — as newsletter acquisition is the top priority. Actively exploring new subscriber acquisition platforms to replace Fluent.</p>
+    <div class="platform-subsection" style="margin-top:12px;"><strong>Asset Class:</strong> 4 editions published. Total open rate 102.78%, unique open rate 54.83%. 168 new subscribers via Meta ads at $2.97 CPA.</div>
+    <div class="platform-subsection" style="margin-top:8px;"><strong>Tuned In:</strong> 4 editions published (March Madness + MLB Opening Day). Total open rate 106.73%, unique open rate 59.36%. 68 new subscribers via Meta ads at $7.42 CPA.</div>
+  `;
+
+  // YouTube insights
+  const ytInsights = document.getElementById('recapYTInsights');
+  [{metric:'121K',label:'Main Channel Subs'},{metric:'62K',label:'FOSN Subs'},{metric:'$122',label:'Main Channel Revenue'},{metric:'$272',label:'FOSN Revenue'}].forEach(d => {
+    ytInsights.innerHTML += '<div class="recap-insight"><div class="insight-metric">'+d.metric+'</div><div class="insight-label">'+d.label+'</div></div>';
+  });
+  document.getElementById('recapYTNarrative').innerHTML = `
+    <p><strong>FOS Main Channel:</strong> 48 videos published in March generating 5.3M views, 4,236 new subscribers, and $122 in estimated revenue. Sponsored content (27 posts) accounted for ~93% of total views. Organic subscriber gains (317) were the highest in 6 months. Paid promotions: $2,499 spent for 5,888 subscribers at $0.42 CPF.</p>
+    <p><strong>Top performers:</strong> "Why is Everyone OBSESSED With Alysa Liu?" (123K views, +30 subs) | Boozer twins content (combined ~1M views) | Bobby Bonilla evergreen (45K views, +29 organic subs)</p>
+    <p><strong>FOS News Channel:</strong> 116 videos published generating 192K views, 13,287 new subscribers, and $272 in estimated revenue — surpassing the main channel's revenue for the first time. WNBA/CBA coverage was the defining story: 15 videos combined for 31K views and 176 subscribers (over half of all March organic subscriber gains). Average view duration 1:48. Paid promotions: $6,482 spent for 13.2K subscribers.</p>
+    <p><em>Revenue note: FOSN outperformed Main despite fewer views because long-form videos (8+ min) allow pre-roll and mid-roll ads, yielding ~$3.68 CPM vs. near-zero effective CPM for Shorts-heavy Main channel.</em></p>
+  `;
+
+  // Games
+  const gamesInsights = document.getElementById('recapGamesInsights');
+  [{metric:'4,545',label:'Factle Avg Daily Visitors'},{metric:'218K',label:'Factle Pageviews'},{metric:'2,490',label:'Factle Sports Avg Daily'},{metric:'106K',label:'Factle Sports Pageviews'}].forEach(d => {
+    gamesInsights.innerHTML += '<div class="recap-insight"><div class="insight-metric">'+d.metric+'</div><div class="insight-label">'+d.label+'</div></div>';
+  });
+
+  // Paid growth
+  document.getElementById('recapPaidInsights').innerHTML = '<div class="recap-insight"><div class="insight-metric">$17,885</div><div class="insight-label">March Total Spend</div></div><div class="recap-insight"><div class="insight-metric">$53,680</div><div class="insight-label">YTD Spend</div></div><div class="recap-insight"><div class="insight-metric">$275K</div><div class="insight-label">Annual Budget</div></div><div class="recap-insight"><div class="insight-metric">19.5%</div><div class="insight-label">Budget Used</div></div>';
+  document.getElementById('recapPaidBody').innerHTML = [
+    {item:'YouTube News Growth', spend:'$6,482.64'},
+    {item:'Chip Fee', spend:'$2,500.00'},
+    {item:'YouTube Main Growth', spend:'$2,499.45'},
+    {item:'Newsletter Meta Ads', spend:'$4,008.84'},
+    {item:'Google Demand Gen (Website)', spend:'$1,893.83'},
+    {item:'Social Boosting', spend:'$499.98'},
+  ].map(r => `<tr><td>${r.item}</td><td style="text-align:right;font-weight:600">${r.spend}</td></tr>`).join('');
+  document.getElementById('recapFranchiseBody').innerHTML = [
+    {f:'Stadium Eats', posts:'84', imp:'10.1M', eng:'539K', er:'5.4%', spon:'0%'},
+    {f:'Stadium Status', posts:'42', imp:'4.0M', eng:'291.8K', er:'7.3%', spon:'0%'},
+    {f:'The Come Up', posts:'16', imp:'2.1M', eng:'114.4K', er:'5.5%', spon:'56%'},
+    {f:'Portfolio Players', posts:'45', imp:'670K', eng:'10.2K', er:'1.5%', spon:'76%'},
+    {f:'Tuned In', posts:'12', imp:'840K', eng:'31.8K', er:'3.8%', spon:'17%'},
+    {f:'Breaking Barriers', posts:'8', imp:'188K', eng:'8.0K', er:'4.3%', spon:'0%'},
+    {f:'Big Ticket', posts:'2', imp:'54K', eng:'0.7K', er:'1.3%', spon:'0%'},
+    {f:'Second Acts', posts:'0', imp:'—', eng:'—', er:'—', spon:'—'},
+    {f:'FOS Explains', posts:'0', imp:'—', eng:'—', er:'—', spon:'—'},
+  ].map(r => `<tr><td>${r.f}</td><td style="text-align:center">${r.posts}</td><td style="text-align:right">${r.imp}</td><td style="text-align:right">${r.eng}</td><td style="text-align:center">${r.er}</td><td style="text-align:center">${r.spon}</td></tr>`).join('');
+  document.getElementById('recapPlatformBody').innerHTML = [
+    {p:'Instagram (FOS)', posts:'461', imp:'57.5M', eng:'2.19M', followers:'+6,771'},
+    {p:'X (FOS)', posts:'846', imp:'37.1M', eng:'813K', followers:'+1,323'},
+    {p:'TikTok (FOS)', posts:'152', imp:'16.1M', eng:'807K', followers:'+3,986'},
+    {p:'Facebook (FOS)', posts:'181', imp:'20.8M', eng:'452K', followers:'+942'},
+    {p:'LinkedIn (FOS)', posts:'113', imp:'9.6M', eng:'1.3M', followers:'+2,516'},
+    {p:'Instagram (Stadium Eats)', posts:'150', imp:'9.1M', eng:'445K', followers:'+6,379'},
+    {p:'Threads', posts:'84', imp:'1.3M', eng:'7.6K', followers:'+503'},
+    {p:'X (FOS News)', posts:'180', imp:'1.39M', eng:'13.3K', followers:'Positive (1st since 2022)'},
+    {p:'Instagram (FOS News)', posts:'177', imp:'5.3M', eng:'18K', followers:'+595'},
+  ].map(r => `<tr><td>${r.p}</td><td style="text-align:center">${r.posts}</td><td style="text-align:right">${r.imp}</td><td style="text-align:right">${r.eng}</td><td style="text-align:right">${r.followers}</td></tr>`).join('');
+  document.getElementById('recapOtherNarrative').innerHTML = `
+    <p><strong>Events:</strong> No events activity in March.</p>
+    <p><strong>Learning:</strong> 882 people took FOS Learning courses in March (+25% vs February) with 1,001 total course enrollments. Top courses: Athlete Marketing Essentials: NIL Certification (408) | Sports Marketing Essentials (332) | Responsible Gaming Essentials (116) | Modern Ticketing Essentials: Beyond the Ticket (93). <em>No new modules published since January 21, 2024.</em></p>
+    <p><strong>Ecommerce:</strong> Only one order placed in March totaling $38.49. 70 total customers since July 2025 launch; 92 items sold. 93% of revenue from Big Business collection; Sports is Big Business hoodie is top seller.</p>
+    <p><strong>Platform Monetization:</strong> Total platform revenue in March was $1,217.68 — YouTube Main ($122), FOSN YouTube ($272), Apple News ($823), SmartNews ($150). MSN March data pending. FOSN YouTube surpassed the main channel in monthly revenue for the first time despite fewer views, due to long-form ad monetization advantage. New Snapchat channel launched; currently at 550 subscribers.</p>
+  `;
+}
+
+
+// ===== BUILD SECONDARY KPIs TAB =====
+function buildSecondary() {
+  // KPIs removed from secondary tab per Victoria's request
+  const removedKPIs = [
+    'Click-through rate',
+    'Returning YouTube viewers',
+    'Monthly sessions per user',
+    'Impressions (Thumbnail) CTR',
+    'Average view duration (AVD)',
+    'Average view percentage (APV)',
+    'Engagement rate (average)'
+  ];
+
+  const secondaryKPIs = SCORECARD.filter(s => s._section === 'secondary' && !removedKPIs.includes(s.goal));
+  const toDiscussKPIs = SCORECARD.filter(s => s._section === 'to_discuss' && !removedKPIs.includes(s.goal));
+
+  const secGrid = document.getElementById('secondaryKPIGrid');
+  secondaryKPIs.forEach(s => {
+    const displayVal = fmtKPI(s, s.march);
+    const goalVal = fmtKPI(s, s.goal_2026);
+    secGrid.innerHTML += `
+      <div class="kpi-card">
+        <div class="accent" style="background: ${pacingColor(s.pacing)}"></div>
+        <div class="label">${s.goal}</div>
+        <div class="value">${displayVal}</div>
+        <div class="meta">
+          <span class="goal">Goal: ${goalVal}</span>
+          <span class="pacing ${pacingClass(s.pacing)}">${fmt(s.pacing, 'pct')}</span>
+        </div>
+      </div>
+    `;
+  });
+
+  const discGrid = document.getElementById('toDiscussKPIGrid');
+  toDiscussKPIs.forEach(s => {
+    const displayVal = fmtKPI(s, s.march);
+    const goalVal = fmtKPI(s, s.goal_2026);
+    discGrid.innerHTML += `
+      <div class="kpi-card" style="opacity: 0.7;">
+        <div class="accent" style="background: ${pacingColor(s.pacing)}"></div>
+        <div class="label">${s.goal}</div>
+        <div class="value">${displayVal}</div>
+        <div class="meta">
+          <span class="goal">Goal: ${goalVal}</span>
+          <span class="pacing ${pacingClass(s.pacing)}">${fmt(s.pacing, 'pct')}</span>
+        </div>
+      </div>
+    `;
+  });
+}
+
+
+function buildCompactKPITable(containerId, kpis) {
+  const container = document.getElementById(containerId);
+  const onTrack = kpis.filter(s => getSmartStatus(s) === 'onTrack');
+  const atRisk = kpis.filter(s => getSmartStatus(s) === 'atRisk');
+  const behind = kpis.filter(s => getSmartStatus(s) === 'behind');
+
+  const colHeader = '<div class="kpi-status-col-header"><span>KPI</span><span>March</span><span>Goal</span><span>Pacing</span></div>';
+
+  const renderItems = (items, colorClass) => items.length === 0
+    ? '<div class="kpi-status-empty">None</div>'
+    : items.map(s => {
+        const marchVal = fmtKPI(s, s.march);
+        const goalVal = fmtKPI(s, s.goal_2026);
+        return `<div class="kpi-status-item"><span class="kpi-name">${s.goal}</span><span class="kpi-val">${marchVal}</span><span class="kpi-goal">${goalVal}</span><span class="kpi-pace ${colorClass}">${fmt(s.pacing, 'pct')}</span></div>`;
+      }).join('');
+
+  container.innerHTML = `
+    <div class="kpi-status-row">
+      <div class="kpi-status-col">
+        <div class="kpi-status-header on-track">On Track (${onTrack.length})</div>
+        ${colHeader}
+        <div class="kpi-status-list">${renderItems(onTrack, 'green')}</div>
+      </div>
+      <div class="kpi-status-col">
+        <div class="kpi-status-header at-risk">Needs Optimization (${atRisk.length})</div>
+        ${colHeader}
+        <div class="kpi-status-list">${renderItems(atRisk, 'yellow')}</div>
+      </div>
+      <div class="kpi-status-col">
+        <div class="kpi-status-header needs-opt">Rediscuss Goaling (${behind.length})</div>
+        ${colHeader}
+        <div class="kpi-status-list">${renderItems(behind, 'red')}</div>
+      </div>
+    </div>
+  `;
+}
+
+// ===== INIT =====
+buildExecSummary();
+buildWebsite();
+buildNewsletter();
+buildSocial();
+buildFOSN();
+buildEats();
+buildContent();
+buildSecondary();
+buildRecap();
+
+// ===== WEB ARTICLES TABLE =====
+(function renderArticlesTable() {
+  const tbody = document.getElementById('articlesBody');
+  if (!tbody) return;
+  TOP_ARTICLES.forEach((a, i) => {
+    const tr = document.createElement('tr');
+    tr.style.borderBottom = '1px solid var(--border-light)';
+    if (i % 2 === 1) tr.style.background = '#f8f9fb';
+    tr.innerHTML = '<td style="text-align:center;padding:10px 8px;font-weight:600;color:var(--scoreboard);">' + (i+1) + '</td>' +
+      '<td style="text-align:left;padding:10px 8px;font-weight:500;">' + a.title + '</td>' +
+      '<td style="text-align:center;padding:10px 8px;color:var(--text-muted);">' + a.date + '</td>' +
+      '<td style="text-align:right;padding:10px 8px;font-weight:600;">' + a.views.toLocaleString() + '</td>' +
+      '<td style="text-align:right;padding:10px 8px;">' + a.engaged_min.toLocaleString() + '</td>' +
+      '<td style="text-align:right;padding:10px 8px;">' + a.avg_min.toFixed(2) + ' min</td>';
+    tbody.appendChild(tr);
+  });
+})();
+</script>
+</body>
+</html>
