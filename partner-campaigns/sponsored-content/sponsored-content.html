@@ -252,8 +252,8 @@ body {
         <span class="status-pill yellow">Behind Pace</span>
       </div>
       <div class="pacing-row">
-        <div class="pacing-label"><span class="lbl">Impressions</span><span class="val">4.46M of 6.6M (67.6%)</span></div>
-        <div class="pbar"><div class="pbar-fill" style="width:67.6%; background:var(--eats-yellow);"></div></div>
+        <div class="pacing-label"><span class="lbl">Impressions</span><span class="val">4.91M of 6.6M (74.3%)</span></div>
+        <div class="pbar"><div class="pbar-fill" style="width:74.3%; background:var(--eats-yellow);"></div></div>
       </div>
       <div class="pacing-row">
         <div class="pacing-label"><span class="lbl">Budget</span><span class="val">$6,591 of $10,916 (60.4%)</span></div>
@@ -462,8 +462,8 @@ body {
   <div class="section-title">Cross-Campaign Insights</div>
   <div class="callouts">
     <div class="callout warning">
-      <div class="callout-title">ADP is 22% behind on pacing — but gap is closing rapidly.</div>
-      <p>At 67.6% delivered with 89.3% of flight elapsed (26 days left). Ep 3 launch + X Ads integration narrowed the gap from 31% to 22%. With $4.3K remaining and in-feed CPM ~$0.51, the budget could theoretically deliver 8M+ more impressions — enough to close and exceed the 6.6M goal.</p>
+      <div class="callout-title">ADP is 15% behind on pacing — but gap is closing rapidly.</div>
+      <p>At 74.3% delivered with 89.3% of flight elapsed (26 days left). TikTok boosted data + X Ads narrowed the gap from 31% to 15%. With $4.3K remaining and in-feed CPM ~$0.51, the budget could theoretically deliver 8M+ more impressions — enough to close and exceed the 6.6M goal.</p>
     </div>
     <div class="callout negative">
       <div class="callout-title">E*TRADE is 37% behind on pacing — significant gap remains.</div>
@@ -506,64 +506,80 @@ body {
     <h3>Campaign Pacing</h3>
     <canvas id="adp-pacing"></canvas>
     <div style="margin-top:14px; padding:14px 16px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
-      <p style="font-size:13px; color:var(--text); line-height:1.6;"><strong>Status:</strong> Campaign is <strong style="color:var(--red-card);">22% behind</strong> on impression pacing — 67.6% delivered at 89.3% of flight. Budget at 60.4% ($6,591 of $10,916). Ep 3 (WTA / Sarah Swanson) now live. X Ads data integrated ($373 spend, 888K impr). 26 days remain — 2.14M impressions still needed to hit 6.6M goal.</p>
+      <p style="font-size:13px; color:var(--text); line-height:1.6;"><strong>Status:</strong> Campaign is <strong style="color:var(--red-card);">15% behind</strong> on impression pacing — 74.3% delivered at 89.3% of flight. Budget at 60.4% ($6,591 of $10,916). All 3 episodes live. TikTok boosted impressions (447K) now integrated alongside X Ads ($373 spend, 888K impr). 26 days remain — 1.69M impressions still needed to hit 6.6M goal.</p>
     </div>
   </div>
 
   <!-- KPIs -->
   <div class="kpi-grid">
-    <div class="kpi-card"><div class="accent" style="background:var(--scoreboard);"></div><div class="label">Total Impressions</div><div class="value">4.46M</div><div class="meta">of 6.6M goal (67.6%)</div></div>
-    <div class="kpi-card"><div class="accent" style="background:var(--primetime);"></div><div class="label">Social Engagements</div><div class="value">14.8K</div><div class="meta">across all platforms</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--scoreboard);"></div><div class="label">Total Impressions</div><div class="value">4.91M</div><div class="meta">of 6.6M goal (74.3%)</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--primetime);"></div><div class="label">Social Engagements</div><div class="value">10.5K</div><div class="meta">IG + X + LI + TT + FB</div></div>
     <div class="kpi-card"><div class="accent" style="background:var(--turf);"></div><div class="label">YT Paid Engagements</div><div class="value">182.7K</div><div class="meta">full eps + cutdowns (Google Ads)</div></div>
     <div class="kpi-card"><div class="accent" style="background:var(--turf);"></div><div class="label">Ad Spend</div><div class="value">$6,591</div><div class="meta">of $10,916 budget (60.4%)</div></div>
-    <div class="kpi-card"><div class="accent" style="background:var(--center-court);"></div><div class="label">Blended CPM</div><div class="value">$1.48</div><div class="meta">all channels blended</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--center-court);"></div><div class="label">Blended CPM</div><div class="value">$1.34</div><div class="meta">all channels blended</div></div>
   </div>
 
   <hr class="divider">
 
-  <!-- SECTION 1: YouTube Full Episodes -->
-  <div class="section-title">YouTube — Full Episodes</div>
+  <!-- SECTION 1: Platform Performance Summary -->
+  <div class="section-title">Platform Performance Summary</div>
+  <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">All sources combined: YouTube full episodes + cutdowns from Google Ads, X paid from X Ads export, social organic + IG/TT boosted from Measure Studio. No double-counting.</p>
 
   <table class="data-table">
-    <thead><tr><th>Episode</th><th class="num">Paid Impr</th><th class="num">Organic Impr</th><th class="num">% Organic</th><th class="num">Total Impr</th><th class="num">Spend</th><th class="num">CPM (Paid)</th></tr></thead>
+    <thead><tr><th>Platform</th><th class="num">Posts</th><th class="num">Organic</th><th class="num">Paid Impr</th><th class="num">Total</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Spend</th><th class="num">CPM</th></tr></thead>
     <tbody>
-      <tr><td>Ep 1: Kim Ng</td><td class="num">986,210</td><td class="num">757</td><td class="num">0.1%</td><td class="num">986,967</td><td class="num">$1,076.82</td><td class="num">$1.09</td></tr>
-      <tr><td>&nbsp;&nbsp;↳ In-feed</td><td class="num" style="color:var(--text-muted);">942,524</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">$464.55</td><td class="num" style="color:var(--text-muted);">$0.49</td></tr>
-      <tr><td>&nbsp;&nbsp;↳ Pre-roll</td><td class="num" style="color:var(--text-muted);">43,686</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">$612.27</td><td class="num" style="color:var(--text-muted);">$14.02</td></tr>
-      <tr><td>Ep 2: Chris Greeley</td><td class="num">676,083</td><td class="num">851</td><td class="num">0.1%</td><td class="num">676,934</td><td class="num">$730.45</td><td class="num">$1.08</td></tr>
-      <tr><td>&nbsp;&nbsp;↳ In-feed</td><td class="num" style="color:var(--text-muted);">643,000</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">$320.61</td><td class="num" style="color:var(--text-muted);">$0.50</td></tr>
-      <tr><td>&nbsp;&nbsp;↳ Pre-roll</td><td class="num" style="color:var(--text-muted);">33,083</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">$409.84</td><td class="num" style="color:var(--text-muted);">$12.39</td></tr>
-      <tr style="background:#f0fdf4;"><td>Ep 3: Sarah Swanson (WTA) <span style="font-size:10px; color:var(--turf);">NEW</span></td><td class="num">715,770</td><td class="num">566</td><td class="num">0.1%</td><td class="num">716,336</td><td class="num">$850.93</td><td class="num">$1.19</td></tr>
-      <tr><td>&nbsp;&nbsp;↳ In-feed</td><td class="num" style="color:var(--text-muted);">686,002</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">$370.61</td><td class="num" style="color:var(--text-muted);">$0.54</td></tr>
-      <tr><td>&nbsp;&nbsp;↳ Pre-roll</td><td class="num" style="color:var(--text-muted);">29,768</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">$480.32</td><td class="num" style="color:var(--text-muted);">$16.14</td></tr>
-      <tr class="total-row"><td>Total YouTube Full Episodes</td><td class="num">2,378,063</td><td class="num">2,174</td><td class="num">0.1%</td><td class="num">2,380,237</td><td class="num">$2,658.20</td><td class="num">$1.12</td></tr>
+      <tr><td>YouTube Full Eps</td><td class="num">3</td><td class="num">2,174</td><td class="num">2,378,063</td><td class="num">2,380,237</td><td class="num">83,424</td><td class="num" style="color:var(--turf); font-weight:600;">3.5%</td><td class="num">$2,658.20</td><td class="num">$1.12</td></tr>
+      <tr><td>YouTube Cutdowns</td><td class="num">6</td><td class="num">43,553</td><td class="num">468,980</td><td class="num">512,533</td><td class="num">99,898</td><td class="num" style="color:var(--turf); font-weight:600;">19.5%</td><td class="num">$1,635.62</td><td class="num">$3.19</td></tr>
+      <tr><td>Instagram</td><td class="num">6</td><td class="num">115,138</td><td class="num">202,933</td><td class="num">318,071</td><td class="num">3,390</td><td class="num">1.07%</td><td class="num">$988.33</td><td class="num">$3.11</td></tr>
+      <tr><td>X</td><td class="num">6</td><td class="num">101,949</td><td class="num">888,344</td><td class="num">990,293</td><td class="num">1,285</td><td class="num">0.13%</td><td class="num">$373.44</td><td class="num">$0.38</td></tr>
+      <tr><td>LinkedIn</td><td class="num">9</td><td class="num">147,499</td><td class="num">—</td><td class="num">147,499</td><td class="num">5,716</td><td class="num" style="color:var(--turf); font-weight:600;">3.88%</td><td class="num">$0</td><td class="num">—</td></tr>
+      <tr><td>TikTok</td><td class="num">4</td><td class="num">110,519</td><td class="num">446,802</td><td class="num">557,321</td><td class="num">151</td><td class="num">0.03%</td><td class="num">$934.97</td><td class="num">$1.68</td></tr>
+      <tr><td>Facebook</td><td class="num">2</td><td class="num">1,023</td><td class="num">—</td><td class="num">1,023</td><td class="num">3</td><td class="num">0.29%</td><td class="num">$0</td><td class="num">—</td></tr>
+      <tr class="total-row"><td>Total</td><td class="num">36</td><td class="num">521,855</td><td class="num">4,385,122</td><td class="num">4,906,977</td><td class="num">193,867</td><td class="num">3.95%</td><td class="num">$6,590.56</td><td class="num">$1.34</td></tr>
     </tbody>
   </table>
-
-  <div class="chart-row full" style="margin-bottom:24px;">
-    <div class="chart-box">
-      <h3>YouTube Full Episodes — Paid vs Organic</h3>
-      <canvas id="adp-yt-chart"></canvas>
-    </div>
-  </div>
 
   <hr class="divider">
 
-  <!-- SECTION 2: Cutdowns & Made for Social -->
-  <div class="section-title">Cutdowns & Made for Social Content</div>
+  <!-- SECTION 2: Per-Episode Detail -->
+  <div class="section-title">Per-Episode Performance Detail</div>
+  <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">3 episodes × 5-7 platforms. YT Full Ep = Google Ads in-feed + pre-roll. YT Cutdowns = Google Ads cutdowns. Social = Measure Studio + X Ads.</p>
 
-  <table class="data-table">
-    <thead><tr><th>Platform</th><th class="num">Posts</th><th class="num">Views / Impr</th><th class="num">Organic</th><th class="num">% Organic</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Spend</th><th class="num">CPM</th></tr></thead>
+  <div style="overflow-x:auto;">
+  <table class="data-table" style="font-size:12px;">
+    <thead>
+      <tr><th>Episode</th><th>Platform</th><th style="font-size:11px;">Type</th><th class="num">Impressions</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Spend</th></tr>
+    </thead>
     <tbody>
-      <tr><td>YouTube Shorts (GA)</td><td class="num">6</td><td class="num">512,533</td><td class="num">43,553</td><td class="num">8.5%</td><td class="num">553</td><td class="num">0.11%</td><td class="num">$1,635.62</td><td class="num">$3.19</td></tr>
-      <tr><td>Instagram</td><td class="num">6</td><td class="num">318,071</td><td class="num">115,138</td><td class="num">36.2%</td><td class="num">6,700</td><td class="num">2.11%</td><td class="num">$988.33</td><td class="num">$3.11</td></tr>
-      <tr><td>TikTok</td><td class="num">4</td><td class="num">110,519</td><td class="num">—</td><td class="num">—</td><td class="num">445</td><td class="num">0.40%</td><td class="num">$934.97</td><td class="num">$8.46</td></tr>
-      <tr><td>X</td><td class="num">6</td><td class="num">990,293</td><td class="num">101,949</td><td class="num">10.3%</td><td class="num">1,285</td><td class="num">0.13%</td><td class="num">$373.44</td><td class="num">$0.38</td></tr>
-      <tr><td>LinkedIn</td><td class="num">6</td><td class="num">97,721</td><td class="num">97,721</td><td class="num">100%</td><td class="num">3,827</td><td class="num">3.92%</td><td class="num">$0</td><td class="num">—</td></tr>
-      <tr><td>Facebook</td><td class="num">2</td><td class="num">1,023</td><td class="num">1,023</td><td class="num">100%</td><td class="num">3</td><td class="num">0.29%</td><td class="num">$0</td><td class="num">—</td></tr>
-      <tr class="total-row"><td>Total Cutdowns & Social</td><td class="num">30</td><td class="num">2,030,160</td><td class="num">359,384</td><td class="num">17.7%</td><td class="num">12,813</td><td class="num">0.63%</td><td class="num">$3,932.36</td><td class="num">$1.94</td></tr>
+      <tr style="background:#f0f7ff;"><td rowspan="7" style="font-weight:600; vertical-align:top;">Ep 1: Kim Ng<div style="font-size:10px; color:var(--text-muted); font-weight:400;">Paused</div></td><td>YT Full Episode</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">986,967</td><td class="num">35,517</td><td class="num" style="color:var(--turf); font-weight:600;">3.60%</td><td class="num">$1,076.82</td></tr>
+      <tr style="background:#f0f7ff;"><td>YT Cutdowns</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">144,010</td><td class="num">50,209</td><td class="num" style="color:var(--turf); font-weight:600;">34.87%</td><td class="num">$544.93</td></tr>
+      <tr style="background:#f0f7ff;"><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">96,830</td><td class="num">998</td><td class="num">1.03%</td><td class="num">$329.38</td></tr>
+      <tr style="background:#f0f7ff;"><td>X</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">278,096</td><td class="num">406</td><td class="num">0.15%</td><td class="num">$162.10</td></tr>
+      <tr style="background:#f0f7ff;"><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">46,572</td><td class="num">2,405</td><td class="num" style="color:var(--turf); font-weight:600;">5.16%</td><td class="num">$0</td></tr>
+      <tr style="background:#f0f7ff;"><td>TikTok</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">263,757</td><td class="num">59</td><td class="num">0.02%</td><td class="num">$374.90</td></tr>
+      <tr style="background:#f0f7ff; border-bottom:2px solid var(--border);"><td style="font-weight:600;">Total</td><td></td><td class="num" style="font-weight:600;">1,816,232</td><td class="num" style="font-weight:600;">89,594</td><td class="num" style="font-weight:600;">4.93%</td><td class="num" style="font-weight:600;">$2,488</td></tr>
+
+      <tr><td rowspan="7" style="font-weight:600; vertical-align:top;">Ep 2: Chris Greeley<div style="font-size:10px; color:var(--text-muted); font-weight:400;">Paused</div></td><td>YT Full Episode</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">676,934</td><td class="num">23,549</td><td class="num" style="color:var(--turf); font-weight:600;">3.48%</td><td class="num">$730.45</td></tr>
+      <tr><td>YT Cutdowns</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">149,152</td><td class="num">35,691</td><td class="num" style="color:var(--turf); font-weight:600;">23.93%</td><td class="num">$545.59</td></tr>
+      <tr><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">89,430</td><td class="num">209</td><td class="num">0.23%</td><td class="num">$329.04</td></tr>
+      <tr><td>X</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">429,860</td><td class="num">501</td><td class="num">0.12%</td><td class="num">$0</td></tr>
+      <tr><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">50,734</td><td class="num">1,253</td><td class="num">2.47%</td><td class="num">$0</td></tr>
+      <tr><td>TikTok</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">146,993</td><td class="num">51</td><td class="num">0.03%</td><td class="num">$293.26</td></tr>
+      <tr style="border-bottom:2px solid var(--border);"><td style="font-weight:600;">Total</td><td></td><td class="num" style="font-weight:600;">1,543,103</td><td class="num" style="font-weight:600;">61,254</td><td class="num" style="font-weight:600;">3.97%</td><td class="num" style="font-weight:600;">$1,898</td></tr>
+
+      <tr style="background:#f0f7ff;"><td rowspan="8" style="font-weight:600; vertical-align:top;">Ep 3: Sarah Swanson<div style="font-size:10px; color:var(--text-muted); font-weight:400;">Paused</div><div style="margin-top:3px;"><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">NEW</span></div></td><td>YT Full Episode</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">716,336</td><td class="num">24,358</td><td class="num" style="color:var(--turf); font-weight:600;">3.40%</td><td class="num">$850.93</td></tr>
+      <tr style="background:#f0f7ff;"><td>YT Cutdowns</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">179,006</td><td class="num">13,701</td><td class="num" style="color:var(--turf); font-weight:600;">7.65%</td><td class="num">$545.10</td></tr>
+      <tr style="background:#f0f7ff;"><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">131,811</td><td class="num">2,183</td><td class="num">1.66%</td><td class="num">$329.91</td></tr>
+      <tr style="background:#f0f7ff;"><td>X</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">282,337</td><td class="num">378</td><td class="num">0.13%</td><td class="num">$211.34</td></tr>
+      <tr style="background:#f0f7ff;"><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">50,193</td><td class="num">2,058</td><td class="num" style="color:var(--turf); font-weight:600;">4.10%</td><td class="num">$0</td></tr>
+      <tr style="background:#f0f7ff;"><td>TikTok</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">146,571</td><td class="num">41</td><td class="num">0.03%</td><td class="num">$266.81</td></tr>
+      <tr style="background:#f0f7ff;"><td>Facebook</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">1,023</td><td class="num">3</td><td class="num">0.29%</td><td class="num">$0</td></tr>
+      <tr style="background:#f0f7ff; border-bottom:2px solid var(--border);"><td style="font-weight:600;">Total</td><td></td><td class="num" style="font-weight:600;">1,507,277</td><td class="num" style="font-weight:600;">42,722</td><td class="num" style="font-weight:600;">2.83%</td><td class="num" style="font-weight:600;">$2,204</td></tr>
     </tbody>
   </table>
+  </div>
+
+  <hr class="divider">
 
   <div class="chart-row full">
     <div class="chart-box">
@@ -640,8 +656,8 @@ body {
   <div class="section-title">Optimization Recommendations</div>
   <div class="callouts">
     <div class="callout warning">
-      <div class="callout-title">Campaign is 22% behind on impression pacing — but gap is closing</div>
-      <p>At 67.6% delivered with 89.3% of flight elapsed (26 days remain), 2.14M impressions still needed to hit the 6.6M goal. Budget at 60.4% ($4,325 remaining). Ep 3 launch + X Ads integration closed the gap from 31% to 22%. At in-feed CPM of $0.49-0.54, the remaining $4.3K in budget could theoretically deliver ~8M impressions — more than enough to close.</p>
+      <div class="callout-title">Campaign is 15% behind on impression pacing — gap closing fast</div>
+      <p>At 74.3% delivered with 89.3% of flight elapsed (26 days remain), 1.69M impressions still needed to hit the 6.6M goal. Budget at 60.4% ($4,325 remaining). TikTok boosted impressions + X Ads integration closed the gap from 31% to 15%. At in-feed CPM of $0.49-0.54, the remaining $4.3K in budget could theoretically deliver ~8M impressions — more than enough to close and exceed the goal.</p>
     </div>
     <div class="callout positive">
       <div class="callout-title">Ep 3 (WTA / Sarah Swanson) now live — 716K YT impressions + 7.3K social eng</div>
@@ -704,47 +720,102 @@ body {
 
   <hr class="divider">
 
-  <!-- SECTION 1: YouTube Full Episodes -->
-  <div class="section-title">YouTube — Full Episodes</div>
+  <!-- SECTION 1: Platform Performance Summary -->
+  <div class="section-title">Platform Performance Summary</div>
+  <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">All sources combined: YouTube full episodes + cutdowns from Google Ads, X paid from X Ads export, social organic + IG boosted from Measure Studio. No double-counting.</p>
 
   <table class="data-table">
-    <thead><tr><th>Episode</th><th class="num">Paid Impr</th><th class="num">Organic Impr</th><th class="num">% Organic</th><th class="num">Total Impr</th><th class="num">Spend</th><th class="num">CPM (Paid)</th><th>Status</th></tr></thead>
+    <thead><tr><th>Platform</th><th class="num">Posts</th><th class="num">Organic</th><th class="num">Paid Impr</th><th class="num">Total</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Spend</th><th class="num">CPM</th></tr></thead>
     <tbody>
-      <tr><td>Ep 1: Mike Repole</td><td class="num">1,069,439</td><td class="num">19,700</td><td class="num">1.8%</td><td class="num">1,089,139</td><td class="num">$1,049.57</td><td class="num">$0.98</td><td>Ended</td></tr>
-      <tr><td>&nbsp;&nbsp;↳ In-feed / Pre-roll</td><td class="num" style="color:var(--text-muted);">1,029,710 / 39,729</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">$0.54 / $12.55</td><td></td></tr>
-      <tr><td>Ep 2: Jon Patricof</td><td class="num">1,161,719</td><td class="num">9,923</td><td class="num">0.8%</td><td class="num">1,171,642</td><td class="num">$1,096.44</td><td class="num">$0.94</td><td>Ended</td></tr>
-      <tr><td>&nbsp;&nbsp;↳ In-feed / Pre-roll</td><td class="num" style="color:var(--text-muted);">1,127,272 / 34,447</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">$0.53 / $14.48</td><td></td></tr>
-      <tr><td>Ep 3: Leslie Osborne</td><td class="num">1,334,812</td><td class="num">9,784</td><td class="num">0.7%</td><td class="num">1,344,596</td><td class="num">$1,092.94</td><td class="num" style="color:var(--turf); font-weight:700;">$0.81</td><td>Ended</td></tr>
-      <tr><td>&nbsp;&nbsp;↳ In-feed / Pre-roll</td><td class="num" style="color:var(--text-muted);">1,297,772 / 37,040</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">$0.46 / $13.36</td><td></td></tr>
-      <tr><td>Ep 4: Paul Rabil</td><td class="num">1,179,414</td><td class="num">12,232</td><td class="num">1.0%</td><td class="num">1,191,646</td><td class="num">$1,098.24</td><td class="num">$0.93</td><td>Ended</td></tr>
-      <tr><td>&nbsp;&nbsp;↳ In-feed / Pre-roll</td><td class="num" style="color:var(--text-muted);">1,145,974 / 33,440</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">$0.52 / $14.91</td><td></td></tr>
-      <tr><td>Ep 5: Assia Grazioli-Venier</td><td class="num">1,216,726</td><td class="num">5,217</td><td class="num">0.4%</td><td class="num">1,221,943</td><td class="num">$1,198.60</td><td class="num">$0.99</td><td>Ended</td></tr>
-      <tr><td>&nbsp;&nbsp;↳ In-feed / Pre-roll</td><td class="num" style="color:var(--text-muted);">1,181,698 / 35,028</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">$0.59 / $14.27</td><td></td></tr>
-      <tr><td>Ep 6: Allyson Felix</td><td class="num">1,180,916</td><td class="num">—</td><td class="num">—</td><td class="num">1,180,916</td><td class="num">$1,097.32</td><td class="num">$0.93</td><td>Ended</td></tr>
-      <tr><td>&nbsp;&nbsp;↳ In-feed / Pre-roll</td><td class="num" style="color:var(--text-muted);">1,143,447 / 37,469</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">$0.52 / $13.32</td><td></td></tr>
-      <tr><td>Ep 7: Brandon Marshall</td><td class="num">1,046,873</td><td class="num">—</td><td class="num">—</td><td class="num">1,046,873</td><td class="num">$1,099.62</td><td class="num">$1.05</td><td>Ended</td></tr>
-      <tr><td>&nbsp;&nbsp;↳ In-feed / Pre-roll</td><td class="num" style="color:var(--text-muted);">1,000,863 / 46,010</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">—</td><td class="num" style="color:var(--text-muted);">$0.60 / $10.87</td><td></td></tr>
-      <tr class="total-row"><td>Total Full Episodes</td><td class="num">8,189,899</td><td class="num">56,856</td><td class="num">0.7%</td><td class="num">8,246,755</td><td class="num">$7,732.73</td><td class="num">$0.94</td><td></td></tr>
+      <tr><td>YouTube Full Eps</td><td class="num">7</td><td class="num">20,788</td><td class="num">8,189,899</td><td class="num">8,210,687</td><td class="num">466,678</td><td class="num" style="color:var(--turf); font-weight:600;">5.7%</td><td class="num">$7,732.73</td><td class="num">$0.94</td></tr>
+      <tr><td>YouTube Shorts</td><td class="num">14</td><td class="num">43,553</td><td class="num">964,745</td><td class="num">1,008,298</td><td class="num">—</td><td class="num">—</td><td class="num">$3,013.72</td><td class="num">$2.99</td></tr>
+      <tr><td>Instagram</td><td class="num">24</td><td class="num">521,415</td><td class="num">2,076,880</td><td class="num">2,598,295</td><td class="num">39,649</td><td class="num">1.53%</td><td class="num">$10,913.20</td><td class="num">$4.20</td></tr>
+      <tr><td>X</td><td class="num">27</td><td class="num">349,001</td><td class="num">1,227,767</td><td class="num">1,576,768</td><td class="num">4,207</td><td class="num">0.27%</td><td class="num">$1,138.08</td><td class="num">$0.72</td></tr>
+      <tr><td>LinkedIn</td><td class="num">23</td><td class="num">398,482</td><td class="num">—</td><td class="num">398,482</td><td class="num">16,668</td><td class="num" style="color:var(--turf); font-weight:600;">4.18%</td><td class="num">$0</td><td class="num">—</td></tr>
+      <tr><td>Facebook</td><td class="num">17</td><td class="num">8,253</td><td class="num">—</td><td class="num">8,253</td><td class="num">41</td><td class="num">0.50%</td><td class="num">$0</td><td class="num">—</td></tr>
+      <tr><td>TikTok</td><td class="num">1</td><td class="num">1,395</td><td class="num">—</td><td class="num">1,395</td><td class="num">45</td><td class="num">3.23%</td><td class="num">$0</td><td class="num">—</td></tr>
+      <tr class="total-row"><td>Total</td><td class="num">113</td><td class="num">1,342,887</td><td class="num">12,459,291</td><td class="num">13,802,178</td><td class="num">527,288</td><td class="num">3.82%</td><td class="num">$22,797.73</td><td class="num">$1.65</td></tr>
     </tbody>
   </table>
 
   <hr class="divider">
 
-  <!-- SECTION 2: Cutdowns & Made for Social -->
-  <div class="section-title">Cutdowns & Made for Social Content</div>
+  <!-- SECTION 2: Per-Episode Detail -->
+  <div class="section-title">Per-Episode Performance Detail</div>
+  <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">7 episodes × 5-6 platforms + 1 teaser. YT Full Ep = Google Ads in-feed + pre-roll. YT Shorts = Google Ads cutdowns. Social = Measure Studio + X Ads.</p>
 
-  <table class="data-table">
-    <thead><tr><th>Platform</th><th class="num">Posts</th><th class="num">Views / Impr</th><th class="num">Organic</th><th class="num">% Organic</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Spend</th><th class="num">CPM</th></tr></thead>
+  <div style="overflow-x:auto;">
+  <table class="data-table" style="font-size:12px;">
+    <thead>
+      <tr><th>Episode</th><th>Platform</th><th style="font-size:11px;">Type</th><th class="num">Impressions</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Spend</th></tr>
+    </thead>
     <tbody>
-      <tr><td>YouTube Shorts</td><td class="num">14</td><td class="num">964,745</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">$3,013.72</td><td class="num">$3.12</td></tr>
-      <tr><td>Instagram</td><td class="num">24</td><td class="num">2,598,295</td><td class="num">521,415</td><td class="num">20.1%</td><td class="num">39,649</td><td class="num">1.53%</td><td class="num">$10,913.20</td><td class="num">$4.20</td></tr>
-      <tr><td>Facebook</td><td class="num">17</td><td class="num">8,253</td><td class="num">8,253</td><td class="num">100%</td><td class="num">41</td><td class="num">0.50%</td><td class="num">$0</td><td class="num">—</td></tr>
-      <tr><td>X</td><td class="num">27</td><td class="num">1,576,768</td><td class="num">349,001</td><td class="num">22.1%</td><td class="num">4,207</td><td class="num">0.27%</td><td class="num">$1,138.08</td><td class="num">$0.93</td></tr>
-      <tr><td>LinkedIn</td><td class="num">23</td><td class="num">398,482</td><td class="num">398,482</td><td class="num">100%</td><td class="num">16,668</td><td class="num">4.18%</td><td class="num">$0</td><td class="num">—</td></tr>
-      <tr><td>TikTok</td><td class="num">1</td><td class="num">1,395</td><td class="num">1,395</td><td class="num">100%</td><td class="num">45</td><td class="num">3.23%</td><td class="num">$0</td><td class="num">—</td></tr>
-      <tr class="total-row"><td>Total Cutdowns & Social</td><td class="num">106</td><td class="num">5,547,938</td><td class="num">1,278,546</td><td class="num">23.0%</td><td class="num">60,610</td><td class="num">1.09%</td><td class="num">$15,064.99</td><td class="num">$2.72</td></tr>
+      <tr style="background:#f0f7ff;"><td rowspan="6" style="font-weight:600; vertical-align:top;">Ep 1: Mike Repole<div style="font-size:10px; color:var(--text-muted); font-weight:400;">Ended</div></td><td>YT Full Episode</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">1,089,139</td><td class="num">35,474</td><td class="num">3.26%</td><td class="num">$1,049.57</td></tr>
+      <tr style="background:#f0f7ff;"><td>YT Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">PAID</span></td><td class="num">256,231</td><td class="num">37,718</td><td class="num" style="color:var(--turf); font-weight:600;">14.72%</td><td class="num">$598.11</td></tr>
+      <tr style="background:#f0f7ff;"><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">268,268</td><td class="num">1,500</td><td class="num">0.56%</td><td class="num">$781.84</td></tr>
+      <tr style="background:#f0f7ff;"><td>X</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">204,773</td><td class="num">1,020</td><td class="num">0.50%</td><td class="num">$190.00</td></tr>
+      <tr style="background:#f0f7ff;"><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">54,796</td><td class="num">2,483</td><td class="num" style="color:var(--turf); font-weight:600;">4.53%</td><td class="num">$0</td></tr>
+      <tr style="background:#f0f7ff; border-bottom:2px solid var(--border);"><td style="font-weight:600;">Total</td><td></td><td class="num" style="font-weight:600;">1,873,207</td><td class="num" style="font-weight:600;">78,195</td><td class="num" style="font-weight:600;">4.18%</td><td class="num" style="font-weight:600;">$2,620</td></tr>
+
+      <tr><td rowspan="7" style="font-weight:600; vertical-align:top;">Ep 2: Jon Patricof<div style="font-size:10px; color:var(--text-muted); font-weight:400;">Ended</div></td><td>YT Full Episode</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">1,171,642</td><td class="num">23,516</td><td class="num">2.01%</td><td class="num">$1,096.44</td></tr>
+      <tr><td>YT Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">PAID</span></td><td class="num">185,898</td><td class="num">57,230</td><td class="num" style="color:var(--turf); font-weight:600;">30.78%</td><td class="num">$558.83</td></tr>
+      <tr><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">317,556</td><td class="num">1,395</td><td class="num">0.44%</td><td class="num">$1,495.38</td></tr>
+      <tr><td>Facebook</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">886</td><td class="num">3</td><td class="num">0.34%</td><td class="num">$0</td></tr>
+      <tr><td>X</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">271,319</td><td class="num">870</td><td class="num">0.32%</td><td class="num">$247.24</td></tr>
+      <tr><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">32,107</td><td class="num">1,299</td><td class="num" style="color:var(--turf); font-weight:600;">4.05%</td><td class="num">$0</td></tr>
+      <tr style="border-bottom:2px solid var(--border);"><td style="font-weight:600;">Total</td><td></td><td class="num" style="font-weight:600;">1,979,408</td><td class="num" style="font-weight:600;">84,313</td><td class="num" style="font-weight:600;">4.26%</td><td class="num" style="font-weight:600;">$3,398</td></tr>
+
+      <tr style="background:#f0f7ff;"><td rowspan="7" style="font-weight:600; vertical-align:top;">Ep 3: Leslie Osborne<div style="font-size:10px; color:var(--text-muted); font-weight:400;">Ended</div></td><td>YT Full Episode</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">1,344,596</td><td class="num">24,327</td><td class="num">1.81%</td><td class="num">$1,092.94</td></tr>
+      <tr style="background:#f0f7ff;"><td>YT Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">PAID</span></td><td class="num">138,266</td><td class="num">51,224</td><td class="num" style="color:var(--turf); font-weight:600;">37.06%</td><td class="num">$379.64</td></tr>
+      <tr style="background:#f0f7ff;"><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">311,101</td><td class="num">3,161</td><td class="num">1.02%</td><td class="num">$1,546.04</td></tr>
+      <tr style="background:#f0f7ff;"><td>Facebook</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">1,106</td><td class="num">11</td><td class="num">0.99%</td><td class="num">$0</td></tr>
+      <tr style="background:#f0f7ff;"><td>X</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">160,541</td><td class="num">1,027</td><td class="num">0.64%</td><td class="num">$175.69</td></tr>
+      <tr style="background:#f0f7ff;"><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">51,329</td><td class="num">2,317</td><td class="num" style="color:var(--turf); font-weight:600;">4.51%</td><td class="num">$0</td></tr>
+      <tr style="background:#f0f7ff; border-bottom:2px solid var(--border);"><td style="font-weight:600;">Total</td><td></td><td class="num" style="font-weight:600;">2,006,939</td><td class="num" style="font-weight:600;">82,067</td><td class="num" style="font-weight:600;">4.09%</td><td class="num" style="font-weight:600;">$3,194</td></tr>
+
+      <tr><td rowspan="7" style="font-weight:600; vertical-align:top;">Ep 4: Paul Rabil<div style="font-size:10px; color:var(--text-muted); font-weight:400;">Ended</div></td><td>YT Full Episode</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">1,191,646</td><td class="num">24,327</td><td class="num">2.04%</td><td class="num">$1,098.24</td></tr>
+      <tr><td>YT Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">PAID</span></td><td class="num">88,730</td><td class="num">40,725</td><td class="num" style="color:var(--turf); font-weight:600;">45.90%</td><td class="num">$359.24</td></tr>
+      <tr><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">336,412</td><td class="num">1,962</td><td class="num">0.58%</td><td class="num">$1,598.83</td></tr>
+      <tr><td>Facebook</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">859</td><td class="num">1</td><td class="num">0.12%</td><td class="num">$0</td></tr>
+      <tr><td>X</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">146,761</td><td class="num">492</td><td class="num">0.34%</td><td class="num">$162.03</td></tr>
+      <tr><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">56,122</td><td class="num">2,352</td><td class="num" style="color:var(--turf); font-weight:600;">4.19%</td><td class="num">$0</td></tr>
+      <tr style="border-bottom:2px solid var(--border);"><td style="font-weight:600;">Total</td><td></td><td class="num" style="font-weight:600;">1,820,530</td><td class="num" style="font-weight:600;">69,859</td><td class="num" style="font-weight:600;">3.84%</td><td class="num" style="font-weight:600;">$3,218</td></tr>
+
+      <tr style="background:#f0f7ff;"><td rowspan="7" style="font-weight:600; vertical-align:top;">Ep 5: Assia Grazioli-Venier<div style="font-size:10px; color:var(--text-muted); font-weight:400;">Ended</div></td><td>YT Full Episode</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">1,221,943</td><td class="num">63,302</td><td class="num" style="color:var(--turf); font-weight:600;">5.18%</td><td class="num">$1,198.60</td></tr>
+      <tr style="background:#f0f7ff;"><td>YT Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">PAID</span></td><td class="num">83,163</td><td class="num">—</td><td class="num">—</td><td class="num">$329.57</td></tr>
+      <tr style="background:#f0f7ff;"><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">331,616</td><td class="num">6,784</td><td class="num" style="color:var(--turf); font-weight:600;">2.05%</td><td class="num">$1,497.32</td></tr>
+      <tr style="background:#f0f7ff;"><td>Facebook</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">1,822</td><td class="num">18</td><td class="num">0.99%</td><td class="num">$0</td></tr>
+      <tr style="background:#f0f7ff;"><td>X</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">361,768</td><td class="num">222</td><td class="num">0.06%</td><td class="num">$122.00</td></tr>
+      <tr style="background:#f0f7ff;"><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">43,494</td><td class="num">1,938</td><td class="num" style="color:var(--turf); font-weight:600;">4.46%</td><td class="num">$0</td></tr>
+      <tr style="background:#f0f7ff; border-bottom:2px solid var(--border);"><td style="font-weight:600;">Total</td><td></td><td class="num" style="font-weight:600;">2,043,806</td><td class="num" style="font-weight:600;">72,264</td><td class="num" style="font-weight:600;">3.54%</td><td class="num" style="font-weight:600;">$3,147</td></tr>
+
+      <tr><td rowspan="7" style="font-weight:600; vertical-align:top;">Ep 6: Allyson Felix<div style="font-size:10px; color:var(--text-muted); font-weight:400;">Ended</div></td><td>YT Full Episode</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">1,180,916</td><td class="num">58,469</td><td class="num" style="color:var(--turf); font-weight:600;">4.95%</td><td class="num">$1,097.32</td></tr>
+      <tr><td>YT Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">PAID</span></td><td class="num">122,283</td><td class="num">—</td><td class="num">—</td><td class="num">$429.01</td></tr>
+      <tr><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">290,336</td><td class="num">11,358</td><td class="num" style="color:var(--turf); font-weight:600;">3.91%</td><td class="num">$1,647.32</td></tr>
+      <tr><td>Facebook</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">1,163</td><td class="num">4</td><td class="num">0.34%</td><td class="num">$0</td></tr>
+      <tr><td>X</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">76,174</td><td class="num">59</td><td class="num">0.08%</td><td class="num">$44.78</td></tr>
+      <tr><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">31,877</td><td class="num">983</td><td class="num">3.08%</td><td class="num">$0</td></tr>
+      <tr style="border-bottom:2px solid var(--border);"><td style="font-weight:600;">Total</td><td></td><td class="num" style="font-weight:600;">1,702,749</td><td class="num" style="font-weight:600;">70,873</td><td class="num" style="font-weight:600;">4.16%</td><td class="num" style="font-weight:600;">$3,218</td></tr>
+
+      <tr style="background:#f0f7ff;"><td rowspan="8" style="font-weight:600; vertical-align:top;">Ep 7: Brandon Marshall<div style="font-size:10px; color:var(--text-muted); font-weight:400;">Ended</div></td><td>YT Full Episode</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">1,046,873</td><td class="num">50,366</td><td class="num" style="color:var(--turf); font-weight:600;">4.81%</td><td class="num">$1,059.24</td></tr>
+      <tr style="background:#f0f7ff;"><td>YT Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">PAID</span></td><td class="num">90,174</td><td class="num">—</td><td class="num">—</td><td class="num">$359.32</td></tr>
+      <tr style="background:#f0f7ff;"><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">348,926</td><td class="num">5,835</td><td class="num">1.67%</td><td class="num">$1,598.26</td></tr>
+      <tr style="background:#f0f7ff;"><td>Facebook</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">1,085</td><td class="num">3</td><td class="num">0.28%</td><td class="num">$0</td></tr>
+      <tr style="background:#f0f7ff;"><td>X</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">254,513</td><td class="num">157</td><td class="num">0.06%</td><td class="num">$196.34</td></tr>
+      <tr style="background:#f0f7ff;"><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">61,524</td><td class="num">2,270</td><td class="num" style="color:var(--turf); font-weight:600;">3.69%</td><td class="num">$0</td></tr>
+      <tr style="background:#f0f7ff;"><td>TikTok</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">1,395</td><td class="num">45</td><td class="num">3.23%</td><td class="num">$0</td></tr>
+      <tr style="background:#f0f7ff; border-bottom:2px solid var(--border);"><td style="font-weight:600;">Total</td><td></td><td class="num" style="font-weight:600;">1,804,490</td><td class="num" style="font-weight:600;">58,676</td><td class="num" style="font-weight:600;">3.25%</td><td class="num" style="font-weight:600;">$3,213</td></tr>
+
+      <tr style="background:#fffbe6;"><td rowspan="5" style="font-weight:600; vertical-align:top;">Ep 8: Mark Cuban<div style="font-size:10px; color:var(--text-muted); font-weight:400;">Pre-launch</div><div style="margin-top:3px;"><span style="background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">TEASER</span></div></td><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">391,961</td><td class="num">7,654</td><td class="num">1.95%</td><td class="num">$748.21</td></tr>
+      <tr style="background:#fffbe6;"><td>Facebook</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">1,332</td><td class="num">1</td><td class="num">0.08%</td><td class="num">$0</td></tr>
+      <tr style="background:#fffbe6;"><td>X</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">82,316</td><td class="num">328</td><td class="num">0.40%</td><td class="num">$0</td></tr>
+      <tr style="background:#fffbe6;"><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">56,601</td><td class="num">2,536</td><td class="num" style="color:var(--turf); font-weight:600;">4.48%</td><td class="num">$0</td></tr>
+      <tr style="background:#fffbe6; border-bottom:2px solid var(--border);"><td style="font-weight:600;">Total</td><td></td><td class="num" style="font-weight:600;">532,210</td><td class="num" style="font-weight:600;">10,519</td><td class="num" style="font-weight:600;">1.98%</td><td class="num" style="font-weight:600;">$748</td></tr>
     </tbody>
   </table>
+  </div>
+
+  <hr class="divider">
 
   <div class="chart-row full">
     <div class="chart-box">
@@ -1064,9 +1135,9 @@ function drawADPPacing() {
   charts.adpP = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ['Flight: Oct 1, 2025 \u2013 May 31, 2026', 'Impressions: 4.46M of 6.6M', 'Budget: $6,591 of $10,916'],
+      labels: ['Flight: Oct 1, 2025 \u2013 May 31, 2026', 'Impressions: 4.91M of 6.6M', 'Budget: $6,591 of $10,916'],
       datasets: [
-        { label: 'Actual', data: [89.3, 67.6, 60.4], backgroundColor: ['#0D1D64', '#196CFC', '#007640'], borderRadius: 2 },
+        { label: 'Actual', data: [89.3, 74.3, 60.4], backgroundColor: ['#0D1D64', '#196CFC', '#007640'], borderRadius: 2 },
         { label: 'Remaining', data: [10.7, 32.4, 39.6], backgroundColor: '#e5e5e5', borderRadius: 2 }
       ]
     },
