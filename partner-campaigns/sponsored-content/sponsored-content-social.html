@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOS Sponsored Social Campaigns — Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  --scoreboard: #196CFC;
+  --primetime: #0D1D64;
+  --turf: #007640;
+  --eats-yellow: #D4A800;
+  --red-card: #E00922;
+  --center-court: #CFA677;
+  --deep-rough: #044928;
+  --infield: #B47E41;
+  --seams: #800B14;
+  --bg: #f0f2f5;
+  --bg-card: #ffffff;
+  --border: #e5e7eb;
+  --border-light: #f0f1f3;
+  --text: #1a1a2e;
+  --text-muted: #6b7280;
+  --text-dim: #9ca3af;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+  --radius: 10px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* HEADER */
+.header {
+  background: var(--bg-card);
+  padding: 24px 40px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+.header-inner { max-width: 1440px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+.header h1 span { color: var(--scoreboard); font-weight: 400; font-size: 18px; }
+.header-meta { font-size: 13px; color: var(--text-muted); }
+.header-meta strong { color: var(--text); font-weight: 600; }
+
+/* NAV */
+.nav-tabs {
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+  position: sticky; top: 73px; z-index: 99;
+}
+.nav-tab {
+  padding: 12px 20px; font-size: 13px; font-weight: 500;
+  color: var(--text-muted); cursor: pointer;
+  border: none; border-bottom: 2px solid transparent;
+  background: none; font-family: inherit; white-space: nowrap;
+  transition: all 0.15s;
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--scoreboard); border-bottom-color: var(--scoreboard); font-weight: 600; }
+
+/* MAIN */
+.main { max-width: 1440px; margin: 0 auto; padding: 28px 40px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* SECTION */
+.section-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 16px; }
+.section-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* KPI CARDS */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.kpi-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px;
+  box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+}
+.kpi-card .accent { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.kpi-card .label { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+.kpi-card .value { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1.1; letter-spacing: -0.5px; }
+.kpi-card .meta { margin-top: 10px; font-size: 12px; color: var(--text-dim); }
+
+/* CAMPAIGN CARDS */
+.campaign-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.campaign-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+  box-shadow: var(--shadow-sm); cursor: pointer; transition: all 0.15s;
+}
+.campaign-card:hover { border-color: var(--scoreboard); box-shadow: var(--shadow-md); }
+.campaign-card .card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+.campaign-card .partner { font-size: 16px; font-weight: 700; color: var(--text); }
+.campaign-card .series { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.status-pill { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.status-pill.green { background: #ecfdf5; color: #047857; }
+.status-pill.yellow { background: #fefce8; color: #a16207; }
+.status-pill.red { background: #fef2f2; color: #b91c1c; }
+.status-pill.blue { background: #dbeafe; color: #1e40af; }
+.pacing-row { margin-bottom: 10px; }
+.pacing-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+.pacing-label .lbl { color: var(--text-muted); font-weight: 500; }
+.pacing-label .val { color: var(--text); font-weight: 600; }
+.pbar { height: 6px; background: #f0f1f3; border-radius: 3px; overflow: hidden; }
+.pbar-fill { height: 100%; border-radius: 3px; }
+.card-footer { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
+
+/* TABLES */
+.data-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+  background: var(--bg-card); border-radius: var(--radius);
+  overflow: hidden; border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm); margin-bottom: 20px;
+}
+.data-table th {
+  text-align: left; padding: 10px 14px; font-size: 12px;
+  font-weight: 600; color: var(--text-muted); background: #f9fafb;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border-light); color: var(--text); }
+.data-table tr:hover td { background: #f9fafb; }
+.data-table .num { text-align: right; }
+.data-table .total-row { font-weight: 700; border-top: 2px solid var(--border); }
+
+/* CHART BOXES */
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-row.full { grid-template-columns: 1fr; }
+.chart-box {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm);
+}
+.chart-box h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 14px; }
+.chart-box canvas { max-height: 280px; }
+.chart-box.short canvas { max-height: 180px; }
+
+/* CALLOUTS */
+.callouts { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.callout {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px;
+  border-left: 3px solid; box-shadow: var(--shadow-sm);
+}
+.callout.positive { border-left-color: var(--turf); }
+.callout.warning { border-left-color: var(--eats-yellow); }
+.callout.negative { border-left-color: var(--red-card); }
+.callout.info { border-left-color: var(--scoreboard); }
+.callout-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.callout p { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+
+/* EPISODE CARDS */
+.episode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.episode-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-sm);
+}
+.episode-card .ep-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.episode-card .ep-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+.episode-card .ep-row { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid var(--border-light); }
+.episode-card .ep-row:last-child { border-bottom: none; }
+.episode-card .ep-row .ep-lbl { color: var(--text-muted); }
+.episode-card .ep-row .ep-val { color: var(--text); font-weight: 600; }
+.episode-card .ep-highlight { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-light); font-size: 12px; color: var(--turf); font-weight: 600; }
+
+/* FRESHNESS */
+.freshness {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 20px;
+  box-shadow: var(--shadow-sm); margin-bottom: 20px;
+}
+.freshness .ftitle { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+.freshness-row { display: flex; gap: 20px; flex-wrap: wrap; }
+.freshness-item { display: flex; align-items: center; gap: 8px; }
+.freshness-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--turf); }
+.freshness-label { font-size: 12px; font-weight: 500; color: var(--text); }
+.freshness-date { font-size: 11px; color: var(--text-muted); }
+
+/* ASSET CARDS */
+.asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.asset-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-sm);
+}
+.asset-card .badge {
+  display: inline-block; padding: 2px 10px; border-radius: 10px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.badge-tt { background: #fff7ed; color: var(--center-court); }
+.badge-cb { background: #dbeafe; color: var(--scoreboard); }
+.asset-card .asset-platform { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.asset-card .asset-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 10px; line-height: 1.4; text-decoration: none; display: block; }
+.asset-card a.asset-title:hover { color: var(--scoreboard); text-decoration: underline; }
+.asset-card .hero-metric { font-size: 17px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+.asset-card .asset-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; }
+.asset-card .asset-row .ar-lbl { color: var(--text-muted); }
+.asset-card .asset-row .ar-val { color: var(--text); font-weight: 600; }
+.asset-card .asset-insight { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-light); font-size: 12px; color: var(--turf); font-weight: 600; }
+
+/* CREATOR SECTION */
+.creator-section { margin-bottom: 28px; }
+.creator-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.creator-header h3 { font-size: 14px; font-weight: 700; color: var(--text); }
+.creator-stats { display: flex; gap: 20px; }
+.creator-stats .cs-item { font-size: 12px; color: var(--text-muted); }
+.creator-stats .cs-item strong { color: var(--text); }
+
+.divider { border: none; border-top: 1px solid var(--border); margin: 28px 0 20px; }
+.footer { text-align: center; padding: 20px 40px; font-size: 11px; color: var(--text-dim); border-top: 1px solid var(--border); }
+
+@media (max-width: 900px) {
+  .chart-row { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .main { padding: 20px; }
+  .header { padding: 20px; }
+  .nav-tabs { padding: 0 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>Front Office Sports <span>/ Sponsored Social Campaigns</span></h1>
+    <div class="header-meta">Last Updated: <strong>April 27, 2026</strong></div>
+  </div>
+</div>
+
+<div class="nav-tabs" id="navTabs">
+  <button class="nav-tab active" data-tab="overview">Dashboard</button>
+  <button class="nav-tab" data-tab="usbank">US Bank x NFL Draft</button>
+  <button class="nav-tab" data-tab="tastytrade">TastyTrade x March Madness</button>
+  <button class="nav-tab" data-tab="datasources">Data Sources & Exports</button>
+</div>
+
+<div class="main">
+
+<!-- ==================== DASHBOARD ==================== -->
+<div class="tab-content active" id="tab-overview">
+
+  <div class="section-title">Campaign Pacing Overview</div>
+
+  <div class="campaign-grid">
+    <!-- US Bank -->
+    <div class="campaign-card" onclick="switchTab('usbank')">
+      <div class="card-head">
+        <div><div class="partner">US Bank</div><div class="series">NFL Draft (3 Social Components)</div></div>
+        <span class="status-pill green">Goal Exceeded</span>
+      </div>
+      <div style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">38 posts live · 3 of 3 social components active</div>
+      <div class="pacing-row">
+        <div class="pacing-label"><span class="lbl">Impressions</span><span class="val">14.51M of 14.00M (103.6%)</span></div>
+        <div class="pbar"><div class="pbar-fill" style="width:100%; background:var(--turf);"></div></div>
+      </div>
+      <div class="pacing-row">
+        <div class="pacing-label"><span class="lbl">Budget</span><span class="val">$30,986 of $31,375 (98.8%)</span></div>
+        <div class="pbar"><div class="pbar-fill" style="width:98.8%; background:var(--eats-yellow);"></div></div>
+      </div>
+      <div class="card-footer"><span>Apr 21 – Apr 27, 2026</span><span>Goal exceeded · 14.51M impressions delivered</span></div>
+    </div>
+
+    <!-- TastyTrade -->
+    <div class="campaign-card" onclick="switchTab('tastytrade')">
+      <div class="card-head">
+        <div><div class="partner">TastyTrade</div><div class="series">March Madness (The Come Up)</div></div>
+        <span class="status-pill green">Goal Exceeded</span>
+      </div>
+      <div style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">18 posts · 4 episodes · 5 platforms</div>
+      <div class="pacing-row">
+        <div class="pacing-label"><span class="lbl">Impressions</span><span class="val">2.76M of 2.28M (120.9%)</span></div>
+        <div class="pbar"><div class="pbar-fill" style="width:100%; background:var(--turf);"></div></div>
+      </div>
+      <div class="pacing-row">
+        <div class="pacing-label"><span class="lbl">Budget</span><span class="val">$8,054 of $8,500 (94.8%)</span></div>
+        <div class="pbar"><div class="pbar-fill" style="width:94.8%; background:var(--turf);"></div></div>
+      </div>
+      <div class="card-footer"><span>Mar 1 – Apr 20, 2026</span><span>Flight complete · Goal exceeded</span></div>
+    </div>
+  </div>
+
+  <!-- Data Freshness -->
+  <div class="freshness">
+    <div class="ftitle">Data Sources — Last Updated</div>
+    <div class="freshness-row">
+      <div class="freshness-item"><div class="freshness-dot" style="background:var(--scoreboard);"></div><div><div class="freshness-label">Measure Studio</div><div class="freshness-date">April 27, 2026</div></div></div>
+      <div class="freshness-item"><div class="freshness-dot" style="background:var(--scoreboard);"></div><div><div class="freshness-label">Google Ads</div><div class="freshness-date">April 27, 2026</div></div></div>
+      <div class="freshness-item"><div class="freshness-dot" style="background:var(--scoreboard);"></div><div><div class="freshness-label">X Ads Manager</div><div class="freshness-date">April 27, 2026</div></div></div>
+      <div class="freshness-item"><div class="freshness-dot" style="background:var(--scoreboard);"></div><div><div class="freshness-label">Meta Ads Manager</div><div class="freshness-date">April 27, 2026</div></div></div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- TOP PERFORMING ASSETS — ENGAGEMENT RATE -->
+  <div class="section-title">Top Performing Assets — Engagement Rate</div>
+  <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Highest ER across all campaigns (min 1K views)</p>
+
+  <div class="asset-grid">
+    <div class="asset-card">
+      <div class="badge badge-tt">TASTYTRADE</div>
+      <div class="asset-platform">TikTok</div>
+      <a href="https://tiktok.com/@frontofficesports/video/7620943888877882638" target="_blank" class="asset-title">Ben McCollum turned down a bank job to start coaching...</a>
+      <div class="hero-metric" style="color:var(--scoreboard);">10.36% ER</div>
+      <div class="asset-row"><span class="ar-lbl">Engagements</span><span class="ar-val">7,558</span></div>
+      <div class="asset-row"><span class="ar-lbl">Views</span><span class="ar-val">72,969</span></div>
+      <div class="asset-row"><span class="ar-lbl">Organic %</span><span class="ar-val">100%</span></div>
+      <div class="asset-insight">Highest ER across all posts — pure organic TikTok resonance</div>
+    </div>
+
+    <div class="asset-card">
+      <div class="badge badge-tt">TASTYTRADE</div>
+      <div class="asset-platform">Instagram</div>
+      <a href="https://www.instagram.com/p/DWmIn1XDWfS/" target="_blank" class="asset-title">Braylon Mullins went from a single D1 offer to leading UCONN to the Final Four</a>
+      <div class="hero-metric" style="color:var(--scoreboard);">9.95% ER</div>
+      <div class="asset-row"><span class="ar-lbl">Engagements</span><span class="ar-val">26,135</span></div>
+      <div class="asset-row"><span class="ar-lbl">Views</span><span class="ar-val">262,761</span></div>
+      <div class="asset-row"><span class="ar-lbl">Organic %</span><span class="ar-val">18.0%</span></div>
+      <div class="asset-insight">Highest ER of any IG post across both campaigns — UCONN storyline resonated</div>
+    </div>
+
+    <div class="asset-card">
+      <div class="badge badge-tt">TASTYTRADE</div>
+      <div class="asset-platform">LinkedIn</div>
+      <a href="https://www.linkedin.com/feed/update/urn:li:ugcPost:7445142995672403969" target="_blank" class="asset-title">Braylon Mullins went from a single D1 offer to leading UCONN...</a>
+      <div class="hero-metric" style="color:var(--scoreboard);">3.94% ER</div>
+      <div class="asset-row"><span class="ar-lbl">Engagements</span><span class="ar-val">2,456</span></div>
+      <div class="asset-row"><span class="ar-lbl">Impressions</span><span class="ar-val">62,359</span></div>
+      <div class="asset-row"><span class="ar-lbl">Organic %</span><span class="ar-val">100%</span></div>
+      <div class="asset-insight">LinkedIn organic consistently 4-5% ER across TastyTrade</div>
+    </div>
+
+    <div class="asset-card">
+      <div class="badge badge-tt">TASTYTRADE</div>
+      <div class="asset-platform">TikTok</div>
+      <a href="https://tiktok.com/@frontofficesports/video/7618683643392757005" target="_blank" class="asset-title">After taking over a 4–28 Siena program and leading them to March Madness...</a>
+      <div class="hero-metric" style="color:var(--scoreboard);">0.48% ER</div>
+      <div class="asset-row"><span class="ar-lbl">Engagements</span><span class="ar-val">425</span></div>
+      <div class="asset-row"><span class="ar-lbl">Views</span><span class="ar-val">87,950</span></div>
+      <div class="asset-row"><span class="ar-lbl">Organic %</span><span class="ar-val">33.9%</span></div>
+      <div class="asset-insight">TikTok paid + organic delivering 34% organic lift</div>
+    </div>
+
+    <div class="asset-card">
+      <div class="badge badge-tt">TASTYTRADE</div>
+      <div class="asset-platform">LinkedIn</div>
+      <a href="https://www.linkedin.com/feed/update/urn:li:ugcPost:7442282371841916928" target="_blank" class="asset-title">Ben McCollum turned down a bank job to start coaching...</a>
+      <div class="hero-metric" style="color:var(--scoreboard);">4.72% ER</div>
+      <div class="asset-row"><span class="ar-lbl">Engagements</span><span class="ar-val">1,847</span></div>
+      <div class="asset-row"><span class="ar-lbl">Impressions</span><span class="ar-val">39,126</span></div>
+      <div class="asset-row"><span class="ar-lbl">Organic %</span><span class="ar-val">100%</span></div>
+      <div class="asset-insight">Ep 2 LinkedIn — highest raw engagement among LinkedIn posts</div>
+    </div>
+
+    <div class="asset-card">
+      <div class="badge badge-tt">TASTYTRADE</div>
+      <div class="asset-platform">LinkedIn</div>
+      <a href="https://www.linkedin.com/feed/update/urn:li:ugcPost:7440072916559405056" target="_blank" class="asset-title">After taking over a 4–28 Siena program...</a>
+      <div class="hero-metric" style="color:var(--scoreboard);">4.17% ER</div>
+      <div class="asset-row"><span class="ar-lbl">Engagements</span><span class="ar-val">1,751</span></div>
+      <div class="asset-row"><span class="ar-lbl">Impressions</span><span class="ar-val">42,054</span></div>
+      <div class="asset-row"><span class="ar-lbl">Organic %</span><span class="ar-val">100%</span></div>
+      <div class="asset-insight">Ep 1 LinkedIn — consistent organic engagement at 4.17% ER</div>
+    </div>
+
+
+  </div>
+
+  <hr class="divider">
+
+  <!-- TOP PERFORMING ASSETS — ORGANIC REACH -->
+  <div class="section-title">Top Performing Assets — Organic Reach</div>
+  <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Highest organic views / impressions with no or minimal paid support</p>
+
+  <div class="asset-grid">
+    <div class="asset-card">
+      <div class="badge badge-tt">TASTYTRADE</div>
+      <div class="asset-platform">Instagram</div>
+      <a href="https://www.instagram.com/p/DWCTfRBjl80/" target="_blank" class="asset-title">After taking over a 4–28 Siena program and leading them to March Madness...</a>
+      <div class="hero-metric" style="color:var(--turf);">79,268 organic views</div>
+      <div class="asset-row"><span class="ar-lbl">Total Views</span><span class="ar-val">555,506</span></div>
+      <div class="asset-row"><span class="ar-lbl">Organic %</span><span class="ar-val">14.3%</span></div>
+      <div class="asset-row"><span class="ar-lbl">Platform</span><span class="ar-val">Instagram</span></div>
+      <div class="asset-insight">Ep 1 Instagram organic blowout — highest raw organic volume</div>
+    </div>
+
+    <div class="asset-card">
+      <div class="badge badge-tt">TASTYTRADE</div>
+      <div class="asset-platform">TikTok</div>
+      <a href="https://tiktok.com/@frontofficesports/video/7620943888877882638" target="_blank" class="asset-title">Ben McCollum turned down a bank job to start coaching...</a>
+      <div class="hero-metric" style="color:var(--turf);">72,969 organic views</div>
+      <div class="asset-row"><span class="ar-lbl">Total Views</span><span class="ar-val">72,969</span></div>
+      <div class="asset-row"><span class="ar-lbl">Organic %</span><span class="ar-val">100%</span></div>
+      <div class="asset-row"><span class="ar-lbl">Platform</span><span class="ar-val">TikTok</span></div>
+      <div class="asset-insight">100% organic — pure algorithmic distribution on TikTok</div>
+    </div>
+
+    <div class="asset-card">
+      <div class="badge badge-tt">TASTYTRADE</div>
+      <div class="asset-platform">Instagram</div>
+      <a href="https://www.instagram.com/p/DWSHFvRgafi/" target="_blank" class="asset-title">Ben McCollum turned down a bank job to start coaching...</a>
+      <div class="hero-metric" style="color:var(--turf);">31,932 organic views</div>
+      <div class="asset-row"><span class="ar-lbl">Total Views</span><span class="ar-val">287,631</span></div>
+      <div class="asset-row"><span class="ar-lbl">Organic %</span><span class="ar-val">11.1%</span></div>
+      <div class="asset-row"><span class="ar-lbl">Platform</span><span class="ar-val">Instagram</span></div>
+      <div class="asset-insight">Ep 2 IG — 31K organic on paid-amplified content</div>
+    </div>
+
+    <div class="asset-card">
+      <div class="badge badge-tt">TASTYTRADE</div>
+      <div class="asset-platform">TikTok</div>
+      <a href="https://tiktok.com/@frontofficesports/video/7618683643392757005" target="_blank" class="asset-title">After taking over a 4–28 Siena program...</a>
+      <div class="hero-metric" style="color:var(--turf);">29,786 organic views</div>
+      <div class="asset-row"><span class="ar-lbl">Total Views</span><span class="ar-val">87,950</span></div>
+      <div class="asset-row"><span class="ar-lbl">Organic %</span><span class="ar-val">33.9%</span></div>
+      <div class="asset-row"><span class="ar-lbl">Platform</span><span class="ar-val">TikTok</span></div>
+      <div class="asset-insight">Ep 1 TikTok — 33% organic lift alongside paid amplification</div>
+    </div>
+
+    <div class="asset-card">
+      <div class="badge badge-tt">TASTYTRADE</div>
+      <div class="asset-platform">YouTube</div>
+      <a href="https://www.youtube.com/shorts/QBnFENfBt4I" target="_blank" class="asset-title">Ben McCollum — Iowa to the Sweet 16</a>
+      <div class="hero-metric" style="color:var(--turf);">30,064 organic views</div>
+      <div class="asset-row"><span class="ar-lbl">Total Views</span><span class="ar-val">190,341</span></div>
+      <div class="asset-row"><span class="ar-lbl">Organic %</span><span class="ar-val">15.8%</span></div>
+      <div class="asset-row"><span class="ar-lbl">Platform</span><span class="ar-val">YouTube Shorts</span></div>
+      <div class="asset-insight">Ep 2 YouTube Shorts — strongest organic Shorts performance</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CPM BENCHMARKS -->
+  <div class="section-title">CPM Benchmarks — Cross-Campaign Averages</div>
+
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Social Platform CPMs</h3>
+      <table class="data-table" style="margin-bottom:0; box-shadow:none; border:none;">
+        <thead><tr><th>Platform</th><th class="num">TastyTrade</th><th class="num">US Bank</th></tr></thead>
+        <tbody>
+          <tr><td>Instagram</td><td class="num">$4.99</td><td class="num">$5.07</td></tr>
+          <tr><td>Facebook</td><td class="num">—</td><td class="num">$4.87</td></tr>
+          <tr><td>TikTok</td><td class="num">$1.94</td><td class="num">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="chart-box">
+      <h3>YouTube Shorts (Google Ads)</h3>
+      <table class="data-table" style="margin-bottom:0; box-shadow:none; border:none;">
+        <thead><tr><th>Campaign</th><th class="num">CPM</th><th class="num">Impressions</th><th class="num">Spend</th></tr></thead>
+        <tbody>
+          <tr><td>TastyTrade Ep 1</td><td class="num">$3.78</td><td class="num">187,242</td><td class="num">$707.80</td></tr>
+          <tr><td>TastyTrade Ep 2</td><td class="num">$4.42</td><td class="num">160,277</td><td class="num">$708.86</td></tr>
+          <tr><td>TastyTrade Ep 3</td><td class="num">$3.77</td><td class="num">417,167</td><td class="num">$1,571.89</td></tr>
+          <tr><td>US Bank Mendoza</td><td class="num">$7.19</td><td class="num">82,508</td><td class="num">$593.60</td></tr>
+          <tr><td>US Bank Downs</td><td class="num">$8.67</td><td class="num">46,135</td><td class="num">$400.09</td></tr>
+          <tr><td>US Bank Mauigoa</td><td class="num">$9.62</td><td class="num">41,338</td><td class="num">$397.74</td></tr>
+          <tr><td>US Bank Tate</td><td class="num">$7.71</td><td class="num">38,176</td><td class="num">$294.21</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CPM OUTLIERS & OBSERVATIONS -->
+  <div class="section-title">CPM Outliers &amp; Observations</div>
+  <div class="callouts">
+    <div class="callout positive">
+      <div class="callout-title">TikTok delivered the lowest social CPM at $1.94 on TastyTrade.</div>
+      <p>TastyTrade's TikTok spend of $267 across Eps 1 and 3 generated 138K paid impressions at $1.94 CPM. TikTok is the clear efficiency play for reach — and with 77% organic on TastyTrade, it delivers massive unpaid distribution. US Bank does not include TikTok in its distribution plan.</p>
+    </div>
+    <div class="callout warning">
+      <div class="callout-title">US Bank YouTube Shorts CPMs ($7.19–$9.62) continuing to improve as campaigns scale toward TastyTrade's ($3.77–$4.42).</div>
+      <p>US Bank's GA campaigns continue scaling — Mendoza leads with 82.5K impr at $7.19 CPM, Downs at 46.1K ($8.67), Mauigoa at 41.3K ($9.62), Tate at 38.2K ($7.71). CPMs have improved from $10–$13 range to $7.19–$9.62. Still above TastyTrade's $3.77–$4.42 but converging as volume increases.</p>
+    </div>
+    <div class="callout info">
+      <div class="callout-title">Instagram CPMs consistent across campaigns — $4.99 (TastyTrade) vs $5.07 (US Bank via Meta Ads).</div>
+      <p>Instagram paid CPMs holding steady in the $4.99–$5.07 range. US Bank IG paid now at 915K impressions via Meta Ads, with $4,643 of $7,102 spent (65.4%). IG budget approaching contracted ceiling — engagement remains the strongest among social platforms.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CROSS-CAMPAIGN INSIGHTS -->
+  <div class="section-title">Cross-Campaign Insights</div>
+  <div class="callouts">
+    <div class="callout positive">
+      <div class="callout-title">TastyTrade exceeded goal — 2.76M impressions (121% of 2.28M) on 95% of budget.</div>
+      <p>Campaign delivered 477K impressions above goal across 4 episodes and 18 posts on 5 platforms. Ep 4 (Azzi Fudd / WNBA Draft) was added post-contract and drove 382K incremental impressions on just $74 in spend. Total spend: $8,054 of $8,500 — strong budget discipline with significant over-delivery.</p>
+    </div>
+    <div class="callout positive">
+      <div class="callout-title">TastyTrade engagement rate (4.41%) sets the benchmark for sponsored social.</div>
+      <p>TastyTrade's content resonated deeply — especially TikTok (7.95% ER), Instagram (5.28% ER), and LinkedIn (4.54% ER). Ep 4's TikTok Dark post hit 11.86% ER and Ep 3's IG held at 9.95% ER — the two highest across all posts. Total engagements: 417K (15.1% blended ER). US Bank is tracking 8.5% blended ER — strong trajectory.</p>
+    </div>
+    <div class="callout info">
+      <div class="callout-title">LinkedIn is a zero-cost engagement engine — consistent 4%+ ER across both campaigns.</div>
+      <p>TastyTrade's 4 LinkedIn posts delivered 163K impressions and 7,411 engagements at 4.54% ER — all organic, zero spend. US Bank's LinkedIn is tracking 64K impressions and 4.5% ER across 4 stories (also zero spend). LinkedIn should be a default inclusion for any sponsored social package.</p>
+    </div>
+    <div class="callout positive">
+      <div class="callout-title">Short-form vertical video drives the best organic lift across campaigns.</div>
+      <p>TastyTrade TikTok: 455K organic out of 592K total (77%). YouTube organic impressions at 93K across all 4 episodes. TikTok is where the algorithm amplifies branded content most aggressively — Ep 4's Dark TikTok post hit 325K views (100% organic), and Ep 2 also ran fully organic at 73K. US Bank's X platform is showing strong organic traction at 53K impressions on zero spend.</p>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ==================== TASTYTRADE x THE COME UP ==================== -->
+<div class="tab-content" id="tab-tastytrade">
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div>
+      <div class="section-title" style="margin-bottom:2px;">TastyTrade x March Madness</div>
+      <div class="section-sub">Flight: Mar 1 – Apr 20, 2026 · 4 Episodes · <strong>18 Posts</strong> across YouTube, Instagram, TikTok, LinkedIn, Snapchat</div>
+    </div>
+    <span class="status-pill green">Goal Exceeded</span>
+  </div>
+
+  <!-- Pacing -->
+  <div class="chart-box short" style="margin-bottom:24px;">
+    <h3>Campaign Pacing</h3>
+    <canvas id="tt-pacing"></canvas>
+    <div style="margin-top:14px; padding:14px 16px; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px;">
+      <p style="font-size:13px; color:var(--text); line-height:1.6;"><strong>Status:</strong> <strong style="color:var(--turf);">Goal exceeded</strong> — campaign delivered 2.76M impressions against a 2.28M goal (<strong style="color:var(--turf);">120.9%</strong>). Flight complete (Mar 1 – Apr 20). Budget at 94.8% ($8,054 of $8,500) — $446 remaining. 4 episodes across 18 posts on 5 platforms. Ep 4 (Azzi Fudd / WNBA Draft) added post-March Madness, driving 381K additional impressions.</p>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid" style="grid-template-columns: repeat(5, 1fr);">
+    <div class="kpi-card"><div class="accent" style="background:var(--primetime);"></div><div class="label">Total Posts</div><div class="value">18</div><div class="meta">4 episodes · 5 platforms</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--scoreboard);"></div><div class="label">Total Impressions</div><div class="value">2.76M</div><div class="meta">of 2.28M goal (120.9%)</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--turf);"></div><div class="label">Total Engagements</div><div class="value">417,342</div><div class="meta">social + YT Shorts combined</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--eats-yellow);"></div><div class="label">Engagement Rate</div><div class="value">15.1%</div><div class="meta">cross-platform blended</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--center-court);"></div><div class="label">Ad Spend</div><div class="value">$8,054</div><div class="meta">of $8,500 budget (94.8%)</div></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Platform Detail Table -->
+  <div class="section-title">Platform Performance Summary</div>
+  <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">YouTube Shorts organic = YouTube Impressions (Imported from YouTube Analytics). Social platforms = Measure Studio views/impressions. Paid = Google Ads (YT) or MS Paid Impressions (social). Engagements = MS social engagements + Google Ads YT Shorts engagements combined.</p>
+
+  <table class="data-table">
+    <thead><tr><th>Platform</th><th class="num">Organic</th><th class="num">Paid Impr</th><th class="num">Total</th><th class="num">% Paid</th><th class="num">% Organic</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Spend</th><th class="num">CPM</th></tr></thead>
+    <tbody>
+      <tr><td>YouTube Shorts</td><td class="num">92,966</td><td class="num">764,686</td><td class="num">857,652</td><td class="num" style="color:var(--primetime); font-weight:600;">89.2%</td><td class="num">10.8%</td><td class="num">301,310<span style="color:var(--red-card); font-weight:700;">*</span></td><td class="num" style="color:var(--turf); font-weight:600;">35.1%<span style="color:var(--red-card); font-weight:700;">*</span></td><td class="num">$2,988.55</td><td class="num">$3.91</td></tr>
+      <tr><td>Instagram</td><td class="num">180,316</td><td class="num">961,759</td><td class="num">1,142,075</td><td class="num" style="color:var(--primetime); font-weight:600;">84.2%</td><td class="num">15.8%</td><td class="num">60,334</td><td class="num">5.28%</td><td class="num">$4,798.74</td><td class="num">$4.99</td></tr>
+      <tr><td>TikTok</td><td class="num">454,829</td><td class="num">137,590</td><td class="num">592,419</td><td class="num">23.2%</td><td class="num" style="color:var(--turf); font-weight:600;">76.8%</td><td class="num">47,078</td><td class="num">7.95%</td><td class="num">$266.57</td><td class="num">$1.94</td></tr>
+      <tr><td>LinkedIn</td><td class="num">163,319</td><td class="num">—</td><td class="num">163,319</td><td class="num">—</td><td class="num" style="color:var(--turf); font-weight:600;">100%</td><td class="num">7,411</td><td class="num">4.54%</td><td class="num">$0</td><td class="num">—</td></tr>
+      <tr><td>Snapchat</td><td class="num">1,334</td><td class="num">—</td><td class="num">1,334</td><td class="num">—</td><td class="num" style="color:var(--turf); font-weight:600;">100%</td><td class="num">1,209</td><td class="num">90.6%</td><td class="num">$0</td><td class="num">—</td></tr>
+      <tr class="total-row"><td>Total</td><td class="num">892,764</td><td class="num">1,864,035</td><td class="num">2,756,799</td><td class="num">67.6%</td><td class="num">32.4%</td><td class="num">417,342</td><td class="num">15.1%</td><td class="num">$8,053.86</td><td class="num">$4.32</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:11px; margin:8px 0 0 0; line-height:1.5; color:var(--text-muted);"><span style="color:var(--red-card); font-weight:700;">*</span> YouTube Shorts engagements are sourced from Google Ads, where an engagement is counted when a viewer watches at least 10 seconds of or clicks on a video ad.</p>
+
+  <div class="chart-row" style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+    <div class="chart-box">
+      <h3>Platform Impressions — Paid vs Organic</h3>
+      <canvas id="tt-social-chart"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Spend &amp; Impressions Weight by Platform</h3>
+      <canvas id="tt-weight-chart"></canvas>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CONTENT PLANNER BREAKOUT -->
+  <div class="section-title">Content Planner — Contracted vs Actual by Platform</div>
+  <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Contracted impressions and spend per the original content planner (3 episodes × 4 platforms) vs final delivery. Ep 4 (Fudd) was added post-plan. Snapchat was not in the original contract.</p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Platform</th><th class="num">Contracted Impr</th><th class="num">Actual Impr</th><th class="num">Impr Pacing</th><th class="num">Contracted Spend</th><th class="num">Actual Spend</th><th class="num">Spend Pacing</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Instagram</td>
+        <td class="num">1,156,523<div style="font-size:10px; color:var(--text-dim);">1,057,214 paid + 99,309 org</div></td>
+        <td class="num">1,142,075</td>
+        <td class="num" style="color:var(--turf); font-weight:600;">98.7%</td>
+        <td class="num">$5,950</td>
+        <td class="num">$4,798.74</td>
+        <td class="num" style="color:var(--eats-yellow); font-weight:600;">80.7%</td>
+      </tr>
+      <tr>
+        <td>TikTok</td>
+        <td class="num">259,451<div style="font-size:10px; color:var(--text-dim);">152,221 paid + 107,230 org</div></td>
+        <td class="num">592,419</td>
+        <td class="num" style="color:var(--turf); font-weight:600;">228.4%</td>
+        <td class="num">$425</td>
+        <td class="num">$266.57</td>
+        <td class="num" style="color:var(--turf); font-weight:600;">62.7%</td>
+      </tr>
+      <tr>
+        <td>LinkedIn</td>
+        <td class="num">96,478<div style="font-size:10px; color:var(--text-dim);">organic only</div></td>
+        <td class="num">163,319</td>
+        <td class="num" style="color:var(--turf); font-weight:600;">169.3%</td>
+        <td class="num">$0</td>
+        <td class="num">$0</td>
+        <td class="num">—</td>
+      </tr>
+      <tr>
+        <td>YouTube Shorts</td>
+        <td class="num">1,069,185<div style="font-size:10px; color:var(--text-dim);">1,062,500 paid + 6,685 org</div></td>
+        <td class="num">857,652</td>
+        <td class="num" style="color:var(--eats-yellow); font-weight:600;">80.2%</td>
+        <td class="num">$2,125</td>
+        <td class="num">$2,988.55</td>
+        <td class="num" style="color:var(--red-card); font-weight:600;">140.6%</td>
+      </tr>
+      <tr>
+        <td>Snapchat<div style="font-size:10px; color:var(--text-dim);">not in original plan</div></td>
+        <td class="num">—</td>
+        <td class="num">1,334</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td class="num">$0</td>
+        <td class="num">—</td>
+      </tr>
+      <tr class="total-row">
+        <td>Total</td>
+        <td class="num">2,250,000</td>
+        <td class="num">2,756,799</td>
+        <td class="num" style="font-weight:700; color:var(--turf);">122.5%</td>
+        <td class="num">$8,500</td>
+        <td class="num">$8,053.86</td>
+        <td class="num" style="font-weight:700;">94.8%</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:14px; padding:14px 16px; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px;">
+    <p style="font-size:13px; color:var(--text); line-height:1.6;"><strong>Planner Insight:</strong> Campaign exceeded the contracted 2.25M impression goal by 22.5% while spending only 94.8% of budget — strong overall efficiency. TikTok was the standout over-performer at 228% of contracted impressions on 63% of budget ($1.94 CPM). LinkedIn also crushed its target at 169% on zero spend. YouTube Shorts remained the priciest platform at $3.91 CPM (140.6% of budget for 80.2% of contracted impressions). Instagram delivered 98.7% of goal on 80.7% of budget. Ep 4 (Fudd) added incremental reach beyond the original 3-episode plan.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CONTENT PLANNER — PER POST DETAIL -->
+  <div class="section-title">Content Planner — Per-Post Detail</div>
+  <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Contracted impressions per post (original: 3 episodes × 4 platforms = 12 posts). Ep 4 (Fudd) added post-contract with 4 core platform posts + 2 Snapchat posts = 18 total.</p>
+
+  <div style="overflow-x:auto;">
+  <table class="data-table" style="font-size:12px;">
+    <thead>
+      <tr><th>Episode</th><th>Platform</th><th style="font-size:11px;">Type</th><th class="num">Contracted</th><th class="num">Actual</th><th class="num">Pacing</th><th class="num">Spend</th></tr>
+    </thead>
+    <tbody>
+      <tr><td rowspan="4" style="font-weight:600; vertical-align:top;">Ep 1: McNamara</td><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + BOOSTED</span></td><td class="num">385,508</td><td class="num">555,506</td><td class="num" style="color:var(--turf); font-weight:600;">144.1%</td><td class="num">$2,433.40</td></tr>
+      <tr><td>TikTok</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + BOOSTED</span></td><td class="num">86,484</td><td class="num">87,950</td><td class="num" style="color:var(--turf); font-weight:600;">101.7%</td><td class="num">$125.00</td></tr>
+      <tr><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">32,159</td><td class="num">42,054</td><td class="num" style="color:var(--turf); font-weight:600;">130.8%</td><td class="num">$0</td></tr>
+      <tr><td>YouTube Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + BOOSTED</span></td><td class="num">356,395</td><td class="num">199,582</td><td class="num" style="color:var(--red-card); font-weight:600;">56.0%</td><td class="num">$707.80</td></tr>
+      <tr style="background:#fafafa;"><td rowspan="4" style="font-weight:600; vertical-align:top;">Ep 2: McCollum</td><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + BOOSTED</span></td><td class="num">385,508</td><td class="num">287,631</td><td class="num" style="color:var(--eats-yellow); font-weight:600;">74.6%</td><td class="num">$1,296.72</td></tr>
+      <tr style="background:#fafafa;"><td>TikTok</td><td><span style="background:#fef9c3; color:#854d0e; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">DARK</span></td><td class="num">86,484</td><td class="num">72,969</td><td class="num" style="color:var(--eats-yellow); font-weight:600;">84.4%</td><td class="num">$0</td></tr>
+      <tr style="background:#fafafa;"><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">32,159</td><td class="num">39,126</td><td class="num" style="color:var(--turf); font-weight:600;">121.7%</td><td class="num">$0</td></tr>
+      <tr style="background:#fafafa;"><td>YouTube Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + BOOSTED</span></td><td class="num">356,395</td><td class="num">190,341</td><td class="num" style="color:var(--red-card); font-weight:600;">53.4%</td><td class="num">$708.86</td></tr>
+      <tr><td rowspan="4" style="font-weight:600; vertical-align:top;">Ep 3: Mullins</td><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + BOOSTED</span></td><td class="num">385,508</td><td class="num">262,761</td><td class="num" style="color:var(--eats-yellow); font-weight:600;">68.2%</td><td class="num">$994.38</td></tr>
+      <tr><td>TikTok</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + BOOSTED</span></td><td class="num">86,484</td><td class="num">106,906</td><td class="num" style="color:var(--turf); font-weight:600;">123.6%</td><td class="num">$141.57</td></tr>
+      <tr><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">32,159</td><td class="num">62,359</td><td class="num" style="color:var(--turf); font-weight:600;">193.9%</td><td class="num">$0</td></tr>
+      <tr><td>YouTube Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + BOOSTED</span></td><td class="num">356,395</td><td class="num">467,729</td><td class="num" style="color:var(--turf); font-weight:600;">131.3%</td><td class="num">$1,571.89</td></tr>
+      <tr style="background:#fafafa;"><td rowspan="6" style="font-weight:600; vertical-align:top;">Ep 4: Fudd<div style="font-size:10px; color:var(--text-dim); font-weight:400;">added post-contract</div></td><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">BOOSTED</span></td><td class="num">—</td><td class="num">36,177</td><td class="num">—</td><td class="num">$74.24</td></tr>
+      <tr style="background:#fafafa;"><td>TikTok</td><td><span style="background:#fef9c3; color:#854d0e; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">DARK</span></td><td class="num">—</td><td class="num">324,594</td><td class="num">—</td><td class="num">$0</td></tr>
+      <tr style="background:#fafafa;"><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">—</td><td class="num">19,780</td><td class="num">—</td><td class="num">$0</td></tr>
+      <tr style="background:#fafafa;"><td>YouTube Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">BOOSTED</span></td><td class="num">—</td><td class="num">0</td><td class="num">—</td><td class="num">$0</td></tr>
+      <tr style="background:#fafafa;"><td>Snapchat</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">—</td><td class="num">1,334</td><td class="num">—</td><td class="num">$0</td></tr>
+      <tr style="background:#fafafa; border-top:1px solid var(--border);"><td colspan="2" style="font-weight:600; color:var(--text-dim); font-size:11px;">Ep 4 Subtotal</td><td class="num">—</td><td class="num" style="font-weight:600;">381,885</td><td class="num">—</td><td class="num" style="font-weight:600;">$74.24</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <hr class="divider">
+
+  <!-- EPISODE PERFORMANCE CARDS -->
+  <div class="section-title">Episode Performance Comparison</div>
+  <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Episodes 1–3 posted across YouTube Shorts, Instagram, TikTok, and LinkedIn (4 posts each). Ep 4 added Instagram, TikTok, LinkedIn, YouTube, and Snapchat (6 posts).</p>
+
+  <div class="episode-grid">
+    <div class="episode-card">
+      <div class="ep-name">Ep 1: Gerry McNamara</div>
+      <div class="ep-sub">Siena → March Madness · Published 3/18 · 4 platforms</div>
+      <div class="ep-row"><span class="ep-lbl">YouTube Shorts</span><span class="ep-val"><a href="https://www.youtube.com/shorts/maiPMND_Wvw" target="_blank" style="color:var(--text); text-decoration:none;">199,582 views</a></span></div>
+      <div class="ep-row"><span class="ep-lbl">Instagram</span><span class="ep-val"><a href="https://www.instagram.com/p/DWCTfRBjl80/" target="_blank" style="color:var(--text); text-decoration:none;">555,506 views</a></span></div>
+      <div class="ep-row"><span class="ep-lbl">TikTok</span><span class="ep-val"><a href="https://tiktok.com/@frontofficesports/video/7618683643392757005" target="_blank" style="color:var(--text); text-decoration:none;">87,950 views</a></span></div>
+      <div class="ep-row"><span class="ep-lbl">LinkedIn</span><span class="ep-val">42,054 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Reach</span><span class="ep-val" style="color:var(--scoreboard);">885,092</span></div>
+
+      <div class="ep-row"><span class="ep-lbl">Total Engagements</span><span class="ep-val">80,784</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Spend</span><span class="ep-val">$3,266</span></div>
+      <div class="ep-highlight">Highest reach of any episode — Instagram (556K) was the primary driver with 3.50% ER.</div>
+    </div>
+
+    <div class="episode-card">
+      <div class="ep-name">Ep 2: Ben McCollum</div>
+      <div class="ep-sub">Iowa → Sweet 16 · Published 3/24 · 4 platforms</div>
+      <div class="ep-row"><span class="ep-lbl">YouTube Shorts</span><span class="ep-val"><a href="https://www.youtube.com/shorts/QBnFENfBt4I" target="_blank" style="color:var(--text); text-decoration:none;">190,341 views</a></span></div>
+      <div class="ep-row"><span class="ep-lbl">Instagram</span><span class="ep-val"><a href="https://www.instagram.com/p/DWSHFvRgafi/" target="_blank" style="color:var(--text); text-decoration:none;">287,631 views</a></span></div>
+      <div class="ep-row"><span class="ep-lbl">TikTok</span><span class="ep-val"><a href="https://tiktok.com/@frontofficesports/video/7620943888877882638" target="_blank" style="color:var(--text); text-decoration:none;">72,969 views</a></span></div>
+      <div class="ep-row"><span class="ep-lbl">LinkedIn</span><span class="ep-val"><a href="https://www.linkedin.com/feed/update/urn:li:ugcPost:7442282371841916928" target="_blank" style="color:var(--text); text-decoration:none;">39,126 impr</a></span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Reach</span><span class="ep-val" style="color:var(--scoreboard);">590,067</span></div>
+
+      <div class="ep-row"><span class="ep-lbl">Total Engagements</span><span class="ep-val">76,716</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Spend</span><span class="ep-val">$2,006</span></div>
+      <div class="ep-highlight">TikTok 100% organic (73K views, 10.4% ER) — highest organic ER of any post. IG at 4.32% ER.</div>
+    </div>
+
+    <div class="episode-card" style="border-color: var(--turf);">
+      <div class="ep-name">Ep 3: Braylon Mullins</div>
+      <div class="ep-sub">UCONN → Final Four · Published 4/1 · 4 platforms</div>
+      <div class="ep-row"><span class="ep-lbl">YouTube Shorts</span><span class="ep-val"><a href="https://www.youtube.com/shorts/3YAOb_Zs2uU" target="_blank" style="color:var(--text); text-decoration:none;">467,729 views</a></span></div>
+      <div class="ep-row"><span class="ep-lbl">Instagram</span><span class="ep-val"><a href="https://www.instagram.com/p/DWmIn1XDWfS/" target="_blank" style="color:var(--text); text-decoration:none;">262,761 views</a></span></div>
+      <div class="ep-row"><span class="ep-lbl">TikTok</span><span class="ep-val"><a href="https://tiktok.com/@frontofficesports/video/7623825977554095374" target="_blank" style="color:var(--text); text-decoration:none;">106,906 views</a></span></div>
+      <div class="ep-row"><span class="ep-lbl">LinkedIn</span><span class="ep-val"><a href="https://www.linkedin.com/feed/update/urn:li:ugcPost:7445142995672403969" target="_blank" style="color:var(--text); text-decoration:none;">62,359 impr</a></span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Reach</span><span class="ep-val" style="color:var(--scoreboard);">899,755</span></div>
+
+      <div class="ep-row"><span class="ep-lbl">Total Engagements</span><span class="ep-val">215,406</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Spend</span><span class="ep-val">$2,708</span></div>
+      <div class="ep-highlight">Highest YT Shorts reach (468K) and strongest engagement (215K). IG at 9.95% ER — highest across all posts.</div>
+    </div>
+
+    <div class="episode-card" style="border-color: var(--scoreboard);">
+      <div class="ep-name">Ep 4: Azzi Fudd</div>
+      <div class="ep-sub">WNBA Draft · Published 4/14 · 5 platforms (incl. Snapchat)</div>
+      <div class="ep-row"><span class="ep-lbl">Instagram</span><span class="ep-val">36,177 views</span></div>
+      <div class="ep-row"><span class="ep-lbl">TikTok</span><span class="ep-val">324,594 views</span></div>
+      <div class="ep-row"><span class="ep-lbl">LinkedIn</span><span class="ep-val">19,780 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">YouTube</span><span class="ep-val">0 views</span></div>
+      <div class="ep-row"><span class="ep-lbl">Snapchat</span><span class="ep-val">1,334 views</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Reach</span><span class="ep-val" style="color:var(--scoreboard);">381,885</span></div>
+
+      <div class="ep-row"><span class="ep-lbl">Total Engagements</span><span class="ep-val">44,253</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Spend</span><span class="ep-val">$74</span></div>
+      <div class="ep-highlight">TikTok Dark post hit 325K views (100% organic) with 11.86% ER. IG at 6.55% ER. Highest engagement of any episode (44K) on near-zero spend.</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Recommendations -->
+  <div class="section-title">Campaign Wrap-Up &amp; Key Takeaways</div>
+  <div class="callouts">
+    <div class="callout positive">
+      <div class="callout-title">Goal exceeded — 2.76M impressions delivered (121% of 2.28M goal) on 95% of budget</div>
+      <p>The campaign over-delivered on its primary KPI by 477K impressions while spending just $8,054 of the $8,500 budget. The addition of Ep 4 (Azzi Fudd / WNBA Draft) pushed the campaign well past goal. Blended CPM of $4.32 on paid impressions. This is a strong campaign outcome to reference for future TastyTrade renewals.</p>
+    </div>
+    <div class="callout positive">
+      <div class="callout-title">TikTok was the organic breakout — 77% organic, 228% of contracted impressions, $1.94 CPM</div>
+      <p>TikTok delivered 592K views on just $267 in spend — more than double its contracted impression target. Ep 4's TikTok Dark post alone hit 325K views (100% organic, 11.86% ER). Ep 2's TikTok was also fully organic at 73K views and 10.4% ER. TikTok should receive a larger allocation in future content plans.</p>
+    </div>
+    <div class="callout positive">
+      <div class="callout-title">Total engagements hit 417K (15.1% blended ER) across all platforms</div>
+      <p>Ep 3 drove the highest engagement (215K) powered by YouTube Shorts paid engagement. Ep 4 drove 44K engagements on near-zero spend. Instagram consistently delivered high ERs (3.5%–9.95%) and LinkedIn held steady at 4.54% ER across all 4 episodes on zero spend.</p>
+    </div>
+    <div class="callout warning">
+      <div class="callout-title">YouTube Shorts: highest reach but most expensive — 80% of contracted goal at 141% of budget</div>
+      <p>YouTube Shorts delivered 858K impressions (80.2% of contracted 1.07M) while spending $2,989 (140.6% of $2,125 budget). At $3.91 CPM, it's the most expensive platform. However, Ep 3's Shorts surged to 468K views and drove 184K paid engagements. For future campaigns, consider capping YT Shorts budget and reallocating surplus to TikTok or IG for better efficiency.</p>
+    </div>
+    <div class="callout info">
+      <div class="callout-title">Ep 4 (Fudd) proves the value of extending campaigns with timely content</div>
+      <p>Added post-contract to capitalize on the WNBA Draft narrative, Ep 4 delivered 382K impressions on just $74 in spend — essentially free incremental reach. The TikTok Dark post strategy drove massive organic distribution (325K views). This model — adding a timely bonus episode to an existing series — should be a standard recommendation for future sponsored content packages.</p>
+    </div>
+  </div>
+
+  <div class="freshness" style="margin-top:20px;">
+    <div class="ftitle">Data Sources — FINAL</div>
+    <p style="font-size:12px; color:var(--text-muted); line-height:1.6;">Social metrics from Measure Studio export (April 20, 2026) — 18 posts across 5 platforms. YouTube Shorts organic impressions from YouTube Analytics via MS "Impressions - Imported" column. YouTube Shorts paid data from Google Ads ad-level report (April 20, 2026) — 3 campaigns: Ep 1 ($707.80), Ep 2 ($708.86), Ep 3 ($1,571.89). No GA campaign for Ep 4. YouTube paid engagements from Google Ads "Engagements" column. Platform CPMs calculated from paid impressions and ad spend. Content planner contracted figures from original 3-episode plan; Ep 4 was added post-contract. Campaign is complete — this is the final data pull.</p>
+  </div>
+</div>
+
+
+
+<!-- ==================== US BANK x NFL DRAFT ==================== -->
+<div class="tab-content" id="tab-usbank">
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div>
+      <div class="section-title" style="margin-bottom:2px;">US Bank x NFL Draft</div>
+      <div class="section-sub">Flight: Apr 21 – Apr 27, 2026 · 3 Social Components · <strong>36 Posts Live</strong> across Instagram, Facebook, X, LinkedIn, YouTube Shorts</div>
+    </div>
+    <span class="status-pill green">Goal Exceeded</span>
+  </div>
+
+  <!-- ===== MASTER GOAL PACING ===== -->
+  <div class="chart-box" style="margin-bottom:24px; border-left:3px solid var(--primetime);">
+    <h3>US Bank x NFL Draft — Total Campaign Pacing</h3>
+    <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">Combined progress across all 3 social components toward 14M total impression goal</p>
+
+    <!-- Stacked CSS bar -->
+    <div style="position:relative; margin-bottom:8px;">
+      <div style="height:28px; background:#f0f1f3; border-radius:6px; overflow:hidden; display:flex;">
+        <div style="width:58.0%; background:var(--scoreboard); height:100%;" title="Come Up: 8,410,825"></div>
+        <div style="width:13.5%; background:var(--turf); height:100%;" title="Native Social: 1,964,772"></div>
+        <div style="width:28.5%; background:var(--red-card); height:100%;" title="Red Carpet: 4,130,182"></div>
+      </div>
+      <div style="position:absolute; top:-4px; bottom:-4px; left:100%; width:2px; background:var(--turf); opacity:0.9;" title="Goal: 14M"></div>
+    </div>
+    <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-bottom:16px;">
+      <span><strong style="color:var(--text);">14,505,779</strong> of 14,000,000 impressions (<strong style="color:var(--turf);">103.6% — Goal Exceeded</strong>)</span>
+      <span>Goal: 14M ✓</span>
+    </div>
+
+    <!-- Legend -->
+    <div style="display:flex; gap:20px; flex-wrap:wrap; font-size:12px; margin-bottom:16px;">
+      <div style="display:flex; align-items:center; gap:6px;"><div style="width:12px; height:12px; border-radius:3px; background:var(--scoreboard);"></div><span>Component 1: The Come Up — 8,410,825</span></div>
+      <div style="display:flex; align-items:center; gap:6px;"><div style="width:12px; height:12px; border-radius:3px; background:var(--turf);"></div><span>Component 2: Native Social — 1,964,772</span></div>
+      <div style="display:flex; align-items:center; gap:6px;"><div style="width:12px; height:12px; border-radius:3px; background:var(--red-card);"></div><span>Component 3: Red Carpet — 4,130,182</span></div>
+    </div>
+
+    <!-- Component KPI cards -->
+    <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom:0;">
+      <div class="kpi-card">
+        <div class="accent" style="background:var(--scoreboard);"></div>
+        <div class="label">Component 1: The Come Up</div>
+        <div class="value">8.41M</div>
+        <div class="pbar" style="margin:8px 0 6px; height:8px;">
+          <div class="pbar-fill" style="width:100%; background:var(--scoreboard);"></div>
+        </div>
+        <div class="meta">of 8.00M goal (105.1%) · $22,743 spent</div>
+      </div>
+      <div class="kpi-card">
+        <div class="accent" style="background:var(--turf);"></div>
+        <div class="label">Component 2: Native Social</div>
+        <div class="value">1.96M</div>
+        <div class="pbar" style="margin:8px 0 6px; height:8px;">
+          <div class="pbar-fill" style="width:78.6%; background:var(--turf);"></div>
+        </div>
+        <div class="meta">of 2.50M goal (78.6%) · $0 spent</div>
+      </div>
+      <div class="kpi-card">
+        <div class="accent" style="background:var(--red-card);"></div>
+        <div class="label">Component 3: Red Carpet</div>
+        <div class="value">4.13M</div>
+        <div class="pbar" style="margin:8px 0 6px; height:8px;">
+          <div class="pbar-fill" style="width:100%; background:var(--red-card);"></div>
+        </div>
+        <div class="meta">of 3.50M goal (118.0%) · $8,242 spent</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ===== COMPONENT 1: THE COME UP ===== -->
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <div>
+      <div class="section-title" style="margin-bottom:2px;">Social Component 1: The Come Up</div>
+      <div class="section-sub">4 Athlete Stories × 5 Platforms = 20 Posts · Goal: 8M impressions · Budget: $16,875</div>
+    </div>
+    <span class="status-pill green">Goal Exceeded</span>
+  </div>
+
+  <!-- Pacing -->
+  <div class="chart-box short" style="margin-bottom:24px;">
+    <h3>Campaign Pacing — Social Component 1: The Come Up</h3>
+    <canvas id="ub-pacing"></canvas>
+    <div style="margin-top:14px; padding:14px 16px; background:#f0fdf4; border:1px solid #86efac; border-radius:8px;">
+      <p style="font-size:13px; color:var(--text); line-height:1.6;"><strong>Status:</strong> Campaign has <strong style="color:var(--turf);">exceeded the 8M impression goal</strong> at 8,410,825 impressions (105.1%). Budget at $22,743 of $16,875 (134.8% — over contracted). X paid delivered 4.65M impressions at $1.54 CPM — the dominant reach driver. Meta Ads delivered 2.65M IG+FB impressions. YT Shorts delivering 25.0% blended ER across 4 stories. All 4 stories above 1.7M impressions. <strong>Campaign complete — impression goal exceeded by 411K.</strong></p>
+    </div>
+    <div style="margin-top:10px; padding:12px 16px; background:#fefce8; border:1px solid #fde68a; border-radius:8px;">
+      <p style="font-size:12px; color:#92400e; line-height:1.5; margin:0;"><strong>Budget note:</strong> Budget was reallocated from Native Social Coverage to support The Come Up paid amplification after organic performance came in lower than expected and CPMs were elevated during the busy draft window.</p>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid" style="grid-template-columns: repeat(5, 1fr);">
+    <div class="kpi-card"><div class="accent" style="background:var(--primetime);"></div><div class="label">Total Posts</div><div class="value">20</div><div class="meta">4 stories · 5 platforms</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--scoreboard);"></div><div class="label">Total Impressions</div><div class="value">8.41M</div><div class="meta">of 8.00M goal (105.1%)</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--turf);"></div><div class="label">Total Engagements</div><div class="value">306,409</div><div class="meta">social + YT Shorts combined</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--eats-yellow);"></div><div class="label">Engagement Rate</div><div class="value">3.6%</div><div class="meta">cross-platform blended</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--red-card);"></div><div class="label">Ad Spend</div><div class="value">$22,743</div><div class="meta">of $16,875 budget (134.8%)</div></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Platform Detail Table -->
+  <div class="section-title">Platform Performance Summary</div>
+  <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Social Component 1 only (The Come Up stories). Engagements = MS social engagements + Google Ads YT Shorts engagements combined. Paid impressions sourced from Meta Ads Manager (IG/FB), X Ads Manager, and Google Ads (YT Shorts). Organic from Measure Studio.</p>
+
+  <table class="data-table">
+    <thead><tr><th>Platform</th><th class="num">Posts</th><th class="num">Organic</th><th class="num">Paid Impr</th><th class="num">Total</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Actual Spend</th><th class="num">Estimated</th><th class="num">% Spent</th></tr></thead>
+    <tbody>
+      <tr><td>Instagram</td><td class="num">4</td><td class="num">50,803</td><td class="num">1,717,115</td><td class="num">1,767,918</td><td class="num">139,158</td><td class="num" style="color:var(--turf); font-weight:600;">7.9%</td><td class="num">$8,664.43</td><td class="num">$7,102</td><td class="num" style="color:var(--red-card); font-weight:600;">122.0%</td></tr>
+      <tr><td>Facebook</td><td class="num">4</td><td class="num">35,023</td><td class="num">936,646</td><td class="num">971,669</td><td class="num">16,177</td><td class="num">1.7%</td><td class="num">$4,512.05</td><td class="num">$3,721</td><td class="num" style="color:var(--red-card); font-weight:600;">121.3%</td></tr>
+      <tr><td>X (Twitter)</td><td class="num">4</td><td class="num">253,827</td><td class="num">4,653,038</td><td class="num">4,906,865</td><td class="num">4,938</td><td class="num">0.10%</td><td class="num">$7,180.00</td><td class="num">$2,500</td><td class="num" style="color:var(--red-card); font-weight:600;">287.2%</td></tr>
+      <tr><td>LinkedIn</td><td class="num">4</td><td class="num">187,787</td><td class="num">—</td><td class="num">187,787</td><td class="num">2,046</td><td class="num">1.1%</td><td class="num">$0</td><td class="num">$0</td><td class="num">—</td></tr>
+      <tr><td>YouTube Shorts</td><td class="num">4</td><td class="num">179,914</td><td class="num">396,672</td><td class="num">576,586</td><td class="num">144,090<span style="color:var(--red-card); font-weight:700;">*</span></td><td class="num" style="color:var(--turf); font-weight:600;">25.0%<span style="color:var(--red-card); font-weight:700;">*</span></td><td class="num">$2,386.88</td><td class="num">$3,592</td><td class="num" style="color:var(--eats-yellow); font-weight:600;">66.5%</td></tr>
+      <tr class="total-row"><td>Total</td><td class="num">20</td><td class="num">707,354</td><td class="num">7,703,471</td><td class="num">8,410,825</td><td class="num">306,409</td><td class="num">3.6%</td><td class="num">$22,743.36</td><td class="num">$16,875</td><td class="num" style="color:var(--red-card); font-weight:700;">134.8%</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:11px; margin:8px 0 0 0; line-height:1.5; color:var(--text-muted);"><span style="color:var(--red-card); font-weight:700;">*</span> YouTube Shorts engagements are sourced from Google Ads, where an engagement is counted when a viewer watches at least 10 seconds of or clicks on a video ad.</p>
+
+  <div class="chart-row" style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+    <div class="chart-box">
+      <h3>Platform Impressions — Paid vs Organic</h3>
+      <canvas id="ub-social-chart"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>Budget Pacing by Platform</h3>
+      <canvas id="ub-budget-chart"></canvas>
+    </div>
+  </div>
+
+  <!-- CONTENT PLANNER — PER POST DETAIL -->
+  <div class="section-title">Content Planner — Per-Post Detail</div>
+  <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">4 stories × 5 platforms = 20 posts (all live).</p>
+
+  <div style="overflow-x:auto;">
+  <table class="data-table" style="font-size:12px;">
+    <thead>
+      <tr><th>Story</th><th>Platform</th><th style="font-size:11px;">Type</th><th class="num">Impressions</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Spend</th></tr>
+    </thead>
+    <tbody>
+      <tr style="background:#f0f7ff;"><td rowspan="5" style="font-weight:600; vertical-align:top;">Mendoza<div style="font-size:10px; color:var(--text-muted); font-weight:400;">Published 4/21</div><div style="margin-top:3px;"><span style="background:#f3f4f6; color:#6b7280; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">COLLAB</span></div></td><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">435,545</td><td class="num">52,235</td><td class="num" style="color:var(--turf); font-weight:600;">12.0%</td><td class="num">$2,167.97</td></tr>
+      <tr style="background:#f0f7ff;"><td>Facebook</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">238,490</td><td class="num">3,209</td><td class="num">1.3%</td><td class="num">$1,122.14</td></tr>
+      <tr style="background:#f0f7ff;"><td>X</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">937,608</td><td class="num">1,199</td><td class="num">0.13%</td><td class="num">$1,545.00</td></tr>
+      <tr style="background:#f0f7ff;"><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">72,420</td><td class="num">1,184</td><td class="num">1.6%</td><td class="num">$0</td></tr>
+      <tr style="background:#f0f7ff;"><td>YouTube Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">85,716</td><td class="num">27,000</td><td class="num" style="color:var(--turf); font-weight:600;">31.5%</td><td class="num">$594.38</td></tr>
+
+      <tr><td rowspan="5" style="font-weight:600; vertical-align:top;">Downs<div style="font-size:10px; color:var(--text-muted); font-weight:400;">Published 4/23</div><div style="margin-top:3px;"><span style="background:#f3f4f6; color:#6b7280; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">COLLAB</span></div></td><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">401,309</td><td class="num">11,778</td><td class="num" style="color:var(--turf); font-weight:600;">2.9%</td><td class="num">$2,167.70</td></tr>
+      <tr><td>Facebook</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">232,187</td><td class="num">2,300</td><td class="num">1.0%</td><td class="num">$1,129.98</td></tr>
+      <tr><td>X</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">1,106,334</td><td class="num">725</td><td class="num">0.07%</td><td class="num">$1,645.00</td></tr>
+      <tr><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">13,948</td><td class="num">44</td><td class="num">0.3%</td><td class="num">$0</td></tr>
+      <tr><td>YouTube Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">165,516</td><td class="num">37,787</td><td class="num" style="color:var(--turf); font-weight:600;">22.8%</td><td class="num">$599.51</td></tr>
+
+      <tr style="background:#f0fdf4;"><td rowspan="5" style="font-weight:600; vertical-align:top;">Mauigoa<div style="font-size:10px; color:var(--text-muted); font-weight:400;">Published 4/22</div><div style="margin-top:3px;"><span style="background:#f3f4f6; color:#6b7280; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">NON-COLLAB</span></div></td><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">484,628</td><td class="num">39,924</td><td class="num" style="color:var(--turf); font-weight:600;">8.2%</td><td class="num">$2,163.30</td></tr>
+      <tr style="background:#f0fdf4;"><td>Facebook</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">271,956</td><td class="num">5,417</td><td class="num" style="color:var(--turf); font-weight:600;">2.0%</td><td class="num">$1,129.95</td></tr>
+      <tr style="background:#f0fdf4;"><td>X</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">1,775,698</td><td class="num">2,244</td><td class="num">0.13%</td><td class="num">$2,345.00</td></tr>
+      <tr style="background:#f0fdf4;"><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">84,358</td><td class="num">733</td><td class="num">0.9%</td><td class="num">$0</td></tr>
+      <tr style="background:#f0fdf4;"><td>YouTube Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">131,010</td><td class="num">28,614</td><td class="num" style="color:var(--turf); font-weight:600;">21.8%</td><td class="num">$596.82</td></tr>
+
+      <tr><td rowspan="5" style="font-weight:600; vertical-align:top;">Tate<div style="font-size:10px; color:var(--text-muted); font-weight:400;">Posted 4/23 4:30p</div><div style="margin-top:3px;"><span style="background:#f3f4f6; color:#6b7280; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">NON-COLLAB</span></div></td><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">446,436</td><td class="num">35,221</td><td class="num" style="color:var(--turf); font-weight:600;">7.9%</td><td class="num">$2,165.46</td></tr>
+      <tr><td>Facebook</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">229,036</td><td class="num">5,251</td><td class="num" style="color:var(--turf); font-weight:600;">2.3%</td><td class="num">$1,129.98</td></tr>
+      <tr><td>X</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">1,087,225</td><td class="num">770</td><td class="num">0.07%</td><td class="num">$1,645.00</td></tr>
+      <tr><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">17,061</td><td class="num">85</td><td class="num">0.5%</td><td class="num">$0</td></tr>
+      <tr><td>YouTube Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">194,344</td><td class="num">50,689</td><td class="num" style="color:var(--turf); font-weight:600;">26.1%</td><td class="num">$596.17</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <hr class="divider">
+
+  <!-- IG PERFORMANCE COMPARISON -->
+  <div class="section-title">Instagram — Collab vs Non-Collab</div>
+  <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">All 4 IG posts now have paid amplification. Comparing total performance (organic + boosted) across collab and non-collab formats.</p>
+
+  <div style="margin-top:14px; margin-bottom:16px; display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-sm);">
+      <div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">IG Performance — Collab Posts</div>
+      <table class="data-table" style="margin-bottom:0; box-shadow:none; border:none; font-size:12px;">
+        <thead><tr><th>Story</th><th class="num">IG Views</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Spend</th></tr></thead>
+        <tbody>
+          <tr><td><span style="background:#f3f4f6; color:#6b7280; padding:2px 6px; border-radius:8px; font-size:10px; font-weight:600;">COLLAB</span> Mendoza</td><td class="num">435,545</td><td class="num">52,235</td><td class="num" style="color:var(--turf); font-weight:600;">12.0%</td><td class="num">$2,167.97</td></tr>
+          <tr><td><span style="background:#f3f4f6; color:#6b7280; padding:2px 6px; border-radius:8px; font-size:10px; font-weight:600;">COLLAB</span> Downs</td><td class="num">401,309</td><td class="num">11,778</td><td class="num" style="color:var(--turf); font-weight:600;">2.9%</td><td class="num">$2,167.70</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-sm);">
+      <div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">IG Performance — Non-Collab Posts</div>
+      <table class="data-table" style="margin-bottom:0; box-shadow:none; border:none; font-size:12px;">
+        <thead><tr><th>Story</th><th class="num">IG Views</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Spend</th></tr></thead>
+        <tbody>
+          <tr><td><span style="background:#f3f4f6; color:#6b7280; padding:2px 6px; border-radius:8px; font-size:10px; font-weight:600;">NON-COLLAB</span> Mauigoa</td><td class="num">484,628</td><td class="num">39,924</td><td class="num" style="color:var(--turf); font-weight:600;">8.2%</td><td class="num">$2,163.30</td></tr>
+          <tr><td><span style="background:#f3f4f6; color:#6b7280; padding:2px 6px; border-radius:8px; font-size:10px; font-weight:600;">NON-COLLAB</span> Tate</td><td class="num">446,436</td><td class="num">35,221</td><td class="num" style="color:var(--turf); font-weight:600;">7.9%</td><td class="num">$2,165.46</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="callouts" style="margin-top:16px;">
+    <div class="callout info">
+      <div class="callout-title">Mendoza collab dominates IG engagement — 52,235 engagements at 12.0% ER. All 4 posts above 400K impressions.</div>
+      <p>Meta Ads delivered at scale — all 4 IG posts above 400K impressions on ~$2,165 spend each. Mendoza (collab) leads with 435K views and 52K engagements at a remarkable 12.0% ER. Mauigoa (non-collab) is the top performer by reach at 485K impressions with 40K engagements (8.2% ER). <strong>IG budget at 122% of contracted — $8,664 spent vs $7,102 allocated.</strong></p>
+    </div>
+    <div class="callout positive">
+      <div class="callout-title">Non-collab posts closing the gap — Mauigoa (8.2% ER) and Tate (7.9% ER) both outperforming Downs collab (2.9%)</div>
+      <p>The collab vs non-collab dynamic has shifted. While Mendoza (collab) leads overall at 12.0% ER, both non-collab posts — Mauigoa at 8.2% and Tate at 7.9% — outperform Downs (collab) at 2.9%. Total IG engagements across all 4 stories: 139,158 — nearly 46% of all Come Up engagements came from Instagram alone.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- EPISODE PERFORMANCE CARDS -->
+  <div class="section-title">Story Performance — The Come Up</div>
+  <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">4 stories × 5 platforms = 20 posts. Published Apr 21–23. All paid campaigns complete. Ranked by total reach.</p>
+
+  <div class="episode-grid">
+    <div class="episode-card" style="border-color: var(--turf);">
+      <div class="ep-name">Mauigoa (Non-Collab)</div>
+      <div class="ep-sub">OL · American Samoa → 5-Star IMG Prospect · Published 4/22 · 5 platforms</div>
+      <div class="ep-row"><span class="ep-lbl">Instagram</span><span class="ep-val">484,628 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">Facebook</span><span class="ep-val">271,956 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">X</span><span class="ep-val">1,775,698 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">LinkedIn</span><span class="ep-val">84,358 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">YouTube Shorts</span><span class="ep-val">131,010 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Reach</span><span class="ep-val" style="color:var(--turf);">2,747,650</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Engagements</span><span class="ep-val">76,932</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Spend</span><span class="ep-val">$6,235</span></div>
+      <div class="ep-highlight">Highest reach story (2.75M). X paid delivering 1.64M at $1.43 CPM. IG at 8.2% ER (40K eng). Non-collab leader.</div>
+    </div>
+
+    <div class="episode-card" style="border-color: var(--turf);">
+      <div class="ep-name">Tate (Non-Collab)</div>
+      <div class="ep-sub">WR · Tragedy → NFL Draft · Posted 4/23 at 4:30 PM · 5 platforms</div>
+      <div class="ep-row"><span class="ep-lbl">Instagram</span><span class="ep-val">446,436 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">Facebook</span><span class="ep-val">229,036 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">X</span><span class="ep-val">1,087,225 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">LinkedIn</span><span class="ep-val">17,061 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">YouTube Shorts</span><span class="ep-val">194,344 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Reach</span><span class="ep-val" style="color:var(--turf);">1,974,102</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Engagements</span><span class="ep-val">92,016</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Spend</span><span class="ep-val">$5,537</span></div>
+      <div class="ep-highlight">Highest engagement story (92K). YT Shorts 26.1% ER (51K eng). IG 7.9% ER (35K eng). Strongest emotional resonance.</div>
+    </div>
+
+    <div class="episode-card" style="border-color: var(--turf);">
+      <div class="ep-name">Downs (Collab)</div>
+      <div class="ep-sub">DB · Family of Pros → Carving His Own Name · Published 4/23 · 5 platforms</div>
+      <div class="ep-row"><span class="ep-lbl">Instagram</span><span class="ep-val">401,309 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">Facebook</span><span class="ep-val">232,187 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">X</span><span class="ep-val">1,106,334 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">LinkedIn</span><span class="ep-val">13,948 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">YouTube Shorts</span><span class="ep-val">165,516 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Reach</span><span class="ep-val" style="color:var(--turf);">1,919,294</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Engagements</span><span class="ep-val">52,634</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Spend</span><span class="ep-val">$5,542</span></div>
+      <div class="ep-highlight">X paid at 1.1M impr. YT Shorts 22.8% ER (38K eng). IG ER lower at 2.9% vs other stories — collab format underperforming here.</div>
+    </div>
+
+    <div class="episode-card" style="border-color: var(--turf);">
+      <div class="ep-name">Mendoza (Collab)</div>
+      <div class="ep-sub">QB · Overlooked → Probable No. 1 Pick · Published 4/21 · 5 platforms</div>
+      <div class="ep-row"><span class="ep-lbl">Instagram</span><span class="ep-val">435,545 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">Facebook</span><span class="ep-val">238,490 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">X</span><span class="ep-val">937,608 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">LinkedIn</span><span class="ep-val">72,420 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">YouTube Shorts</span><span class="ep-val">85,716 impr</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Reach</span><span class="ep-val" style="color:var(--turf);">1,769,779</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Engagements</span><span class="ep-val">84,827</span></div>
+      <div class="ep-row"><span class="ep-lbl">Total Spend</span><span class="ep-val">$5,429</span></div>
+      <div class="ep-highlight">Highest IG ER (12.0% — 52K eng). YT Shorts 31.5% ER. Strongest collab story by engagement quality.</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Recommendations -->
+  <div class="section-title">Come Up — Optimization &amp; Spend Strategy</div>
+  <div class="callouts">
+    <div class="callout positive">
+      <div class="callout-title">Goal exceeded — 8.41M impressions delivered against 8M target (105.1%)</div>
+      <p>The Come Up has surpassed its impression goal with 8,410,825 total impressions across 20 posts. All 4 stories exceeded 1.7M impressions. X paid was the dominant reach driver at 4.65M impressions (55% of total), while Meta delivered 2.65M IG+FB impressions. LinkedIn organic contributed 188K impressions across 4 posts. The campaign delivered a 3.6% blended ER with 306K total engagements — a strong balance of reach and engagement.</p>
+    </div>
+    <div class="callout warning">
+      <div class="callout-title">Budget overspent — $22,743 of $16,875 contracted (134.8%). X at 287% of allocation.</div>
+      <p>Total spend exceeded the contracted budget by $5,868. The biggest driver: X Ads spent $7,180 against a $2,500 allocation (287.2%). IG also over at 122% ($8,664 vs $7,102) and FB at 121% ($4,512 vs $3,721). YT Shorts is the only platform under budget at 66.5% ($2,387 of $3,592). <strong>For post-campaign reporting, flag the X overspend and low engagement (4,938 eng on 4.65M impr = 0.10% ER) as a key learning for future budget allocation.</strong></p>
+    </div>
+    <div class="callout positive">
+      <div class="callout-title">Tate is the engagement leader (92K) despite being the last story published</div>
+      <p>Tate delivered 92,016 engagements — the most of any story — driven by YT Shorts (51K eng, 26.1% ER) and IG (35K eng, 7.9% ER). Mauigoa leads in total reach at 2.75M, fueled by X paid (1.64M). All 4 stories now between 1.7M–2.7M total impressions. <strong>Tate's emotional narrative drove the highest engagement; Mauigoa's story had the widest reach. Both formats worked — collab and non-collab — for different reasons.</strong></p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ===== COMPONENT 2: NATIVE SOCIAL COVERAGE ===== -->
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <div>
+      <div class="section-title" style="margin-bottom:2px;">Social Component 2: Native Social Coverage</div>
+      <div class="section-sub">Draft Day editorial content · Goal: 2.5M impressions · Budget: $6K · 10 posts live as of 4/27</div>
+    </div>
+    <span class="status-pill yellow">In Flight — 78.6%</span>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid" style="grid-template-columns: repeat(5, 1fr);">
+    <div class="kpi-card"><div class="accent" style="background:var(--primetime);"></div><div class="label">Total Posts</div><div class="value">10</div><div class="meta">4 platforms</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--turf);"></div><div class="label">Total Impressions</div><div class="value">1.96M</div><div class="meta">of 2.50M goal (78.6%)</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--turf);"></div><div class="label">Total Engagements</div><div class="value">72,579</div><div class="meta">organic only</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--eats-yellow);"></div><div class="label">Engagement Rate</div><div class="value">3.7%</div><div class="meta">cross-platform blended</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--center-court);"></div><div class="label">Ad Spend</div><div class="value">$0</div><div class="meta">of $6,000 budget (0%)</div></div>
+  </div>
+
+  <!-- Platform Performance Table -->
+  <div class="section-title">Platform Performance — Native Social</div>
+  <table class="data-table">
+    <thead><tr><th>Platform</th><th class="num">Posts</th><th class="num">Impressions</th><th class="num">Engagements</th><th class="num">ER</th></tr></thead>
+    <tbody>
+      <tr><td>Instagram</td><td class="num">3</td><td class="num">1,412,517</td><td class="num">56,796</td><td class="num" style="color:var(--turf); font-weight:600;">4.02%</td></tr>
+      <tr><td>Facebook</td><td class="num">1</td><td class="num">135,356</td><td class="num">254</td><td class="num">0.19%</td></tr>
+      <tr><td>LinkedIn</td><td class="num">3</td><td class="num">382,247</td><td class="num">15,087</td><td class="num" style="color:var(--turf); font-weight:600;">3.95%</td></tr>
+      <tr><td>X (Twitter)</td><td class="num">3</td><td class="num">34,652</td><td class="num">442</td><td class="num">1.28%</td></tr>
+      <tr class="total-row"><td>Total</td><td class="num">10</td><td class="num">1,964,772</td><td class="num">72,579</td><td class="num">3.69%</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Callout -->
+  <div class="callouts">
+    <div class="callout positive" style="grid-column: 1 / -1;">
+      <div class="callout-title">Organic momentum strong — 1.96M impressions from 10 posts with $0 paid spend (78.6% of 2.5M goal)</div>
+      <p>Native Social has reached 78.6% of its 2.5M goal entirely through organic distribution — no paid spend deployed. Instagram is the powerhouse (1.41M impr, 72% of total, 4.0% ER). LinkedIn delivering strong engagement (382K impr, 3.95% ER). With 10 posts now live, <strong>continued organic posting through May 15 should close the remaining 536K impression gap without needing to deploy paid spend.</strong></p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ===== COMPONENT 3: RED CARPET PLACEHOLDER ===== -->
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <div>
+      <div class="section-title" style="margin-bottom:2px;">Social Component 3: Red Carpet with Baker Machado</div>
+      <div class="section-sub">NFL Draft Red Carpet interviews · Goal: 3.5M impressions · Budget: $8,500 · 2 videos · 8 posts live as of 4/27</div>
+    </div>
+    <span class="status-pill green">Goal Exceeded</span>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid" style="grid-template-columns: repeat(5, 1fr);">
+    <div class="kpi-card"><div class="accent" style="background:var(--primetime);"></div><div class="label">Total Posts</div><div class="value">8</div><div class="meta">2 videos · 5 platforms · organic + paid</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--red-card);"></div><div class="label">Total Impressions</div><div class="value">4.13M</div><div class="meta">of 3.50M goal (118.0%)</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--turf);"></div><div class="label">Total Engagements</div><div class="value">195,662</div><div class="meta">social + YT Shorts combined</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--eats-yellow);"></div><div class="label">Engagement Rate</div><div class="value">4.7%</div><div class="meta">cross-platform blended</div></div>
+    <div class="kpi-card"><div class="accent" style="background:var(--red-card);"></div><div class="label">Ad Spend</div><div class="value">$8,242</div><div class="meta">of $8,500 budget (97.0%)</div></div>
+  </div>
+  <div style="margin-top:12px; margin-bottom:20px; padding:12px 16px; background:#fefce8; border:1px solid #fde68a; border-radius:8px;">
+    <p style="font-size:12px; color:#92400e; line-height:1.5; margin:0;"><strong>Budget note:</strong> Budget was reallocated from Native Social Coverage to support Red Carpet paid amplification after organic performance came in lower than expected and CPMs were elevated during the busy draft window.</p>
+  </div>
+
+  <!-- Platform Detail -->
+  <!-- PER-VIDEO DETAIL -->
+  <div class="section-title" style="margin-top:28px;">Content Planner — Per-Video Detail</div>
+  <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">2 videos across 5 platforms. Video 1 is an organic post boosted with paid amplification. Video 2 is a paid-only (dark) post across all platforms — no organic delivery anywhere.</p>
+
+  <div style="overflow-x:auto;">
+  <table class="data-table" style="font-size:12px;">
+    <thead>
+      <tr><th>Video</th><th>Platform</th><th style="font-size:11px;">Type</th><th class="num">Impressions</th><th class="num">Engagements</th><th class="num">ER</th><th class="num">Spend</th></tr>
+    </thead>
+    <tbody>
+      <tr style="background:#f0fdf4;"><td rowspan="5" style="font-weight:600; vertical-align:top;">Video 1<div style="font-size:10px; color:var(--text-muted); font-weight:400; line-height:1.4; margin-top:4px;">"Cars, homes, watches..."</div><div style="margin-top:3px;"><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></div></td><td>Instagram</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">774,249</td><td class="num">25,546</td><td class="num" style="color:var(--turf); font-weight:600;">3.3%</td><td class="num">$1,887.11</td></tr>
+      <tr style="background:#f0fdf4;"><td>Facebook</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">6,327</td><td class="num">51</td><td class="num">0.8%</td><td class="num">$0</td></tr>
+      <tr style="background:#f0fdf4;"><td>X</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">864,430</td><td class="num">1,454</td><td class="num">0.17%</td><td class="num">$861.24</td></tr>
+      <tr style="background:#f0fdf4;"><td>LinkedIn</td><td><span style="background:#f0fdf4; color:#166534; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC ONLY</span></td><td class="num">59,423</td><td class="num">294</td><td class="num">0.5%</td><td class="num">$0</td></tr>
+      <tr style="background:#f0fdf4;"><td>YouTube Shorts</td><td><span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">ORGANIC + PAID</span></td><td class="num">327,627</td><td class="num">114,309<span style="color:var(--red-card); font-weight:700;">*</span></td><td class="num" style="color:var(--turf); font-weight:600;">34.9%<span style="color:var(--red-card); font-weight:700;">*</span></td><td class="num">$1,300.28</td></tr>
+
+      <tr><td rowspan="3" style="font-weight:600; vertical-align:top;">Video 2<div style="font-size:10px; color:var(--text-muted); font-weight:400; line-height:1.4; margin-top:4px;">"Best financial advice..."</div><div style="margin-top:3px;"><span style="background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">PAID ONLY</span></div></td><td>Instagram</td><td><span style="background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">PAID ONLY</span></td><td class="num">636,674</td><td class="num">497</td><td class="num">0.08%</td><td class="num">$1,999.96</td></tr>
+      <tr><td>X</td><td><span style="background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">PAID ONLY</span></td><td class="num">916,140</td><td class="num">712</td><td class="num">0.08%</td><td class="num">$900.00</td></tr>
+      <tr><td>YouTube Shorts</td><td><span style="background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">PAID ONLY</span></td><td class="num">545,312</td><td class="num">52,799<span style="color:var(--red-card); font-weight:700;">*</span></td><td class="num" style="color:var(--turf); font-weight:600;">9.7%<span style="color:var(--red-card); font-weight:700;">*</span></td><td class="num">$1,293.86</td></tr>
+
+      <tr class="total-row"><td colspan="3">Video 1 Subtotal</td><td class="num">2,032,056</td><td class="num">141,654</td><td class="num">7.0%</td><td class="num">$4,048.63</td></tr>
+      <tr class="total-row"><td colspan="3">Video 2 Subtotal</td><td class="num">2,098,126</td><td class="num">54,008</td><td class="num">2.6%</td><td class="num">$4,193.82</td></tr>
+      <tr class="total-row" style="border-top:2px solid var(--border);"><td colspan="3">Combined Total</td><td class="num">4,130,182</td><td class="num">195,662</td><td class="num">4.7%</td><td class="num">$8,242.45</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="font-size:11px; margin:8px 0 0 0; line-height:1.5; color:var(--text-muted);"><span style="color:var(--red-card); font-weight:700;">*</span> YouTube Shorts engagements from Google Ads. Video 2 is fully paid (dark) across all platforms. Measure Studio shows organic views for Video 2 YT Shorts — this is a known tracking bug; all Video 2 YT delivery is paid.</p>
+
+  <div class="callouts">
+    <div class="callout positive" style="grid-column: 1 / -1;">
+      <div class="callout-title">Red Carpet exceeded goal — 4.13M impressions delivered on $8,242 spend (118% of 3.5M target)</div>
+      <p>Red Carpet smashed its 3.5M impression goal with 4.13M delivered at 97% budget utilization ($8,242 of $8,500). X was the top reach driver at 1.78M impressions (43% of total). YouTube Shorts delivered the strongest engagement: 167K engagements at 19.1% ER. Instagram organic drove meaningful engagement too — 336K organic views with 25.5K engagements (7.6% organic ER). <strong>Budget efficiency was strong at $2.00 blended CPM. The paid strategy of spreading across Meta, X, and YT worked — with YT Shorts once again delivering outsized engagement returns.</strong></p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="freshness" style="margin-top:20px;">
+    <div class="ftitle">Data Sources</div>
+    <p style="font-size:12px; color:var(--text-muted); line-height:1.6;">Social metrics from Measure Studio export (April 27, 2026) — 20 Come Up posts, 10 Native Social Coverage posts, 6 Red Carpet posts (+ 2 dark posts via Ads Managers). Paid data from: Meta Ads Manager (IG/FB), X Ads Manager, Google Ads (YT Shorts). Organic from Measure Studio. Come Up spend: $22,743 (134.8% of $16,875). Red Carpet spend: $8,242 (97.0% of $8,500). Campaign exceeded 14M goal at 14.51M impressions (103.6%). Total spend: $30,986 of $31,375 (98.8%).</p>
+  </div>
+</div>
+
+<!-- ==================== DATA SOURCES ==================== -->
+<div class="tab-content" id="tab-datasources">
+
+  <div class="section-title" style="margin-bottom:24px;">Data Sources &amp; Methodology</div>
+
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Measure Studio — Post-Level Exports</h3>
+      <table class="data-table" style="margin-bottom:0; box-shadow:none; border:none;">
+        <tbody>
+          <tr><td style="font-weight:600;">Source</td><td>Measure Studio CSV exports</td></tr>
+          <tr><td style="font-weight:600;">Data date</td><td>April 20–27, 2026</td></tr>
+          <tr><td style="font-weight:600;">TastyTrade file</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">Tastytrade 4.20.csv</code></td></tr>
+          <tr><td style="font-weight:600;">US Bank Come Up file</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">US Bank The Come Up 4.24.csv</code></td></tr>
+          <tr><td style="font-weight:600;">US Bank Native Social file</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">Native Social Coverage 4.24.csv</code></td></tr>
+          <tr><td style="font-weight:600;">US Bank Red Carpet file</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">Red Carpet 4.24.csv</code></td></tr>
+          <tr><td style="font-weight:600;">Format</td><td>Header at row 8 (index 7). 400+ columns per post. Column names: "Post Platform", "Post Title", etc. Platforms: YouTube, Instagram, TikTok, LinkedIn, Facebook, X.</td></tr>
+          <tr><td style="font-weight:600;">Posts</td><td>TastyTrade: 18 posts (4 episodes across 5 platforms). US Bank Come Up: 20 posts (4 stories across 5 platforms). US Bank Native Social: 10 posts (4 platforms). US Bank Red Carpet: 8 posts (2 videos across 5 platforms).</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="chart-box">
+      <h3>Measure Studio — Campaign Charts</h3>
+      <table class="data-table" style="margin-bottom:0; box-shadow:none; border:none;">
+        <tbody>
+          <tr><td style="font-weight:600;">Source</td><td>Measure Studio campaign zip exports</td></tr>
+          <tr><td style="font-weight:600;">TastyTrade</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">Tastytrade - Campaign 4.9.zip</code></td></tr>
+          <tr><td style="font-weight:600;">Contains</td><td>Per-platform summary CSVs (views, organic/paid split, ER, spend, CPM) + cross-platform totals.</td></tr>
+          <tr><td style="font-weight:600;">Used for</td><td>Campaign-level totals, platform CPMs, engagement rates. Cross-referenced with post-level data for accuracy.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Google Ads — YouTube Shorts Paid</h3>
+      <table class="data-table" style="margin-bottom:0; box-shadow:none; border:none;">
+        <tbody>
+          <tr><td style="font-weight:600;">Source</td><td>Google Ads campaign export</td></tr>
+          <tr><td style="font-weight:600;">TastyTrade file</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">Ad report (56).csv</code> (ad-level, Mar 1 – Apr 20)</td></tr>
+          <tr><td style="font-weight:600;">US Bank file</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">FOS Reporting.csv</code> (campaign-level, Apr 1 – Apr 24)</td></tr>
+          <tr><td style="font-weight:600;">US Bank 4/24 file</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">US Bank - YT.csv</code></td></tr>
+          <tr><td style="font-weight:600;">Campaigns</td><td>TastyTrade: 3 campaigns (Ep 1–3), ended. US Bank: 4 campaigns (Mendoza, Downs, Mauigoa, Tate), active.</td></tr>
+          <tr><td style="font-weight:600;">Metrics</td><td>Impressions, CPM, Cost, Engagements, YouTube Public Views, Watch Time.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="chart-box">
+      <h3>X Ads Manager — X Paid</h3>
+      <table class="data-table" style="margin-bottom:0; box-shadow:none; border:none;">
+        <tbody>
+          <tr><td style="font-weight:600;">Source</td><td>X Ads Manager export</td></tr>
+          <tr><td style="font-weight:600;">File</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">US Bank - X.xlsx</code></td></tr>
+          <tr><td style="font-weight:600;">Data date</td><td>April 27, 2026</td></tr>
+          <tr><td style="font-weight:600;">Metrics</td><td>Impressions, Engagements, Spend per story (6 campaigns)</td></tr>
+          <tr><td style="font-weight:600;">Total</td><td>Come Up: 4,653,038 impr · 3,365 eng · $7,180 spend. Red Carpet: 1,703,685 impr · 1,399 eng · $1,761.24 spend.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Meta Ads Manager — IG/FB Paid</h3>
+      <table class="data-table" style="margin-bottom:0; box-shadow:none; border:none;">
+        <tbody>
+          <tr><td style="font-weight:600;">Source</td><td>Meta Ads Manager export</td></tr>
+          <tr><td style="font-weight:600;">File</td><td><code style="background:#f3f4f6; padding:2px 6px; border-radius:3px; font-size:12px;">US Bank - Meta.csv</code></td></tr>
+          <tr><td style="font-weight:600;">Data date</td><td>April 27, 2026</td></tr>
+          <tr><td style="font-weight:600;">Metrics</td><td>Impressions, Spend per story per platform (IG + FB)</td></tr>
+          <tr><td style="font-weight:600;">Total IG</td><td>Come Up IG: 1,717,115 impr · $8,664 spend. Red Carpet IG: 437,410 impr · $1,887 spend.</td></tr>
+          <tr><td style="font-weight:600;">Total FB</td><td>Come Up FB: 936,646 impr · $4,512 spend. Red Carpet FB: 636,674 impr · $2,000 spend.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="chart-box">
+      <h3>Methodology Notes</h3>
+      <table class="data-table" style="margin-bottom:0; box-shadow:none; border:none;">
+        <tbody>
+          <tr><td style="font-weight:600;">Impressions</td><td>Total = MS Organic + Platform Ads Paid. Instagram/Facebook paid from Meta Ads Manager. X paid from X Ads Manager. YouTube Shorts paid from Google Ads. Organic from Measure Studio. YouTube Shorts organic uses MS Views Total.</td></tr>
+          <tr><td style="font-weight:600;">CPM</td><td>Spend ÷ Paid Impressions × 1,000. YouTube CPMs from Google Ads. Social CPMs from Measure Studio paid metrics.</td></tr>
+          <tr><td style="font-weight:600;">Engagement Rate</td><td>Total Engagements ÷ Total Views or Impressions. Uses platform-specific definitions (MS "Total Engagements" field).</td></tr>
+          <tr><td style="font-weight:600;">Organic %</td><td>Organic Views ÷ Total Views. LinkedIn is 100% organic (no paid). Facebook varies by campaign.</td></tr>
+          <tr><td style="font-weight:600;">Facebook CPM</td><td>Estimated from Total Spend ÷ Total Paid Views × 1,000 (MS doesn't report FB "Impressions - Paid" directly).</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+</div><!-- /main -->
+
+<div class="footer">Front Office Sports — Sponsored Social Campaigns Dashboard · April 27, 2026 · Measure Studio + Meta Ads + X Ads + Google Ads</div>
+
+<script>
+// Tab switching
+function switchTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    if (t.dataset.tab === id) t.classList.add('active');
+  });
+  setTimeout(() => drawAllCharts(), 100);
+}
+
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+});
+
+// Charts
+let charts = {};
+function destroyChart(name) { if (charts[name]) { charts[name].destroy(); charts[name] = null; } }
+
+function drawAllCharts() {
+  drawTTPacing(); drawTTSocial(); drawTTWeight();
+  drawUBPacing(); drawUBSocial(); drawUBBudget();
+}
+
+function drawTTPacing() {
+  const ctx = document.getElementById('tt-pacing');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('ttP');
+  charts.ttP = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Flight: Mar 1 – Apr 20, 2026', 'Impressions: 2.76M of 2.28M', 'Budget: $8,054 of $8,500'],
+      datasets: [
+        { label: 'Actual', data: [100, 100, 94.8], backgroundColor: ['#0D1D64', '#007640', '#007640'], borderRadius: 2 },
+        { label: 'Remaining', data: [0, 0, 5.2], backgroundColor: '#e5e5e5', borderRadius: 2 }
+      ]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom', labels: { font: { family: 'Inter', size: 11 } } },
+        tooltip: { callbacks: { label: c => c.dataset.label + ': ' + c.raw.toFixed(1) + '%' } }
+      },
+      scales: { x: { stacked: true, max: 100, ticks: { callback: v => v + '%', font: { family: 'Inter', size: 11 } } }, y: { stacked: true, ticks: { font: { family: 'Inter', size: 11 } } } }
+    }
+  });
+}
+
+function drawTTSocial() {
+  const ctx = document.getElementById('tt-social-chart');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('ttS');
+  charts.ttS = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['YT Shorts', 'Instagram', 'TikTok', 'LinkedIn', 'Snapchat'],
+      datasets: [
+        { label: 'Organic', data: [92966, 180316, 454829, 163319, 1334], backgroundColor: '#196CFC', stack: 'a' },
+        { label: 'Paid', data: [764686, 961759, 137590, 0, 0], backgroundColor: '#0D1D64', stack: 'a' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom', labels: { font: { family: 'Inter', size: 11 } } } },
+      scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : v, font: { family: 'Inter', size: 11 } } } }
+    }
+  });
+}
+
+function drawTTWeight() {
+  const ctx = document.getElementById('tt-weight-chart');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('ttW');
+  charts.ttW = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['YT Shorts', 'Instagram', 'TikTok', 'LinkedIn', 'Snapchat'],
+      datasets: [
+        { label: '% of Spend', data: [37.1, 59.6, 3.3, 0, 0], backgroundColor: '#E00922', borderRadius: 2 },
+        { label: '% of Impressions', data: [31.1, 41.4, 21.5, 5.9, 0.0], backgroundColor: '#196CFC', borderRadius: 2 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom', labels: { font: { family: 'Inter', size: 11 } } },
+        tooltip: { callbacks: { label: c => c.dataset.label + ': ' + c.raw.toFixed(1) + '%' } }
+      },
+      scales: { y: { ticks: { callback: v => v + '%', font: { family: 'Inter', size: 11 } } } }
+    }
+  });
+}
+
+function drawUBPacing() {
+  const ctx = document.getElementById('ub-pacing');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('ubP');
+
+  const goalLine = {
+    id: 'ubGoalLine',
+    afterDraw(chart) {
+      const xScale = chart.scales.x;
+      const yScale = chart.scales.y;
+      const c = chart.ctx;
+      const x = xScale.getPixelForValue(100);
+      c.save();
+      c.strokeStyle = '#6b7280';
+      c.lineWidth = 2;
+      c.setLineDash([6, 4]);
+      c.beginPath();
+      c.moveTo(x, yScale.top - 4);
+      c.lineTo(x, yScale.bottom);
+      c.stroke();
+      c.setLineDash([]);
+      c.fillStyle = '#6b7280';
+      c.font = '600 11px Inter, sans-serif';
+      c.textAlign = 'center';
+      c.fillText('100% Goal', x, yScale.top - 8);
+      c.restore();
+    }
+  };
+
+  charts.ubP = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Flight: Apr 21 – Apr 27', 'Impressions: 8.41M of 8.0M', 'Budget: $22,743 of $16,875'],
+      datasets: [
+        { label: 'On Target', data: [100, 100, 100], backgroundColor: ['#0D1D64', '#007640', '#0D1D64'], borderRadius: 2, borderSkipped: 'end' },
+        { label: 'Over Target', data: [0, 5.1, 34.8], backgroundColor: ['#0D1D64', '#22c55e', '#E00922'], borderRadius: {topRight: 4, bottomRight: 4}, borderSkipped: false }
+      ]
+    },
+    plugins: [goalLine],
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { font: { family: 'Inter', size: 11 },
+          generateLabels: function(chart) {
+            return [
+              { text: 'On Target (≤100%)', fillStyle: '#0D1D64', strokeStyle: '#0D1D64', lineWidth: 0 },
+              { text: 'Overperformance', fillStyle: '#22c55e', strokeStyle: '#22c55e', lineWidth: 0 },
+              { text: 'Overspend', fillStyle: '#E00922', strokeStyle: '#E00922', lineWidth: 0 }
+            ];
+          }
+        } },
+        tooltip: { callbacks: { label: function(c) {
+          const totals = [100, 105.1, 134.8];
+          if (c.datasetIndex === 0) return 'On Target: ' + Math.min(c.raw, 100).toFixed(1) + '%';
+          return 'Over: +' + c.raw.toFixed(1) + '% (Total: ' + totals[c.dataIndex].toFixed(1) + '%)';
+        } } }
+      },
+      scales: {
+        x: { stacked: true, max: 150, ticks: { callback: v => v + '%', font: { family: 'Inter', size: 11 }, stepSize: 25 } },
+        y: { stacked: true, ticks: { font: { family: 'Inter', size: 11 } } }
+      }
+    }
+  });
+}
+
+function drawUBSocial() {
+  const ctx = document.getElementById('ub-social-chart');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('ubS');
+  charts.ubS = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Instagram', 'Facebook', 'X', 'LinkedIn', 'YT Shorts'],
+      datasets: [
+        { label: 'Organic', data: [50803, 35023, 253827, 187787, 179914], backgroundColor: '#196CFC', stack: 'a' },
+        { label: 'Paid', data: [1717115, 936646, 4653038, 0, 396672], backgroundColor: '#0D1D64', stack: 'a' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom', labels: { font: { family: 'Inter', size: 11 } } } },
+      scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : v, font: { family: 'Inter', size: 11 } } } }
+    }
+  });
+}
+
+function drawUBBudget() {
+  const ctx = document.getElementById('ub-budget-chart');
+  if (!ctx || !ctx.getContext) return;
+  destroyChart('ubB');
+  charts.ubB = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Instagram', 'Facebook', 'X', 'YT Shorts'],
+      datasets: [
+        { label: 'Spent', data: [8664.43, 4512.05, 7180.00, 2386.88], backgroundColor: '#E00922', borderRadius: 2 },
+        { label: 'Remaining', data: [0, 0, 0, 3592-2386.88], backgroundColor: '#e5e5e5', borderRadius: 2 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom', labels: { font: { family: 'Inter', size: 11 } } },
+        tooltip: { callbacks: { label: c => c.dataset.label + ': $' + c.raw.toFixed(0) } }
+      },
+      scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(1)+'K' : v), font: { family: 'Inter', size: 11 } } } }
+    }
+  });
+}
+
+// Init
+drawAllCharts();
+</script>
+</body>
+</html>
